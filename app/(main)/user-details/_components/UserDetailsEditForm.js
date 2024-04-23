@@ -37,7 +37,7 @@ import { FormError } from "@/components/FormError";
 import { update } from "@/actions/update";
 import { toast } from "@/components/ui/use-toast";
 
-export const UserDetailsEditForm = ({ userDetails, errors }) => {
+export const UserDetailsEditForm = ({ userDetails }) => {
 
     const [formErrors, setFormErrors] = useState();
     const [error, setError] = useState();

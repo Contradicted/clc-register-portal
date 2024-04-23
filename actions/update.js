@@ -39,7 +39,5 @@ export const update = async (values) => {
         }
     })
 
-    revalidatePath("/user-details/edit")
-
     return { success: "User details successfully updated!"}
 }
