@@ -1,6 +1,6 @@
 @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
+@tailwind components;
+@tailwind utilities;
 
   html,
   body,
@@ -82,3 +82,7 @@
       @apply bg-background text-foreground;
     }
   }
+
+.rdp-vhidden {
+  @apply hidden;
+}

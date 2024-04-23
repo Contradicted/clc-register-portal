@@ -3,8 +3,7 @@ import authConfig from "@/auth.config";
 
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { db } from "@/lib/db";
-import { LoginSchema } from "@/schemas";
-import { getUserByEmail, getUserById } from "@/data/user";
+import { getUserById } from "@/data/user";
 import { getAccountById } from "@/data/account";
 
 export const { 
@@ -14,7 +13,7 @@ export const {
     auth 
 } = NextAuth({
     pages: {
-        signIn: "/auth/login"
+        signIn: "/auth/login",
     },
     adapter: PrismaAdapter(db),
     session: { strategy: "jwt"},
@@ -35,6 +34,14 @@ export const {
             token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
 
             return token;
+        },
+        session: async ({ session, token }) => {
+            if (session.user) {
+              session.user.name = token.name;
+              session.user.email = token.email;
+            }
+
+            return session;
         }
     },
     ...authConfig,

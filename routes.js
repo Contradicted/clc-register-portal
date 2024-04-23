@@ -2,7 +2,7 @@
  * An array of routes that are protected.
  * These routes require authentication
  */
-export const protectedRoutes = ["/"]
+export const protectedRoutes = ["/", "/user-details", "/user-details/edit"]
 
 /**
  * An array of routes that are used for authentication.
@@ -25,4 +25,4 @@ export const apiAuthPrefix = "/api/auth"
 /**
  * The default redirect path after logging in
  */
-export const DEFAULT_LOGIN_REDIRECT = "/";
+export const DEFAULT_LOGIN_REDIRECT = "/user-details";
