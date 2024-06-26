@@ -8,24 +8,25 @@ generator client {
 }
 
 model User {
-  id              String        @id
-  title           String
-  firstName       String
-  lastName        String
-  dateOfBirth     DateTime?
-  gender          String?
-  addressLine1    String?
-  addressLine2    String?
-  city            String?
-  postcode        String?
-  homeTelephoneNo String?
-  email           String        @unique
-  emailVerified   DateTime?
-  image           String?
-  password        String?
-  accounts        Account[]
-  sessions        Session[]
-  applications    Application[]
+  id                String             @id
+  title             String
+  firstName         String
+  lastName          String
+  dateOfBirth       DateTime?
+  gender            String?
+  addressLine1      String?
+  addressLine2      String?
+  city              String?
+  postcode          String?
+  homeTelephoneNo   String?
+  email             String             @unique
+  emailVerified     DateTime?
+  image             String?
+  password          String?
+  accounts          Account[]
+  sessions          Session[]
+  applications      Application[]
+  savedApplications SavedApplication[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -84,6 +85,18 @@ model Application {
   id                  String   @id
   courseTitle         String   @map("course_title")
   studyMode           String   @map("study_mode")
+  title               String
+  firstName           String
+  lastName            String
+  photoUrl            String   @map("photo_url")
+  dateOfBirth         DateTime
+  gender              String
+  addressLine1        String
+  addressLine2        String
+  city                String
+  postcode            String
+  homeTelephoneNo     String
+  email               String
   placeOfBirth        String   @map("place_of_birth")
   countryOfBirth      String   @map("country_of_birth")
   nationality         String
@@ -118,26 +131,116 @@ model Application {
   updatedAt DateTime @updatedAt
 }
 
+model SavedApplication {
+  id                  String    @id
+  courseTitle         String?   @map("course_title")
+  studyMode           String?   @map("study_mode")
+  title               String?
+  firstName           String?
+  lastName            String?
+  photoName           String?   @map("photo_name")
+  photoUrl            String?   @map("photo_url")
+  dateOfBirth         DateTime?
+  gender              String?
+  addressLine1        String?
+  addressLine2        String?
+  city                String?
+  postcode            String?
+  homeTelephoneNo     String?
+  email               String?
+  placeOfBirth        String?   @map("place_of_birth")
+  countryOfBirth      String?   @map("country_of_birth")
+  nationality         String?
+  entryDateToUK       DateTime? @map("entry_date_to_UK")
+  identificationNo    String?   @map("identification_no")
+  identificationNoUrl String?   @map("identification_no_url")
+  mobileNo            String?   @map("mobile_no")
+  tuitionFees         String?   @map("tuition_fees")
+
+  hasPendingResults Boolean? @map("has_pending_results")
+
+  qualifications        SavedQualification[]
+  pendingQualifications SavedPendingQualification[]
+
+  isEnglishFirstLanguage Boolean? @map("is_english_first_language")
+
+  hasWorkExperience Boolean? @map("has_work_experience")
+
+  workExperience SavedWorkExperience[]
+
+  reasonsForChoosingProgram String? @map("reasons_for_choosing_programme")
+  futureEduPlans            String? @map("future_education_plans")
+  intentedEmployment        String? @map("intended_employment")
+  hobbies                   String?
+  specialNeeds              String? @map("special_needs")
+  stateBenefits             String? @map("state_benefits")
+  criminalRecord            String? @map("criminal_record")
+  marketing                 String?
+
+  user   User   @relation(fields: [userID], references: [id])
+  userID String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SavedQualification {
+  id            String    @id @default(uuid())
+  title         String?
+  examiningBody String?   @map("examining_body")
+  dateAwarded   DateTime? @map("date_awarded")
+  fileName      String?   @map("file_name")
+  fileUrl       String?   @map("file_url")
+
+  applicationID String
+  application   SavedApplication @relation(fields: [applicationID], references: [id], onDelete: Cascade)
+}
+
 model Qualification {
-  id            String   @id
-  title         String
-  examiningBody String   @map("examining_body")
-  dateAwarded   DateTime @map("date_awarded")
-  url           String
+  id            String    @id @default(uuid())
+  title         String?
+  examiningBody String?   @map("examining_body")
+  dateAwarded   DateTime? @map("date_awarded")
+  url           String?
 
   applicationID String
   application   Application @relation(fields: [applicationID], references: [id], onDelete: Cascade)
 }
 
+model SavedPendingQualification {
+  id             String    @id @default(uuid())
+  title          String?
+  examiningBody  String?   @map("examining_body")
+  dateOfResults  DateTime? @map("date_of_results")
+  subjectsPassed String?   @map("subjects_passed")
+
+  applicationID String
+  application   SavedApplication @relation(fields: [applicationID], references: [id], onDelete: Cascade)
+}
+
 model PendingQualification {
-  id             String   @id
-  title          String
-  examiningBody  String   @map("examining_body")
-  dateOfResults  DateTime @map("date_of_results")
-  subjectsPassed String   @map("subjects_passed")
+  id             String    @id @default(uuid())
+  title          String?
+  examiningBody  String?   @map("examining_body")
+  dateOfResults  DateTime? @map("date_of_results")
+  subjectsPassed String?   @map("subjects_passed")
 
   applicationID String
   application   Application @relation(fields: [applicationID], references: [id], onDelete: Cascade)
+}
+
+model SavedWorkExperience {
+  id                 String    @id @default(uuid())
+  title              String?
+  nameOfOrganisation String?   @map("name_of_organisation")
+  natureOfJob        String?   @map("nature_of_job")
+  jobStartDate       DateTime? @map("job_start_date")
+  jobEndDate         DateTime? @map("job_end_date")
+  fileName           String?   @map("file_name")
+  fileUrl            String?   @map("file_url")
+
+  applicationID String
+  application   SavedApplication @relation(fields: [applicationID], references: [id], onDelete: Cascade)
 }
 
 model WorkExperience {

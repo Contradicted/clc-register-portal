@@ -1,12 +1,15 @@
+import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
+import { getSavedApplicationByUserID } from "@/data/application";
 import { getUserByEmail } from "@/data/user";
 import { currentUser } from "@/lib/auth";
-import Link from "next/link";
 
 const UserDetailsPage = async () => {
 
     const user = await currentUser();
     const userDetails = await getUserByEmail(user.email);
+    const savedApplication = await getSavedApplicationByUserID(user.id)
 
     return (
       <div className="h-full w-full pt-12">
@@ -41,9 +44,15 @@ const UserDetailsPage = async () => {
             <Button asChild>
               <Link href="/user-details/edit">Edit Details</Link>
             </Button>
-            <Button>
-              <Link href="/application">Submit an application</Link>
-            </Button>
+            {savedApplication ? (
+              <Button>
+                <Link href="/application">Edit application</Link>
+              </Button>
+            ) : (
+              <Button>
+                <Link href="/application">Submit an application</Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>

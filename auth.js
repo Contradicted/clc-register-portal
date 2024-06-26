@@ -6,45 +6,41 @@ import { db } from "@/lib/db";
 import { getUserById } from "@/data/user";
 import { getAccountById } from "@/data/account";
 
-export const { 
-    handlers, 
-    signIn, 
-    signOut, 
-    auth 
-} = NextAuth({
-    pages: {
-        signIn: "/auth/login",
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  pages: {
+    signIn: "/auth/login",
+  },
+  adapter: PrismaAdapter(db),
+  session: { strategy: "jwt" },
+  callbacks: {
+    jwt: async ({ token }) => {
+      if (!token.sub) return token;
+
+      const existingUser = await getUserById(token.sub);
+
+      if (!existingUser) return token;
+
+      const existingAccount = await getAccountById(existingUser.id);
+
+      token.isOAuth = !!existingAccount;
+      token.id = existingUser.id;
+      token.name = existingUser.name;
+      token.email = existingUser.email;
+      token.role = existingUser.role;
+      token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
+
+      return token;
     },
-    adapter: PrismaAdapter(db),
-    session: { strategy: "jwt"},
-    callbacks: {
-        jwt: async ({ token }) => {
-            if (!token.sub) return token;
+    session: async ({ session, token }) => {
+      if (session.user) {
+        session.user.name = token.name;
+        session.user.email = token.email;
+        session.user.id = token.id;
+      }
 
-            const existingUser = await getUserById(token.sub);
-
-            if (!existingUser) return token;
-
-            const existingAccount = await getAccountById(existingUser.id);
-
-            token.isOAuth = !!existingAccount;
-            token.id = existingUser.id
-            token.name = existingUser.name;
-            token.email = existingUser.email;
-            token.role = existingUser.role;
-            token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
-
-            return token;
-        },
-        session: async ({ session, token }) => {
-            if (session.user) {
-              session.user.name = token.name;
-              session.user.email = token.email;
-              session.user.id = token.id;
-            }
-
-            return session;
-        }
+      return session;
     },
-    ...authConfig,
-})
+  },
+  secret: process.env.AUTH_SECRET || "secret",
+  ...authConfig,
+});

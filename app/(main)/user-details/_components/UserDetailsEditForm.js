@@ -198,7 +198,7 @@ export const UserDetailsEditForm = ({ userDetails }) => {
                                 disabled={isPending}
                               >
                                 {field.value ? (
-                                  format(field.value, "yyyy-MM-dd")
+                                  format(field.value, "dd-MM-yyyy")
                                 ) : (
                                   <span>Pick a date</span>
                                 )}
@@ -209,10 +209,10 @@ export const UserDetailsEditForm = ({ userDetails }) => {
                           <PopoverContent className="w-auto p-0">
                             <Calendar
                               mode="single"
+                              selected={field.value}
                               captionLayout="dropdown-buttons"
                               fromYear={1920}
                               toYear={now.getFullYear()}
-                              // selected={format(field.value, "yyyy-MM-dd")}
                               onSelect={field.onChange}
                               disabled={(date) =>
                                 date > new Date() ||
