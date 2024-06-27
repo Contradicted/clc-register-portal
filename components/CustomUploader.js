@@ -45,7 +45,7 @@ export const MultiUploader = ({
     } else if (defaultPreviewUrl) {
       setPreviewUrl(defaultPreviewUrl);
     }
-  }, [isRemoved, defaultFile, defaultPreviewUrl]);
+  }, [isRemoved, defaultPreviewUrl, defaultFile]);
 
   useEffect(() => {
     return () => {

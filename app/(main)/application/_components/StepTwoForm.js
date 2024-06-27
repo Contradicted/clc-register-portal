@@ -37,8 +37,9 @@ export const StepTwoForm = ({
   fData,
   updateData,
   deletedQualifications,
-  setDeletedQualifications,
   deletedPendingQualifications,
+  deletedWorkExperiences,
+  setDeletedQualifications,
   setDeletedPendingQualifications,
   accumulatedFiles,
   setAccumulatedFiles,
@@ -52,11 +53,14 @@ export const StepTwoForm = ({
   const [isPending, startTransition] = useTransition();
   const [fileUploads, setFileUploads] = useState([]);
   const [formErrors, setFormErrors] = useState();
+  const [isRemoved, setIsRemoved] = useState({});
   const [error, setError] = useState();
 
   const now = new Date();
   const { toast } = useToast();
   const router = useRouter();
+
+  console.log(accumulatedFiles);
 
   const form = useForm({
     defaultValues: {
@@ -152,16 +156,36 @@ export const StepTwoForm = ({
     removePendingQualification(index);
   };
 
-  const handleFileChange = (index, file) => {
+  const handleFileChange = (index, file, removed) => {
     const newFileUploads = [...fileUploads];
     newFileUploads[index] = file;
     setFileUploads(newFileUploads);
 
-    const updatedAccumulatedFiles = {
-      ...accumulatedFiles,
-      [`file_${index}`]: { file, alreadyExists: false },
-    };
+    const updatedAccumulatedFiles = { ...accumulatedFiles };
+    const updatedIsRemoved = { ...isRemoved };
+
+    if (removed) {
+      if (updatedAccumulatedFiles[`qualification_file_${index}`]) {
+        updatedAccumulatedFiles[`qualification_file_${index}`].file = null;
+      } else {
+        updatedAccumulatedFiles[`qualification_file_${index}`] = {
+          file: null,
+          alreadyExists: false,
+        };
+      }
+      updatedAccumulatedFiles[`qualification_file_${index}_isRemoved`] = true;
+      updatedIsRemoved[`qualification_file_${index}`] = true;
+    } else {
+      updatedAccumulatedFiles[`qualification_file_${index}`] = {
+        file,
+        alreadyExists: false,
+      };
+      updatedAccumulatedFiles[`qualification_file_${index}_isRemoved`] = false;
+      updatedIsRemoved[`qualification_file_${index}`] = false;
+    }
+
     setAccumulatedFiles(updatedAccumulatedFiles);
+    setIsRemoved(updatedIsRemoved);
   };
 
   const onSubmit = (values) => {
@@ -189,6 +213,20 @@ export const StepTwoForm = ({
 
     updateData(currentValues, accumulatedFiles);
     previousStep(currentValues, accumulatedFiles);
+  };
+
+  const onNext = () => {
+    const currentValues = form.getValues();
+
+    if (
+      currentValues.addPendingQualifications === "No" ||
+      currentValues.addPendingQualifications === undefined
+    ) {
+      currentValues.pendingQualifications = [];
+    }
+
+    updateData(currentValues, accumulatedFiles);
+    nextStep(currentValues, accumulatedFiles);
   };
 
   const saveForm = () => {
@@ -227,6 +265,7 @@ export const StepTwoForm = ({
         JSON.stringify(currentValues),
         deletedQualifications,
         deletedPendingQualifications,
+        deletedWorkExperiences,
         formData
       ).then((data) => {
         if (data?.success) {
@@ -245,16 +284,25 @@ export const StepTwoForm = ({
     });
   };
 
-  const onNext = () => {
-    nextStep();
+  const hasNoQualificationFiles = () => {
+    return !Object.keys(accumulatedFiles).some(
+      (key) =>
+        key.startsWith("qualification_file_") &&
+        !key.endsWith("_isRemoved") &&
+        accumulatedFiles[key]?.file
+    );
   };
 
   useEffect(() => {
-    if (application && application.qualifications) {
+    if (
+      application &&
+      application.qualifications &&
+      hasNoQualificationFiles()
+    ) {
       const initialFileUploads = application.qualifications.map(
         (qual, index) => {
           if (qual.fileUrl) {
-            accumulatedFiles[`file_${index}`] = {
+            accumulatedFiles[`qualification_file_${index}`] = {
               file: "existing",
               alreadyExists: true,
             };
@@ -412,15 +460,40 @@ export const StepTwoForm = ({
                         <FormItem>
                           <FormLabel>Upload Qualification File</FormLabel>
                           <MultiUploader
-                            onChange={(file) => handleFileChange(index, file)}
+                            onChange={(file, removed) =>
+                              handleFileChange(index, file, removed)
+                            }
                             defaultFile={
-                              accumulatedFiles[`file_${index}`]?.file ||
-                              fileUploads[index]
+                              !accumulatedFiles[
+                                `qualification_file_${index}_isRemoved`
+                              ]
+                                ? accumulatedFiles[
+                                    `qualification_file_${index}`
+                                  ]?.file
+                                : null
                             }
                             defaultPreviewUrl={
-                              (application?.qualifications &&
-                                application?.qualifications[index]?.fileUrl) ||
-                              null
+                              accumulatedFiles[
+                                `qualification_file_${index}_isRemoved`
+                              ]
+                                ? null
+                                : accumulatedFiles[
+                                    `qualification_file_${index}`
+                                  ]?.alreadyExists
+                                ? application?.qualifications &&
+                                  application?.qualifications[index]?.fileUrl
+                                : accumulatedFiles[
+                                    `qualification_file_${index}`
+                                  ]?.file
+                                ? URL.createObjectURL(
+                                    accumulatedFiles[
+                                      `qualification_file_${index}`
+                                    ]?.file
+                                  )
+                                : null
+                              // (application?.qualifications &&
+                              //   application?.qualifications[index]?.fileUrl) ||
+                              // null
                             }
                             isPending={isPending}
                           />

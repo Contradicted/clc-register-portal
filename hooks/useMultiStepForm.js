@@ -8,6 +8,7 @@ export const useMultiStepForm = (steps, initialData) => {
   const [fData, setFData] = useState({});
   const [accumulatedFiles, setAccumulatedFiles] = useState({});
   const [deletedQualifications, setDeletedQualifications] = useState([]);
+  const [deletedWorkExperiences, setDeletedWorkExperiences] = useState([]);
   const [deletedPendingQualifications, setDeletedPendingQualifications] =
     useState([]);
 
@@ -58,6 +59,8 @@ export const useMultiStepForm = (steps, initialData) => {
     setDeletedQualifications,
     deletedPendingQualifications,
     setDeletedPendingQualifications,
+    deletedWorkExperiences,
+    setDeletedWorkExperiences,
     accumulatedFiles,
     setAccumulatedFiles,
     previousStep,

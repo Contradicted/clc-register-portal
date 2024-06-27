@@ -50,6 +50,7 @@ export const StepOneForm = ({
   accumulatedFiles,
   deletedQualifications,
   deletedPendingQualifications,
+  deletedWorkExperiences,
   setAccumulatedFiles,
 }) => {
   const defaultIsClicked = application
@@ -64,95 +65,117 @@ export const StepOneForm = ({
     : false;
 
   const [file, setFile] = useState(null);
-  const [isClicked, setIsClicked] = useState(defaultIsClicked);
-  const [isPending, startTransition] = useTransition();
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
-  const [error, setError] = useState();
-  const [isRemoved, setIsRemoved] = useState(false);
+  const [idFile, setIdFile] = useState(null);
+    const [isClicked, setIsClicked] = useState(defaultIsClicked);
+    const [isPending, startTransition] = useTransition();
+    const [isLoading, setIsLoading] = useState(true); // Add loading state
+    const [error, setError] = useState();
+    const [isRemoved, setIsRemoved] = useState(false);
 
-  console.log("foo", fData);
+    console.log("foo", fData);
 
-  const form = useForm({
-    defaultValues: {
-      courseTitle: application?.courseTitle || undefined,
-      studyMode: application?.studyMode || undefined,
-      title: userDetails?.title || application?.title || undefined,
-      firstName: userDetails?.firstName || application?.firstName || undefined,
-      lastName: userDetails?.lastName || application?.lastName || undefined,
-      gender: userDetails?.gender || application?.gender || undefined,
-      dateOfBirth:
-        userDetails?.dateOfBirth || application?.dateOfBirth || undefined,
-      placeOfBirth: application?.placeOfBirth || undefined,
-      countryOfBirth: application?.countryOfBirth || undefined,
-      nationality: application?.nationality || undefined,
-      entryDateToUK: application?.entryDateToUK || undefined,
-      identificationNo: application?.identificationNo || undefined,
-      addressLine1:
-        userDetails?.addressLine1 || application?.addressLine1 || undefined,
-      addressLine2:
-        userDetails?.addressLine2 || application?.addressLine2 || undefined,
-      city: userDetails?.city || application?.city || undefined,
-      postcode: userDetails?.postcode || application?.postcode || undefined,
-      homeTelephoneNo:
-        userDetails?.homeTelephoneNo ||
-        application?.homeTelephoneNo ||
-        undefined,
-      mobileNo: userDetails?.mobileNo || application?.mobileNo || undefined,
-      email: application?.email || undefined,
-      tuitionFees: application?.tuitionFees || "",
-    },
-  });
+    const form = useForm({
+      defaultValues: {
+        courseTitle: application?.courseTitle || undefined,
+        studyMode: application?.studyMode || undefined,
+        title: userDetails?.title || application?.title || undefined,
+        firstName:
+          userDetails?.firstName || application?.firstName || undefined,
+        lastName: userDetails?.lastName || application?.lastName || undefined,
+        gender: userDetails?.gender || application?.gender || undefined,
+        dateOfBirth:
+          userDetails?.dateOfBirth || application?.dateOfBirth || undefined,
+        placeOfBirth: application?.placeOfBirth || undefined,
+        countryOfBirth: application?.countryOfBirth || undefined,
+        nationality: application?.nationality || undefined,
+        entryDateToUK: application?.entryDateToUK || undefined,
+        identificationNo: application?.identificationNo || undefined,
+        addressLine1:
+          userDetails?.addressLine1 || application?.addressLine1 || undefined,
+        addressLine2:
+          userDetails?.addressLine2 || application?.addressLine2 || undefined,
+        city: userDetails?.city || application?.city || undefined,
+        postcode: userDetails?.postcode || application?.postcode || undefined,
+        homeTelephoneNo:
+          userDetails?.homeTelephoneNo ||
+          application?.homeTelephoneNo ||
+          undefined,
+        mobileNo: userDetails?.mobileNo || application?.mobileNo || undefined,
+        email: application?.email || undefined,
+        tuitionFees: application?.tuitionFees || "",
+      },
+    });
 
-  const now = new Date();
-  const { toast } = useToast();
-  const router = useRouter();
+    const now = new Date();
+    const { toast } = useToast();
+    const router = useRouter();
 
-  const onSubmit = (values) => {
-    console.log("test");
-  };
+    const onSubmit = (values) => {
+      console.log("test");
+    };
 
-  const onNext = () => {
-    if (!file) {
-      setIsRemoved(true);
-    }
-    const currentValues = form.getValues();
-    updateData(currentValues, accumulatedFiles);
-    nextStep(currentValues, accumulatedFiles);
-  };
+    const onNext = () => {
+      if (!file) {
+        setIsRemoved(true);
+      }
+      const currentValues = form.getValues();
+      updateData(currentValues, accumulatedFiles);
+      nextStep(currentValues, accumulatedFiles);
+    };
 
-  const onFileChange = (file, isRemoved) => {
-    setFile(file);
+    // const onFileChange = (file, isRemoved) => {
+    //   setFile(file);
 
-    const newAccumulatedFiles = { ...accumulatedFiles };
-    if (isRemoved) {
-      delete newAccumulatedFiles.file;
-      newAccumulatedFiles.isFileRemoved = true; // Track the removed state
-    } else {
-      newAccumulatedFiles.file = { file, alreadyExists: false };
-      newAccumulatedFiles.isFileRemoved = false;
-    }
-    setAccumulatedFiles(newAccumulatedFiles);
-  };
+    //   const newAccumulatedFiles = { ...accumulatedFiles };
+    //   if (isRemoved) {
+    //     delete newAccumulatedFiles.file;
+    //     newAccumulatedFiles.isFileRemoved = true; // Track the removed state
+    //   } else {
+    //     newAccumulatedFiles.file = { file, alreadyExists: false };
+    //     newAccumulatedFiles.isFileRemoved = false;
+    //   }
+    //   setAccumulatedFiles(newAccumulatedFiles);
+    // };
 
-  useEffect(() => {
-    if (application && application.photoUrl && !accumulatedFiles.file) {
-      setIsLoading(true);
-      fetch(application.photoUrl)
-        .then((response) => response.blob())
-        .then((blob) => {
-          const file = new File([blob], application.photoName, {
-            type: blob.type,
+    useEffect(() => {
+      if (application && application.photoUrl && !accumulatedFiles.file) {
+        setIsLoading(true);
+        fetch(application.photoUrl)
+          .then((response) => response.blob())
+          .then((blob) => {
+            const file = new File([blob], application.photoName, {
+              type: blob.type,
+            });
+            setFile(file);
+            setAccumulatedFiles((prev) => ({
+              ...prev,
+              file: { file, alreadyExists: true },
+            }));
           });
-          setFile(file);
-          setAccumulatedFiles((prev) => ({
-            ...prev,
-            file: { file, alreadyExists: true },
-          }));
-        });
-    }
+      }
 
-    setIsLoading(false);
-  }, [application]);
+      if (
+        application &&
+        application.identificationNoUrl &&
+        !accumulatedFiles.idFile
+      ) {
+        setIsLoading(true);
+        fetch(application.identificationNoUrl)
+          .then((response) => response.blob())
+          .then((blob) => {
+            const file = new File([blob], application.identificationNo, {
+              type: blob.type,
+            });
+            setIdFile(file);
+            setAccumulatedFiles((prev) => ({
+              ...prev,
+              idFile: { file, alreadyExists: true },
+            }));
+          });
+      }
+
+      setIsLoading(false);
+    }, [application]);
 
   const saveForm = () => {
     setError("");
@@ -186,6 +209,7 @@ export const StepOneForm = ({
         JSON.stringify({ ...fData, ...currentValues }),
         deletedQualifications,
         deletedPendingQualifications,
+        deletedWorkExperiences,
         formData
       ).then((data) => {
         if (data?.success) {
@@ -632,6 +656,31 @@ export const StepOneForm = ({
                   )}
                 />
               </div>
+
+              {!isLoading && (
+                <MultiUploader
+                  onChange={(file, removed) => {
+                    setIdFile(file);
+                    setIsRemoved(removed);
+
+                    const newAccumulatedFiles = { ...accumulatedFiles };
+                    newAccumulatedFiles.idFile = {
+                      file,
+                      alreadyExists: false,
+                    };
+                    setAccumulatedFiles(newAccumulatedFiles);
+                  }}
+                  defaultFile={accumulatedFiles.idFile?.file || idFile}
+                  defaultPreviewUrl={
+                    accumulatedFiles.idFile?.alreadyExists
+                      ? application?.identificationNoUrl
+                      : accumulatedFiles.idFile?.file
+                      ? URL.createObjectURL(accumulatedFiles.idFile.file)
+                      : null
+                  }
+                  isPending={isPending}
+                />
+              )}
 
               {/* Row 5 */}
               <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
