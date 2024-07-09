@@ -79,10 +79,9 @@ export const StepTwoForm = ({
           ? "Yes"
           : fData?.addPendingQualifications === "No"
           ? "No"
-          : application?.hasPendingResults
+          : application?.hasPendingResults === true
           ? "Yes"
-          : !application?.hasPendingResults &&
-            application?.hasPendingResults !== undefined
+          : application?.hasPendingResults === false
           ? "No"
           : undefined,
       pendingQualifications:
@@ -274,7 +273,7 @@ export const StepTwoForm = ({
             title: data.success,
           });
 
-          router.push("/user-details");
+          router.push("/application-saved");
         }
 
         if (data?.error) {

@@ -23,6 +23,14 @@ export const authRoutes = [
 export const apiAuthPrefix = "/api/auth"
 
 /**
+ * An array of routes that are used for the application.
+ * These routes require the user to have an active application
+ */
+export const applicationRoutes = [
+  "/application",
+];
+
+/**
  * The default redirect path after logging in
  */
 export const DEFAULT_LOGIN_REDIRECT = "/user-details";

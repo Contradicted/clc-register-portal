@@ -5,10 +5,14 @@ import { StepOneForm } from "./StepOneForm";
 import { FormHeader } from "./FormHeader";
 import { StepTwoForm } from "./StepTwoForm";
 import { StepThreeForm } from "./StepThreeForm";
+import { StepFourForm } from "./StepFourForm";
+import { StepFiveForm } from "./StepFiveForm";
 
 export const Forms = ({ formData, userData }) => {
   const {
     currentStepIndex,
+    isFirstStep,
+    isLastStep,
     nextStep,
     previousStep,
     applicationData,
@@ -24,11 +28,12 @@ export const Forms = ({ formData, userData }) => {
     setDeletedWorkExperiences,
   } = useMultiStepForm(5, formData);
 
-  // console.log('tet', formData)
+  console.log("tet", currentStepIndex);
 
   const forms = [
     <StepOneForm
       userDetails={userData}
+      isFirstStep={isFirstStep}
       application={applicationData}
       nextStep={nextStep}
       fData={fData}
@@ -65,6 +70,31 @@ export const Forms = ({ formData, userData }) => {
       deletedQualifications={deletedQualifications}
       deletedWorkExperiences={deletedWorkExperiences}
       setDeletedWorkExperiences={setDeletedWorkExperiences}
+    />,
+    <StepFourForm
+      application={applicationData}
+      previousStep={previousStep}
+      nextStep={nextStep}
+      accumulatedFiles={accumulatedFiles}
+      setAccumulatedFiles={setAccumulatedFiles}
+      fData={fData}
+      updateData={updateData}
+      deletedPendingQualifications={deletedPendingQualifications}
+      deletedQualifications={deletedQualifications}
+      deletedWorkExperiences={deletedWorkExperiences}
+    />,
+    <StepFiveForm
+      application={applicationData}
+      previousStep={previousStep}
+      nextStep={nextStep}
+      isLastStep={isLastStep}
+      accumulatedFiles={accumulatedFiles}
+      setAccumulatedFiles={setAccumulatedFiles}
+      fData={fData}
+      updateData={updateData}
+      deletedPendingQualifications={deletedPendingQualifications}
+      deletedQualifications={deletedQualifications}
+      deletedWorkExperiences={deletedWorkExperiences}
     />,
   ];
 

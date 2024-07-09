@@ -1,15 +1,24 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { getSavedApplicationByUserID } from "@/data/application";
+import {
+  getApplicationByUserID,
+  getSavedApplicationByUserID,
+} from "@/data/application";
 import { getUserByEmail } from "@/data/user";
 import { currentUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 const UserDetailsPage = async () => {
 
     const user = await currentUser();
     const userDetails = await getUserByEmail(user.email);
     const savedApplication = await getSavedApplicationByUserID(user.id)
+    const application = await getApplicationByUserID(user.id);
+
+    if (application) {
+      return redirect("/");
+    }
 
     return (
       <div className="h-full w-full pt-12">

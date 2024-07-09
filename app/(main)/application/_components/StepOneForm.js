@@ -43,6 +43,7 @@ import { useMultiStepForm } from "@/hooks/useMultiStepForm";
 export const StepOneForm = ({
   application,
   userDetails,
+  isFirstStep,
   nextStep,
   fData,
   updateData,
@@ -56,6 +57,7 @@ export const StepOneForm = ({
   const defaultIsClicked = application
     ? ![
         "",
+        null,
         "Parents",
         "Family Members",
         "Employers",
@@ -66,80 +68,118 @@ export const StepOneForm = ({
 
   const [file, setFile] = useState(null);
   const [idFile, setIdFile] = useState(null);
-    const [isClicked, setIsClicked] = useState(defaultIsClicked);
-    const [isPending, startTransition] = useTransition();
-    const [isLoading, setIsLoading] = useState(true); // Add loading state
-    const [error, setError] = useState();
-    const [isRemoved, setIsRemoved] = useState(false);
+  const [isClicked, setIsClicked] = useState(defaultIsClicked);
+  const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [error, setError] = useState();
+  const [isRemoved, setIsRemoved] = useState(false);
+  const [otherOptionText, setOtherOptionText] = useState(
+    defaultIsClicked ? application?.tuitionFees : ""
+  );
 
-    console.log("foo", fData);
+  console.log("foo", fData);
 
-    const form = useForm({
-      defaultValues: {
-        courseTitle: application?.courseTitle || undefined,
-        studyMode: application?.studyMode || undefined,
-        title: userDetails?.title || application?.title || undefined,
-        firstName:
-          userDetails?.firstName || application?.firstName || undefined,
-        lastName: userDetails?.lastName || application?.lastName || undefined,
-        gender: userDetails?.gender || application?.gender || undefined,
-        dateOfBirth:
-          userDetails?.dateOfBirth || application?.dateOfBirth || undefined,
-        placeOfBirth: application?.placeOfBirth || undefined,
-        countryOfBirth: application?.countryOfBirth || undefined,
-        nationality: application?.nationality || undefined,
-        entryDateToUK: application?.entryDateToUK || undefined,
-        identificationNo: application?.identificationNo || undefined,
-        addressLine1:
-          userDetails?.addressLine1 || application?.addressLine1 || undefined,
-        addressLine2:
-          userDetails?.addressLine2 || application?.addressLine2 || undefined,
-        city: userDetails?.city || application?.city || undefined,
-        postcode: userDetails?.postcode || application?.postcode || undefined,
-        homeTelephoneNo:
-          userDetails?.homeTelephoneNo ||
-          application?.homeTelephoneNo ||
-          undefined,
-        mobileNo: userDetails?.mobileNo || application?.mobileNo || undefined,
-        email: application?.email || undefined,
-        tuitionFees: application?.tuitionFees || "",
+  const form = useForm({
+    defaultValues: {
+      courseTitle: application?.courseTitle || undefined,
+      studyMode: application?.studyMode || undefined,
+      title: userDetails?.title || application?.title || undefined,
+      firstName: userDetails?.firstName || application?.firstName || undefined,
+      lastName: userDetails?.lastName || application?.lastName || undefined,
+      gender: userDetails?.gender || application?.gender || undefined,
+      dateOfBirth:
+        userDetails?.dateOfBirth || application?.dateOfBirth || undefined,
+      placeOfBirth: application?.placeOfBirth || undefined,
+      countryOfBirth: application?.countryOfBirth || undefined,
+      nationality: application?.nationality || undefined,
+      entryDateToUK: application?.entryDateToUK || undefined,
+      identificationNo: application?.identificationNo || undefined,
+      addressLine1:
+        fData?.addressLine1 ||
+        userDetails?.addressLine1 ||
+        application?.addressLine1 ||
+        undefined,
+      addressLine2:
+        fData?.addressLine2 ||
+        userDetails?.addressLine2 ||
+        application?.addressLine2 ||
+        undefined,
+      city: userDetails?.city || application?.city || undefined,
+      postcode: userDetails?.postcode || application?.postcode || undefined,
+      homeTelephoneNo:
+        userDetails?.homeTelephoneNo ||
+        application?.homeTelephoneNo ||
+        undefined,
+      mobileNo: userDetails?.mobileNo || application?.mobileNo || undefined,
+      email: application?.email || undefined,
+      tuitionFees: application?.tuitionFees || "",
+    },
+  });
+
+  const now = new Date();
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const onSubmit = (values) => {
+    console.log("test");
+  };
+
+  const onNext = () => {
+    if (!file) {
+      setIsRemoved(true);
+    }
+    const currentValues = form.getValues();
+
+    if (isClicked && !otherOptionText) {
+      setError("Please specify where you heard about us.");
+      return;
+    }
+
+    updateData(
+      {
+        ...currentValues,
+        tuitionFees: isClicked ? otherOptionText : currentValues.tuitionFees,
       },
-    });
+      accumulatedFiles
+    );
+    nextStep(
+      {
+        ...currentValues,
+        tuitionFees: isClicked ? otherOptionText : currentValues.tuitionFees,
+      },
+      accumulatedFiles
+    );
+  };
 
-    const now = new Date();
-    const { toast } = useToast();
-    const router = useRouter();
+  // const onFileChange = (file, isRemoved) => {
+  //   setFile(file);
 
-    const onSubmit = (values) => {
-      console.log("test");
-    };
+  //   const newAccumulatedFiles = { ...accumulatedFiles };
+  //   if (isRemoved) {
+  //     delete newAccumulatedFiles.file;
+  //     newAccumulatedFiles.isFileRemoved = true; // Track the removed state
+  //   } else {
+  //     newAccumulatedFiles.file = { file, alreadyExists: false };
+  //     newAccumulatedFiles.isFileRemoved = false;
+  //   }
+  //   setAccumulatedFiles(newAccumulatedFiles);
+  // };
 
-    const onNext = () => {
-      if (!file) {
-        setIsRemoved(true);
-      }
-      const currentValues = form.getValues();
-      updateData(currentValues, accumulatedFiles);
-      nextStep(currentValues, accumulatedFiles);
-    };
+  useEffect(() => {
+    if (application && application.photoUrl && !accumulatedFiles.file) {
+      setIsLoading(true);
+      // let url = application?.photoUrl;
+      // let blob = new Blob([url]);
+      // let file = new File([blob], application.photoName, {
+      //   type: blob.type,
+      // });
 
-    // const onFileChange = (file, isRemoved) => {
-    //   setFile(file);
-
-    //   const newAccumulatedFiles = { ...accumulatedFiles };
-    //   if (isRemoved) {
-    //     delete newAccumulatedFiles.file;
-    //     newAccumulatedFiles.isFileRemoved = true; // Track the removed state
-    //   } else {
-    //     newAccumulatedFiles.file = { file, alreadyExists: false };
-    //     newAccumulatedFiles.isFileRemoved = false;
-    //   }
-    //   setAccumulatedFiles(newAccumulatedFiles);
-    // };
-
-    useEffect(() => {
-      if (application && application.photoUrl && !accumulatedFiles.file) {
-        setIsLoading(true);
+      // setFile(file);
+      // setAccumulatedFiles((prev) => ({
+      //   ...prev,
+      //   file: { file, alreadyExists: true },
+      // }));
+      try {
         fetch(application.photoUrl)
           .then((response) => response.blob())
           .then((blob) => {
@@ -152,14 +192,27 @@ export const StepOneForm = ({
               file: { file, alreadyExists: true },
             }));
           });
+      } catch (error) {
+        console.error("Error loading file:", error);
       }
+    }
 
-      if (
-        application &&
-        application.identificationNoUrl &&
-        !accumulatedFiles.idFile
-      ) {
-        setIsLoading(true);
+    if (
+      application &&
+      application.identificationNoUrl &&
+      !accumulatedFiles.idFile
+    ) {
+      setIsLoading(true);
+      // let url = application?.identificationNoUrl;
+      // let blob = new Blob([url]);
+      // let file = new File([blob], application?.identificationNo);
+
+      // setIdFile(file);
+      // setAccumulatedFiles((prev) => ({
+      //   ...prev,
+      //   idFile: { file, alreadyExists: true },
+      // }));
+      try {
         fetch(application.identificationNoUrl)
           .then((response) => response.blob())
           .then((blob) => {
@@ -172,26 +225,35 @@ export const StepOneForm = ({
               idFile: { file, alreadyExists: true },
             }));
           });
+      } catch (error) {
+        console.error("Error loading file:", error);
       }
+    }
 
-      setIsLoading(false);
-    }, [application]);
+    setIsLoading(false);
+  }, [application]);
+
+  useEffect(() => {
+    if (defaultIsClicked) {
+      form.setValue("tuitionFees", "Other");
+      setOtherOptionText(otherOptionText || "");
+    }
+  }, [application, form, defaultIsClicked]);
 
   const saveForm = () => {
     setError("");
-    const currentValues = form.getValues();
+    const stepOneData = form.getValues();
 
-    // Ensure date fields are converted to ISO strings
-    if (currentValues.dateOfBirth) {
-      currentValues.dateOfBirth = new Date(
-        currentValues.dateOfBirth
-      ).toISOString();
+    if (isClicked && !otherOptionText) {
+      setError("Please specify where you heard about us.");
+      return;
     }
-    if (currentValues.entryDateToUK) {
-      currentValues.entryDateToUK = new Date(
-        currentValues.entryDateToUK
-      ).toISOString();
-    }
+
+    const currentValues = {
+      ...fData,
+      ...stepOneData,
+      tuitionFees: isClicked ? otherOptionText : stepOneData.tuitionFees,
+    };
 
     const formData = new FormData();
     for (const key in accumulatedFiles) {
@@ -206,7 +268,7 @@ export const StepOneForm = ({
 
     startTransition(() => {
       save(
-        JSON.stringify({ ...fData, ...currentValues }),
+        JSON.stringify(currentValues),
         deletedQualifications,
         deletedPendingQualifications,
         deletedWorkExperiences,
@@ -218,7 +280,7 @@ export const StepOneForm = ({
             title: data.success,
           });
 
-          router.push("/user-details");
+          router.push("/application-saved");
         }
 
         if (data?.error) {
@@ -491,7 +553,7 @@ export const StepOneForm = ({
                                 fromYear={1920}
                                 toYear={now.getFullYear()}
                                 onSelect={(date) =>
-                                  field.onChange(date.toISOString())
+                                  field.onChange(new Date(date))
                                 }
                                 disabled={(date) =>
                                   date > new Date() ||
@@ -619,7 +681,7 @@ export const StepOneForm = ({
                                 fromYear={1920}
                                 toYear={now.getFullYear()}
                                 onSelect={(date) =>
-                                  field.onChange(date.toISOString())
+                                  field.onChange(new Date(date))
                                 }
                                 disabled={(date) =>
                                   date > new Date() ||
@@ -808,17 +870,22 @@ export const StepOneForm = ({
                         </div>
                         <FormControl>
                           <RadioGroup
-                            onValueChange={field.onChange}
-                            value={field.value}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              if (value === "Other") {
+                                setIsClicked(true);
+                              } else {
+                                setIsClicked(false);
+                                setOtherOptionText("");
+                              }
+                            }}
+                            value={isClicked ? "Other" : field.value}
                             className="flex flex-col space-y-1"
                             disabled={isPending}
                           >
                             <FormItem className="flex items-center space-x-3 space-y-0 mt-3">
                               <FormControl>
-                                <RadioGroupItem
-                                  value="Parents"
-                                  onClick={() => setIsClicked(false)}
-                                />
+                                <RadioGroupItem value="Parents" />
                               </FormControl>
                               <FormLabel className="font-medium">
                                 Parents
@@ -826,10 +893,7 @@ export const StepOneForm = ({
                             </FormItem>
                             <FormItem className="flex items-center space-x-3 space-y-0">
                               <FormControl>
-                                <RadioGroupItem
-                                  value="Family Members"
-                                  onClick={() => setIsClicked(false)}
-                                />
+                                <RadioGroupItem value="Family Members" />
                               </FormControl>
                               <FormLabel className="font-medium">
                                 Family Members
@@ -837,10 +901,7 @@ export const StepOneForm = ({
                             </FormItem>
                             <FormItem className="flex items-center space-x-3 space-y-0">
                               <FormControl>
-                                <RadioGroupItem
-                                  value="Employers"
-                                  onClick={() => setIsClicked(false)}
-                                />
+                                <RadioGroupItem value="Employers" />
                               </FormControl>
                               <FormLabel className="font-medium">
                                 Employers
@@ -848,10 +909,7 @@ export const StepOneForm = ({
                             </FormItem>
                             <FormItem className="flex items-center space-x-3 space-y-0">
                               <FormControl>
-                                <RadioGroupItem
-                                  value="Self"
-                                  onClick={() => setIsClicked(false)}
-                                />
+                                <RadioGroupItem value="Self" />
                               </FormControl>
                               <FormLabel className="font-medium">
                                 Self
@@ -859,10 +917,7 @@ export const StepOneForm = ({
                             </FormItem>
                             <FormItem className="flex items-center space-x-3 space-y-0">
                               <FormControl>
-                                <RadioGroupItem
-                                  value="Student Loan Company England (SLC)"
-                                  onClick={() => setIsClicked(false)}
-                                />
+                                <RadioGroupItem value="Student Loan Company England (SLC)" />
                               </FormControl>
                               <FormLabel className="font-medium">
                                 Student Loan Company England (SLC)
@@ -871,6 +926,7 @@ export const StepOneForm = ({
                             <FormItem className="flex items-center space-x-3 space-y-0">
                               <FormControl>
                                 <RadioGroupItem
+                                  value="Other"
                                   checked={isClicked}
                                   onClick={() => setIsClicked(true)}
                                 />
@@ -882,8 +938,10 @@ export const StepOneForm = ({
                             {isClicked && (
                               <FormControl>
                                 <Input
-                                  {...field}
-                                  value={field.value || ""}
+                                  onChange={(e) => {
+                                    setOtherOptionText(e.target.value);
+                                  }}
+                                  value={otherOptionText}
                                   type="text"
                                   className="lg:max-w-[400px]"
                                 />
@@ -900,7 +958,7 @@ export const StepOneForm = ({
           </div>
 
           <FormButtons
-            isFirstStep
+            isFirstStep={isFirstStep}
             isPending={isPending}
             onSave={saveForm}
             nextStep={onNext}

@@ -50,9 +50,24 @@ export const save = async (
     ...applicationValues
   } = parsedValues;
 
-  applicationValues.isEnglishFirstLanguage = isEnglishFirstLanguage === "Yes";
-  applicationValues.hasPendingResults = hasPendingResults === "Yes";
-  applicationValues.hasWorkExperience = hasWorkExperience === "Yes";
+  if (parsedValues.hasOwnProperty("isEnglishFirstLanguage")) {
+    applicationValues.isEnglishFirstLanguage =
+      parsedValues.isEnglishFirstLanguage === "Yes";
+  }
+
+  applicationValues.hasPendingResults =
+    hasPendingResults === "Yes"
+      ? true
+      : hasPendingResults === "No"
+      ? false
+      : null;
+
+  applicationValues.hasWorkExperience =
+    hasWorkExperience === "Yes"
+      ? true
+      : hasWorkExperience === "No"
+      ? false
+      : null;
 
   const existingSavedApplication = await getSavedApplicationByUserID(user.id);
 

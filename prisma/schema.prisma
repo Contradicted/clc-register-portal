@@ -83,28 +83,31 @@ model PasswordResetToken {
 
 model Application {
   id                  String   @id
-  courseTitle         String   @map("course_title")
-  studyMode           String   @map("study_mode")
-  title               String
-  firstName           String
-  lastName            String
-  photoUrl            String   @map("photo_url")
-  dateOfBirth         DateTime
-  gender              String
-  addressLine1        String
-  addressLine2        String
-  city                String
-  postcode            String
-  homeTelephoneNo     String
-  email               String
-  placeOfBirth        String   @map("place_of_birth")
-  countryOfBirth      String   @map("country_of_birth")
-  nationality         String
-  entryDateToUK       DateTime @map("entry_date_to_UK")
-  identificationNo    String   @map("identification_no")
-  identificationNoUrl String   @map("identification_no_url")
-  mobileNo            String   @map("mobile_no")
-  tuitionFees         String   @map("tuition_fees")
+  courseTitle         String?   @map("course_title")
+  studyMode           String?   @map("study_mode")
+  title               String?
+  firstName           String?
+  lastName            String?
+  photoName           String?  @map("photo_name")
+  photoUrl            String?   @map("photo_url")
+  dateOfBirth         DateTime?
+  gender              String?
+  addressLine1        String?
+  addressLine2        String?
+  city                String?
+  postcode            String?
+  homeTelephoneNo     String?
+  email               String?
+  placeOfBirth        String?   @map("place_of_birth")
+  countryOfBirth      String?   @map("country_of_birth")
+  nationality         String?
+  entryDateToUK       DateTime? @map("entry_date_to_UK")
+  identificationNo    String?   @map("identification_no")
+  identificationNoUrl String?   @map("identification_no_url")
+  mobileNo            String?   @map("mobile_no")
+  tuitionFees         String?   @map("tuition_fees")
+
+  hasPendingResults Boolean? @map("has_pending_results")
 
   qualifications        Qualification[]
   pendingQualifications PendingQualification[]
@@ -201,6 +204,7 @@ model Qualification {
   title         String?
   examiningBody String?   @map("examining_body")
   dateAwarded   DateTime? @map("date_awarded")
+  fileName      String?  @map("file_name")
   url           String?
 
   applicationID String
@@ -244,13 +248,14 @@ model SavedWorkExperience {
 }
 
 model WorkExperience {
-  id                 String   @id
+  id                 String   @id @default(uuid())
   title              String
   nameOfOrganisation String   @map("name_of_organisation")
   natureOfJob        String   @map("nature_of_job")
   jobStartDate       DateTime @map("job_start_date")
   jobEndDate         DateTime @map("job_end_date")
-  url                String
+  fileName           String?  @map("file_name")
+  url                String?
 
   applicationID String
   application   Application @relation(fields: [applicationID], references: [id], onDelete: Cascade)

@@ -72,10 +72,9 @@ export const StepThreeForm = ({
           ? "Yes"
           : fData?.addWorkExperience === "No"
           ? "No"
-          : application?.hasWorkExperience
+          : application?.hasWorkExperience === true
           ? "Yes"
-          : !application?.hasWorkExperience &&
-            application?.hasWorkExperience !== undefined
+          : application?.hasWorkExperience === false
           ? "No"
           : undefined,
       workExperience:
@@ -446,7 +445,7 @@ export const StepThreeForm = ({
                                       field.onChange(new Date(date))
                                     }
                                     disabled={(date) =>
-                                      date <= new Date() ||
+                                      date > new Date() ||
                                       date < new Date("1900-01-01")
                                     }
                                     initialFocus
@@ -497,10 +496,16 @@ export const StepThreeForm = ({
                                     onSelect={(date) =>
                                       field.onChange(new Date(date))
                                     }
-                                    disabled={(date) =>
-                                      date <= new Date() ||
-                                      date < new Date("1900-01-01")
-                                    }
+                                    disabled={(date) => {
+                                      const jobStartDate = form.getValues(
+                                        `workExperience.${index}.jobStartDate`
+                                      );
+
+                                      return (
+                                        date < new Date(jobStartDate) ||
+                                        date < new Date("1900-01-01")
+                                      );
+                                    }}
                                     initialFocus
                                   />
                                 </PopoverContent>
