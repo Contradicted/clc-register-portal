@@ -77,7 +77,7 @@ export const StepOneForm = ({
     defaultIsClicked ? application?.tuitionFees : ""
   );
 
-  console.log("foo", fData);
+  // console.log("foo", fData);
 
   const form = useForm({
     defaultValues: {

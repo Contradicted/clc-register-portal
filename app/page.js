@@ -1,11 +1,6 @@
-import { LogoutButton } from "@/components/auth/LogoutButton";
+import { LogoutButton } from '@/components/auth/LogoutButton'
+import { redirect } from 'next/navigation'
 
 export default function Home() {
-  return (
-    <div className="flex h-full items-center justify-center w-full">
-      <LogoutButton>
-        Log out
-      </LogoutButton>
-    </div>
-  );
+    return redirect('/dashboard')
 }

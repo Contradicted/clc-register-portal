@@ -19,6 +19,7 @@
 # misc
 .DS_Store
 *.pem
+.prettierrc.json
 
 # debug
 npm-debug.log*
