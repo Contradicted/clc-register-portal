@@ -177,8 +177,8 @@ export const save = async (
       });
 
       for (const qual of qualificationsToDelete) {
-        if (qual.fileUrl) {
-          const fileKey = qual.fileUrl.split("f/");
+        if (qual.url) {
+          const fileKey = qual.url.split("f/");
           await utapi.deleteFiles(fileKey);
         }
       }
@@ -195,6 +195,7 @@ export const save = async (
       for (let i = 0; i < qualifications.length; i++) {
         const qual = qualifications[i];
         const fileIndex = `qualification_file_${i}`;
+        const fileExists = `qualification_file_${i}_alreadyExists`;
         const fileUrl = photo.get(fileIndex);
 
         if (qual.id) {
@@ -204,8 +205,8 @@ export const save = async (
 
           if (existingQualification) {
             if (fileUrl === "null") {
-              if (existingQualification.fileUrl) {
-                const fileKey = existingQualification.fileUrl.split("f/");
+              if (existingQualification.url) {
+                const fileKey = existingQualification.url.split("f/");
                 await utapi.deleteFiles(fileKey);
               }
 
@@ -217,18 +218,19 @@ export const save = async (
                   title: qual.title,
                   examiningBody: qual.examiningBody,
                   dateAwarded: qual.dateAwarded,
-                  fileUrl: null,
+                  url: null,
                   fileName: null,
                 },
               });
             } else if (
               fileUrl &&
               fileUrl !== "null" &&
-              !(typeof fileUrl === "string")
+              !(typeof fileUrl === "string") &&
+              !fileExists
             ) {
               const uploadedFile = await utapi.uploadFiles(fileUrl);
-              if (existingQualification.fileUrl) {
-                const fileKey = existingQualification.fileUrl.split("f/");
+              if (existingQualification.url) {
+                const fileKey = existingQualification.url.split("f/");
                 await utapi.deleteFiles(fileKey);
               }
               await db.savedQualification.update({
@@ -239,7 +241,7 @@ export const save = async (
                   title: qual.title,
                   examiningBody: qual.examiningBody,
                   dateAwarded: qual.dateAwarded,
-                  fileUrl: uploadedFile.data.url,
+                  url: uploadedFile.data.url,
                   fileName: uploadedFile.data.name,
                 },
               });
@@ -273,7 +275,7 @@ export const save = async (
               dateAwarded: qual.dateAwarded,
               applicationID: existingSavedApplication.id,
               fileName: name,
-              fileUrl: url,
+              url,
             },
           });
         }
@@ -346,8 +348,8 @@ export const save = async (
       });
 
       for (const we of workExperiencesToDelete) {
-        if (we.fileUrl) {
-          const fileKey = we.fileUrl.split("f/");
+        if (we.url) {
+          const fileKey = we.url.split("f/");
           await utapi.deleteFiles(fileKey);
         }
       }
@@ -367,8 +369,8 @@ export const save = async (
       });
 
       for (const we of existingWorkExperiences) {
-        if (we.fileUrl) {
-          const fileKey = we.fileUrl.split("f/");
+        if (we.url) {
+          const fileKey = we.url.split("f/");
           await utapi.deleteFiles(fileKey);
         }
       }
@@ -387,6 +389,7 @@ export const save = async (
       for (let i = 0; i < workExperience.length; i++) {
         const we = workExperience[i];
         const fileIndex = `work_experience_file_${i}`;
+        const fileExists = `work_experience_file_${i}_alreadyExists`;
         const fileUrl = photo.get(fileIndex);
 
         if (we.id) {
@@ -397,8 +400,8 @@ export const save = async (
 
           if (existingWorkExperience) {
             if (fileUrl === "null") {
-              if (existingWorkExperience.fileUrl) {
-                const fileKey = existingWorkExperience.fileUrl.split("f/");
+              if (existingWorkExperience.url) {
+                const fileKey = existingWorkExperience.url.split("f/");
                 await utapi.deleteFiles(fileKey);
               }
 
@@ -412,18 +415,19 @@ export const save = async (
                   natureOfJob: we.natureOfJob,
                   jobStartDate: we.jobStartDate,
                   jobEndDate: we.jobEndDate,
-                  fileUrl: null,
+                  url: null,
                   fileName: null,
                 },
               });
             } else if (
               fileUrl &&
               fileUrl !== "null" &&
-              !(typeof fileUrl === "string")
+              !(typeof fileUrl === "string") &&
+              !fileExists
             ) {
               const uploadedFile = await utapi.uploadFiles(fileUrl);
-              if (existingWorkExperience.fileUrl) {
-                const fileKey = existingWorkExperience.fileUrl.split("f/");
+              if (existingWorkExperience.url) {
+                const fileKey = existingWorkExperience.url.split("f/");
                 await utapi.deleteFiles(fileKey);
               }
               await db.savedWorkExperience.update({
@@ -436,7 +440,7 @@ export const save = async (
                   natureOfJob: we.natureOfJob,
                   jobStartDate: we.jobStartDate,
                   jobEndDate: we.jobEndDate,
-                  fileUrl: uploadedFile.data.url,
+                  url: uploadedFile.data.url,
                   fileName: uploadedFile.data.name,
                 },
               });
@@ -474,7 +478,7 @@ export const save = async (
               jobEndDate: we.jobEndDate,
               applicationID: existingSavedApplication.id,
               fileName: name,
-              fileUrl: url,
+              url,
             },
           });
         }
@@ -588,7 +592,7 @@ export const save = async (
           examiningBody: qual.examiningBody,
           dateAwarded: qual.dateAwarded,
           applicationID,
-          fileUrl,
+          url: fileUrl,
           fileName,
         },
       });
@@ -636,7 +640,7 @@ export const save = async (
           jobStartDate: we.jobStartDate,
           jobEndDate: we.jobEndDate,
           applicationID,
-          fileUrl,
+          url: fileUrl,
           fileName,
         },
       });

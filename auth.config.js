@@ -12,6 +12,7 @@ import {
     getApplicationByUserID,
     getSavedApplicationByUserID,
 } from './data/application'
+import { getUpdateApplicationTokenByEmail } from "./data/update-application-token";
 
 export default {
     providers: [
@@ -52,6 +53,15 @@ export default {
 
             const existingAccount = await getAccountById(existingUser.id)
             const hasApplication = await getApplicationByUserID(existingUser.id)
+            const tokenDetails = await getUpdateApplicationTokenByEmail(
+              existingUser.email
+            );
+
+            if (tokenDetails && new Date(tokenDetails.expires) > new Date()) {
+              token.activeCode = true;
+            } else {
+              token.activeCode = false;
+            }
 
             token.isOAuth = !!existingAccount
             token.id = existingUser.id
@@ -71,6 +81,7 @@ export default {
                 session.user.email = token.email
                 session.user.id = token.id
                 session.user.hasApplication = token.hasApplication
+                session.user.activeCode = token.activeCode;
             }
 
             return session

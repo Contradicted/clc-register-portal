@@ -12,63 +12,72 @@ import {
     editUserRoutes,
 } from '@/routes'
 
-const { auth } = NextAuth(authConfig)
+const { auth } = NextAuth(authConfig);
 
 export default auth(async (req) => {
-    const { nextUrl } = req
-    const isLoggedIn = !!req.auth
+  const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
+  const token = nextUrl.searchParams.get("token");
 
-    const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix)
-    const isAuthRoute = authRoutes.includes(nextUrl.pathname)
-    const isProtectedRoute = protectedRoutes.includes(nextUrl.pathname)
-    const isDashboardRoute = dashboardRoutes.includes(nextUrl.pathname)
-    const isEditUserRoute = editUserRoutes.includes(nextUrl.pathname)
-    const isApplicationRoutes = applicationRoutes.includes(nextUrl.pathname)
+  const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+  const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+  const isProtectedRoute = protectedRoutes.includes(nextUrl.pathname);
+  const isDashboardRoute = dashboardRoutes.includes(nextUrl.pathname);
+  const isEditUserRoute = editUserRoutes.includes(nextUrl.pathname);
+  const isApplicationRoutes = applicationRoutes.includes(nextUrl.pathname);
 
-    if (isApiAuthRoute) {
-        return null
+  if (isApiAuthRoute) {
+    return null;
+  }
+
+  if (isAuthRoute) {
+    if (isLoggedIn && !req.auth.user.hasApplication) {
+      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
 
-    if (isAuthRoute) {
-        if (isLoggedIn && !req.auth.user.hasApplication) {
-            return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
-        }
+    if (isLoggedIn && req.auth.user.hasApplication) {
+      return Response.redirect(new URL("/dashboard", nextUrl));
+    }
+    return null;
+  }
 
-        if (isLoggedIn && req.auth.user.hasApplication) {
-            return Response.redirect(new URL('/dashboard', nextUrl))
-        }
-        return null
+  if (!isLoggedIn && isProtectedRoute) {
+    let callbackURL = nextUrl.pathname;
+
+    if (nextUrl.search) {
+      callbackURL += nextUrl.search;
     }
 
-    if (!isLoggedIn && isProtectedRoute) {
-        let callbackURL = nextUrl.pathname
+    const encodedCallbackURL = encodeURIComponent(callbackURL);
 
-        if (nextUrl.search) {
-            callbackURL += nextUrl.search
-        }
+    return Response.redirect(
+      new URL(`/auth/login?callbackURL=${encodedCallbackURL}`, nextUrl)
+    );
+  }
 
-        const encodedCallbackURL = encodeURIComponent(callbackURL)
-
+  if (isLoggedIn) {
+    if (
+      (isApplicationRoutes || isEditUserRoute) &&
+      req.auth.user.hasApplication
+    ) {
+      if (token) {
         return Response.redirect(
-            new URL(`/auth/login?callbackURL=${encodedCallbackURL}`, nextUrl)
-        )
+          new URL(`/validate-token?token=${token}`, nextUrl)
+        );
+      }
+
+      if (!req.auth.user.activeCode) {
+        return Response.redirect(new URL("/dashboard", nextUrl));
+      }
     }
 
-    if (isLoggedIn) {
-        if (
-            (isApplicationRoutes || isEditUserRoute) &&
-            req.auth.user.hasApplication
-        ) {
-            return Response.redirect(new URL('/dashboard', nextUrl))
-        }
-
-        if (isDashboardRoute && !req.auth.user.hasApplication) {
-            return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
-        }
+    if (isDashboardRoute && !req.auth.user.hasApplication) {
+      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
+  }
 
-    return null
-})
+  return null;
+});
 
 // Optionally, don't invoke Middleware on some paths
 export const config = {

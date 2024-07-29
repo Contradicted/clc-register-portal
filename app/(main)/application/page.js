@@ -4,9 +4,7 @@ import {
     getApplicationByUserID,
     getSavedApplicationByUserID,
 } from '@/data/application'
-import { getUserById } from '@/data/user'
-import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
-import { redirect } from 'next/navigation'
+import { getUserById } from "@/data/user";
 
 const ApplicationPage = async () => {
     const user = await currentUser()
@@ -14,7 +12,9 @@ const ApplicationPage = async () => {
     const userDetails = await getUserById(user.id)
     const application = await getApplicationByUserID(user.id)
 
-    return <Forms formData={formData} userData={userDetails} />
+    return (
+      <Forms formData={application[0] || formData} userData={userDetails} />
+    );
 }
 
 export default ApplicationPage

@@ -79,113 +79,134 @@ export const EditUserDetailsSchema = z.object({
     ),
 });
 
-export const SectionOneSchema = z.object({
-  courseTitle: z.string({
-    required_error: "Course Title is required",
-  }),
-  studyMode: z
-    .string({
-      required_error: "Study Mode is required",
-    })
-    .refine(
-      (value) => {
-        return (
-          value === "Full-Time" ||
-          value == "Part-Time" ||
-          value === "Blended-Learning"
-        );
-      },
-      {
-        message:
-          "Study mode must either be Full Time, Part Time or Blended Learning",
-      }
-    ),
-  title: z.string({
-    required_error: "Title is required",
-  }),
-  firstName: z.string({
-    required_error: "First name is required",
-  }),
-  lastName: z.string({
-    required_error: "Last name is required",
-  }),
-  gender: z
-    .string({
-      required_error: "Gender is required",
-    })
-    .refine(
-      (value) => {
-        return value === "Male" || value === "Female" || value === "Non-binary";
-      },
-      {
-        message: "Gender must either be Male, Female or Non-binary",
-      }
-    ),
-  dateOfBirth: z
-    .date({
-      required_error: "A date of birth is required",
-    })
-    .refine(isAdult, {
-      message: "You must be aged 18 or older",
-    })
-    .refine(
-      (date) => {
-        return date < new Date(Date.now());
-      },
-      {
-        message: "The date must be before today",
-      }
-    ),
-  placeOfBirth: z.string({
-    required_error: "Place of Birth is required",
-  }),
-  countryOfBirth: z.string({
-    required_error: "Country of Birth is required",
-  }),
-  nationality: z.string({
-    required_error: "Nationality is required",
-  }),
-  entryDateToUK: z
-    .date({
-      required_error: "Entry date to UK is required",
-    })
-    .refine(
-      (date) => {
-        return date < new Date(Date.now());
-      },
-      {
-        message: "The date must be before today",
-      }
-    ),
-  identificationNo: z.string({
-    required_error: "Identification number is required",
-  }),
-  addressLine1: z.string({
-    required_error: "Address Line 1 is required",
-  }),
-  city: z.string({
-    required_error: "City is required",
-  }),
-  postcode: z
-    .string({
-      required_error: "Zip/Post code is required",
-    })
-    .regex(postcodeRegEx, {
-      message: "Invalid postcode",
+export const SectionOneSchema = z
+  .object({
+    courseTitle: z.string({
+      required_error: "Course Title is required",
     }),
-  homeTelephoneNo: z.string({
-    required_error: "Home telephone number is required",
-  }),
-  mobileNo: z.string({
-    required_error: "Mobile number is required",
-  }),
-  email: z.string().email({
-    message: "Email is required",
-  }),
-  tuitionFees: z.string({
-    required_error: "Tuition fee is required",
-  }),
-});
+    studyMode: z
+      .string({
+        required_error: "Study Mode is required",
+      })
+      .refine(
+        (value) => {
+          return (
+            value === "Full-Time" ||
+            value == "Part-Time" ||
+            value === "Blended-Learning"
+          );
+        },
+        {
+          message:
+            "Study mode must either be Full Time, Part Time or Blended Learning",
+        }
+      ),
+    title: z.string({
+      required_error: "Title is required",
+    }),
+    firstName: z.string({
+      required_error: "First name is required",
+    }),
+    lastName: z.string({
+      required_error: "Last name is required",
+    }),
+    gender: z
+      .string({
+        required_error: "Gender is required",
+      })
+      .refine(
+        (value) => {
+          return (
+            value === "Male" || value === "Female" || value === "Non-binary"
+          );
+        },
+        {
+          message: "Gender must either be Male, Female or Non-binary",
+        }
+      ),
+    dateOfBirth: z
+      .date({
+        required_error: "A date of birth is required",
+      })
+      .refine(isAdult, {
+        message: "You must be aged 18 or older",
+      })
+      .refine(
+        (date) => {
+          return date < new Date(Date.now());
+        },
+        {
+          message: "The date must be before today",
+        }
+      ),
+    placeOfBirth: z.string({
+      required_error: "Place of Birth is required",
+    }),
+    countryOfBirth: z.string({
+      required_error: "Country of Birth is required",
+    }),
+    nationality: z.string({
+      required_error: "Nationality is required",
+    }),
+    entryDateToUK: z
+      .date({
+        required_error: "Entry date to UK is required",
+      })
+      .refine(
+        (date) => {
+          return date < new Date(Date.now());
+        },
+        {
+          message: "The date must be before today",
+        }
+      )
+      .optional(),
+    identificationNo: z.string({
+      required_error: "Identification number is required",
+    }),
+    addressLine1: z.string({
+      required_error: "Address Line 1 is required",
+    }),
+    city: z.string({
+      required_error: "City is required",
+    }),
+    postcode: z
+      .string({
+        required_error: "Zip/Post code is required",
+      })
+      .regex(postcodeRegEx, {
+        message: "Invalid postcode",
+      }),
+    homeTelephoneNo: z.string({
+      required_error: "Home telephone number is required",
+    }),
+    mobileNo: z.string({
+      required_error: "Mobile number is required",
+    }),
+    email: z
+      .string({
+        required_error: "Email is required",
+      })
+      .email({
+        message: "Please enter a valid email",
+      }),
+    tuitionFees: z.string({
+      required_error: "Tuition fee is required",
+    }),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.countryOfBirth !== "United Kingdom" ||
+      data.nationality !== "British"
+    ) {
+      if (!data.entryDateToUK) {
+        ctx.addIssue({
+          path: ["entryDateToUK"],
+          message: "Entry Date to UK is required",
+        });
+      }
+    }
+  });
 
 export const SectionTwoSchema = z.object({
   qualifications: z

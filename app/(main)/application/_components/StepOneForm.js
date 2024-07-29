@@ -39,6 +39,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { MultiUploader } from "@/components/CustomUploader";
 import { useMultiStepForm } from "@/hooks/useMultiStepForm";
+import { SectionOneSchema } from "@/schemas";
 
 export const StepOneForm = ({
   application,
@@ -76,8 +77,11 @@ export const StepOneForm = ({
   const [otherOptionText, setOtherOptionText] = useState(
     defaultIsClicked ? application?.tuitionFees : ""
   );
-
-  // console.log("foo", fData);
+  const [isEntryDateRequired, setIsEntryDateRequired] = useState(
+    (application?.countryOfBirth !== "United Kingdom" &&
+      application?.nationality !== "British") ||
+      true
+  );
 
   const form = useForm({
     defaultValues: {
@@ -130,8 +134,15 @@ export const StepOneForm = ({
     }
     const currentValues = form.getValues();
 
+    const isValid = SectionOneSchema.safeParse(currentValues);
+
+    if (!isValid.success) {
+      setError(isValid.error.formErrors.fieldErrors);
+      return;
+    }
+
     if (isClicked && !otherOptionText) {
-      setError("Please specify where you heard about us.");
+      setError("Please specify how you will fund your studies.");
       return;
     }
 
@@ -239,6 +250,14 @@ export const StepOneForm = ({
       setOtherOptionText(otherOptionText || "");
     }
   }, [application, form, defaultIsClicked]);
+
+  useEffect(() => {
+    const { countryOfBirth, nationality } = form.getValues();
+
+    if (countryOfBirth === "United Kingdom" && nationality === "British") {
+      setIsEntryDateRequired(false);
+    }
+  }, [form.getValues()]);
 
   const saveForm = () => {
     setError("");
@@ -647,55 +666,58 @@ export const StepOneForm = ({
                     )}
                   />
                 </div>
-                <div className="flex flex-col gap-2 lg:w-[290px]">
-                  <FormField
-                    control={form.control}
-                    name="entryDateToUK"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Entry Date to UK</FormLabel>
-                        <FormControl>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "w-full justify-start text-left font-normal h-12 rounded-[10px] px-[25px]",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                                disabled={isPending}
-                              >
-                                {field.value ? (
-                                  format(new Date(field.value), "dd-MM-yyyy")
-                                ) : (
-                                  <span>Pick a date</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                              <Calendar
-                                mode="single"
-                                selected={new Date(field.value)}
-                                captionLayout="dropdown-buttons"
-                                fromYear={1920}
-                                toYear={now.getFullYear()}
-                                onSelect={(date) =>
-                                  field.onChange(new Date(date))
-                                }
-                                disabled={(date) =>
-                                  date > new Date() ||
-                                  date < new Date("1900-01-01")
-                                }
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+
+                {isEntryDateRequired && (
+                  <div className="flex flex-col gap-2 lg:w-[290px]">
+                    <FormField
+                      control={form.control}
+                      name="entryDateToUK"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Entry Date to UK</FormLabel>
+                          <FormControl>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal h-12 rounded-[10px] px-[25px]",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                  disabled={isPending}
+                                >
+                                  {field.value ? (
+                                    format(new Date(field.value), "dd-MM-yyyy")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                  mode="single"
+                                  selected={new Date(field.value)}
+                                  captionLayout="dropdown-buttons"
+                                  fromYear={1920}
+                                  toYear={now.getFullYear()}
+                                  onSelect={(date) =>
+                                    field.onChange(new Date(date))
+                                  }
+                                  disabled={(date) =>
+                                    date > new Date() ||
+                                    date < new Date("1900-01-01")
+                                  }
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Row 4 */}

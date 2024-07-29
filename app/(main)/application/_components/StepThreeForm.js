@@ -245,34 +245,50 @@ export const StepThreeForm = ({
   };
 
   useEffect(() => {
-    if (
-      application &&
-      application.workExperience &&
-      hasNoWorkExperienceFiles()
-    ) {
-      const initialFileUploads = application.workExperience.map((we, index) => {
-        if (we.fileUrl) {
-          accumulatedFiles[`work_experience_file_${index}`] = {
-            file: "existing",
-            alreadyExists: true,
-          };
-          return we.fileUrl;
-        }
-        return null;
-      });
-      setFileUploads(initialFileUploads);
-      setAccumulatedFiles(accumulatedFiles);
+    const updateFiles = async () => {
+      if (
+        application &&
+        application.workExperience &&
+        hasNoWorkExperienceFiles()
+      ) {
+        const updatedAccumulatedFiles = { ...accumulatedFiles };
 
-      application.workExperience.forEach((we, index) => {
-        if (we.fileUrl) {
-          updateWorkExperience(index, {
-            ...we,
-            file: initialFileUploads[index],
-          });
-        }
-      });
-    }
+        const initialFileUploads = await Promise.all(
+          application.workExperience.map(async (we, index) => {
+            if (we.url) {
+              try {
+                const response = await fetch(we.url);
+                const blob = await response.blob();
+                const file = new File([blob], we.fileName, {
+                  type: blob.type,
+                });
+                updatedAccumulatedFiles[`work_experience_file_${index}`] = {
+                  file: file,
+                  alreadyExists: true,
+                };
+                return we.url;
+              } catch (error) {
+                console.log("Something went wrong", error);
+                return null;
+              }
+            }
+          })
+        );
+        setFileUploads(initialFileUploads);
+        setAccumulatedFiles(accumulatedFiles);
 
+        application.workExperience.forEach((we, index) => {
+          if (we.url) {
+            updateWorkExperience(index, {
+              ...we,
+              file: initialFileUploads[index],
+            });
+          }
+        });
+      }
+    };
+
+    updateFiles();
     setIsLoading(false);
   }, [application, updateWorkExperience]);
 
@@ -554,7 +570,7 @@ export const StepThreeForm = ({
                                       `work_experience_file_${index}`
                                     ]?.alreadyExists
                                   ? application?.workExperience &&
-                                    application?.workExperience[index]?.fileUrl
+                                    application?.workExperience[index]?.url
                                   : accumulatedFiles[
                                       `work_experience_file_${index}`
                                     ]?.file

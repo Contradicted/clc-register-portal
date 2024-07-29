@@ -7,8 +7,14 @@ import { StepTwoForm } from "./StepTwoForm";
 import { StepThreeForm } from "./StepThreeForm";
 import { StepFourForm } from "./StepFourForm";
 import { StepFiveForm } from "./StepFiveForm";
+import { useSearchParams } from "next/navigation";
 
 export const Forms = ({ formData, userData }) => {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+
+  // console.log(formData);
+
   const {
     currentStepIndex,
     isFirstStep,
@@ -27,8 +33,6 @@ export const Forms = ({ formData, userData }) => {
     setDeletedQualifications,
     setDeletedWorkExperiences,
   } = useMultiStepForm(5, formData);
-
-  console.log("tet", currentStepIndex);
 
   const forms = [
     <StepOneForm

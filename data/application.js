@@ -3,10 +3,15 @@ import { db } from '@/lib/db'
 export const getApplicationByUserID = async (userID) => {
     try {
         const application = await db.application.findMany({
-            where: {
-                userID: userID,
-            },
-        })
+          where: {
+            userID: userID,
+          },
+          include: {
+            qualifications: true,
+            pendingQualifications: true,
+            workExperience: true,
+          },
+        });
 
         return application
     } catch (error) {

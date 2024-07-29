@@ -8,9 +8,9 @@ import { PrimeReactProvider } from 'primereact/api'
 import ClientLayout from '@/components/ClientLayout'
 
 const font = Kumbh_Sans({
-    subsets: ['latin'],
-    weight: ['400', '500', '600', '700', '800', '900'],
-})
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+});
 
 export default async function RootLayout({ children }) {
     const session = await auth()
