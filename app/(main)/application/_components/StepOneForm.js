@@ -14,6 +14,7 @@ import {
   FormItem,
   FormLabel,
   FormDescription,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,6 +28,8 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -40,6 +43,14 @@ import { useRouter } from "next/navigation";
 import { MultiUploader } from "@/components/CustomUploader";
 import { useMultiStepForm } from "@/hooks/useMultiStepForm";
 import { SectionOneSchema } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import PlaceOfBirthInput from "./PlaceOfBirthInput";
+
+import countries from "i18n-iso-countries";
+import countriesEnglish from "i18n-iso-countries/langs/en.json";
+import { popularCountries } from "@/constants";
+
+countries.registerLocale(countriesEnglish);
 
 export const StepOneForm = ({
   application,
@@ -59,6 +70,7 @@ export const StepOneForm = ({
     ? ![
         "",
         null,
+        undefined,
         "Parents",
         "Family Members",
         "Employers",
@@ -73,6 +85,7 @@ export const StepOneForm = ({
   const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(true); // Add loading state
   const [error, setError] = useState();
+  const [hasError, setHasError] = useState(false);
   const [isRemoved, setIsRemoved] = useState(false);
   const [otherOptionText, setOtherOptionText] = useState(
     defaultIsClicked ? application?.tuitionFees : ""
@@ -80,8 +93,13 @@ export const StepOneForm = ({
   const [isEntryDateRequired, setIsEntryDateRequired] = useState(
     (application?.countryOfBirth !== "United Kingdom" &&
       application?.nationality !== "British") ||
-      true
+      false
   );
+  const [detectedCountry, setDetectedCountry] = useState(
+    fData?.countryOfBirth || application?.countryOfBirth || ""
+  );
+
+  console.log(fData);
 
   const form = useForm({
     defaultValues: {
@@ -116,33 +134,46 @@ export const StepOneForm = ({
         undefined,
       mobileNo: userDetails?.mobileNo || application?.mobileNo || undefined,
       email: application?.email || undefined,
-      tuitionFees: application?.tuitionFees || "",
+      tuitionFees: application?.tuitionFees || undefined,
     },
+    // resolver: zodResolver(SectionOneSchema),
   });
 
   const now = new Date();
   const { toast } = useToast();
   const router = useRouter();
 
+  const handlePlaceSelect = ({ placeOfBirth, countryName }) => {
+    form.setValue("placeOfBirth", placeOfBirth);
+    setDetectedCountry(countryName);
+  };
+
   const onSubmit = (values) => {
     console.log("test");
   };
 
   const onNext = () => {
+    setHasError(false);
     if (!file) {
       setIsRemoved(true);
     }
     const currentValues = form.getValues();
 
-    const isValid = SectionOneSchema.safeParse(currentValues);
+    // const isValid = SectionOneSchema.safeParse(currentValues);
 
-    if (!isValid.success) {
-      setError(isValid.error.formErrors.fieldErrors);
+    // if (!isValid.success) {
+    //   setError(isValid.error.formErrors.fieldErrors);
+    //   return;
+    // }
+
+    if (currentValues.countryOfBirth !== detectedCountry) {
+      setError("Please select the right country");
       return;
     }
 
     if (isClicked && !otherOptionText) {
       setError("Please specify how you will fund your studies.");
+      setHasError(true);
       return;
     }
 
@@ -162,34 +193,9 @@ export const StepOneForm = ({
     );
   };
 
-  // const onFileChange = (file, isRemoved) => {
-  //   setFile(file);
-
-  //   const newAccumulatedFiles = { ...accumulatedFiles };
-  //   if (isRemoved) {
-  //     delete newAccumulatedFiles.file;
-  //     newAccumulatedFiles.isFileRemoved = true; // Track the removed state
-  //   } else {
-  //     newAccumulatedFiles.file = { file, alreadyExists: false };
-  //     newAccumulatedFiles.isFileRemoved = false;
-  //   }
-  //   setAccumulatedFiles(newAccumulatedFiles);
-  // };
-
   useEffect(() => {
     if (application && application.photoUrl && !accumulatedFiles.file) {
       setIsLoading(true);
-      // let url = application?.photoUrl;
-      // let blob = new Blob([url]);
-      // let file = new File([blob], application.photoName, {
-      //   type: blob.type,
-      // });
-
-      // setFile(file);
-      // setAccumulatedFiles((prev) => ({
-      //   ...prev,
-      //   file: { file, alreadyExists: true },
-      // }));
       try {
         fetch(application.photoUrl)
           .then((response) => response.blob())
@@ -214,15 +220,7 @@ export const StepOneForm = ({
       !accumulatedFiles.idFile
     ) {
       setIsLoading(true);
-      // let url = application?.identificationNoUrl;
-      // let blob = new Blob([url]);
-      // let file = new File([blob], application?.identificationNo);
 
-      // setIdFile(file);
-      // setAccumulatedFiles((prev) => ({
-      //   ...prev,
-      //   idFile: { file, alreadyExists: true },
-      // }));
       try {
         fetch(application.identificationNoUrl)
           .then((response) => response.blob())
@@ -256,10 +254,19 @@ export const StepOneForm = ({
 
     if (countryOfBirth === "United Kingdom" && nationality === "British") {
       setIsEntryDateRequired(false);
+    } else if (
+      (countryOfBirth !== "United Kingdom" && nationality === "British") ||
+      (countryOfBirth !== "United Kingdom" && nationality !== "British")
+    ) {
+      setIsEntryDateRequired(true);
+    } else {
+      setIsEntryDateRequired(false);
     }
-  }, [form.getValues()]);
+  }, [form.watch("countryOfBirth"), form.watch("nationality")]);
 
   const saveForm = () => {
+    setHasError(false);
+
     setError("");
     const stepOneData = form.getValues();
 
@@ -337,7 +344,13 @@ export const StepOneForm = ({
                           value={field.value}
                           disabled={isPending}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger
+                            className={
+                              form.formState.errors.courseTitle
+                                ? "border-red-500"
+                                : ""
+                            }
+                          >
                             <SelectValue placeholder="Select a course" />
                           </SelectTrigger>
                           <SelectContent>
@@ -383,7 +396,13 @@ export const StepOneForm = ({
                           value={field.value}
                           disabled={isPending}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger
+                            className={
+                              form.formState.errors.studyMode
+                                ? "border-red-500"
+                                : ""
+                            }
+                          >
                             <SelectValue placeholder="Select an option" />
                           </SelectTrigger>
                           <SelectContent>
@@ -433,7 +452,12 @@ export const StepOneForm = ({
                           value={field.value}
                           disabled={isPending}
                         >
-                          <SelectTrigger className="lg:w-[290px]">
+                          <SelectTrigger
+                            className={cn(
+                              "lg:w-[290px]",
+                              form.formState.errors.title && "border-red-500"
+                            )}
+                          >
                             <SelectValue placeholder="Select an option" />
                           </SelectTrigger>
                           <SelectContent>
@@ -458,7 +482,10 @@ export const StepOneForm = ({
                         <Input
                           {...field}
                           type="text"
-                          className="lg:w-[400px]"
+                          className={cn(
+                            "lg:w-[400px]",
+                            form.formState.errors.firstName && "border-red-500"
+                          )}
                           disabled={isPending}
                         />
                       </FormControl>
@@ -475,7 +502,10 @@ export const StepOneForm = ({
                         <Input
                           {...field}
                           type="text"
-                          className="lg:w-[400px]"
+                          className={cn(
+                            "lg:w-[400px]",
+                            form.formState.errors.lastName && "border-red-500"
+                          )}
                           disabled={isPending}
                         />
                       </FormControl>
@@ -506,6 +536,7 @@ export const StepOneForm = ({
                       : null
                   }
                   isPending={isPending}
+                  fileType="image"
                 />
               )}
 
@@ -524,7 +555,12 @@ export const StepOneForm = ({
                           value={field.value}
                           disabled={isPending}
                         >
-                          <SelectTrigger className="lg:w-[290px]">
+                          <SelectTrigger
+                            className={cn(
+                              "lg:w-[290px]",
+                              form.formState.errors.gender && "border-red-500"
+                            )}
+                          >
                             <SelectValue placeholder="Select an option" />
                           </SelectTrigger>
                           <SelectContent>
@@ -547,7 +583,13 @@ export const StepOneForm = ({
                         <FormLabel>Date of Birth</FormLabel>
                         <FormControl>
                           <Popover>
-                            <PopoverTrigger asChild>
+                            <PopoverTrigger
+                              asChild
+                              className={
+                                form.formState.errors.dateOfBirth &&
+                                "border-red-500"
+                              }
+                            >
                               <Button
                                 variant={"outline"}
                                 className={cn(
@@ -592,15 +634,36 @@ export const StepOneForm = ({
                   name="placeOfBirth"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Place of Birth</FormLabel>
+                      <FormLabel>Place of Birth (City/Town)</FormLabel>
                       <FormControl>
-                        <Input
+                        {/* <Input
                           {...field}
                           type="text"
-                          className="lg:w-[400px]"
+                          className={cn(
+                            "lg:w-[400px]",
+                            form.formState.errors.placeOfBirth &&
+                              "border-red-500"
+                          )}
+                          disabled={isPending}
+                        /> */}
+
+                        <PlaceOfBirthInput
+                          {...field}
+                          defaultValue={application?.placeOfBirth}
+                          onPlaceSelect={handlePlaceSelect}
+                          className={cn(
+                            "lg:w-[400px]",
+                            form.formState.errors.placeOfBirth &&
+                              "border-red-500"
+                          )}
                           disabled={isPending}
                         />
                       </FormControl>
+                      {detectedCountry && field.value !== detectedCountry && (
+                        <p className="text-yellow-500 text-sm absolute">
+                          Detected country: {detectedCountry}
+                        </p>
+                      )}
                     </FormItem>
                   )}
                 />
@@ -621,15 +684,38 @@ export const StepOneForm = ({
                           value={field.value}
                           disabled={isPending}
                         >
-                          <SelectTrigger className="lg:w-[290px]">
+                          <SelectTrigger
+                            className={cn(
+                              "lg:w-[290px]",
+                              detectedCountry &&
+                                field.value !== detectedCountry &&
+                                "border-yellow-500"
+                            )}
+                          >
                             <SelectValue placeholder="Select an option" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
-                              <SelectItem value="United Kingdom">
-                                United Kingdom
-                              </SelectItem>
-                              <SelectItem value="Spain">Spain</SelectItem>
+                              <SelectLabel>Popular Countries</SelectLabel>
+                              {popularCountries.map((country) => (
+                                <SelectItem key={country} value={country}>
+                                  {country}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                            <SelectSeparator />
+                            <SelectGroup>
+                              <SelectLabel>All Countries</SelectLabel>
+                              {Object.entries(countries.getNames("en"))
+                                .filter(
+                                  ([code, name]) =>
+                                    !popularCountries.includes(name)
+                                )
+                                .map(([code, name]) => (
+                                  <SelectItem key={code} value={name}>
+                                    {name}
+                                  </SelectItem>
+                                ))}
                             </SelectGroup>
                           </SelectContent>
                         </Select>
@@ -651,7 +737,13 @@ export const StepOneForm = ({
                             value={field.value}
                             disabled={isPending}
                           >
-                            <SelectTrigger className="lg:w-[290px]">
+                            <SelectTrigger
+                              className={cn(
+                                "lg:w-[290px]",
+                                form.formState.errors.nationality &&
+                                  "border-red-500"
+                              )}
+                            >
                               <SelectValue placeholder="Select an option" />
                             </SelectTrigger>
                             <SelectContent>
@@ -677,7 +769,13 @@ export const StepOneForm = ({
                           <FormLabel>Entry Date to UK</FormLabel>
                           <FormControl>
                             <Popover>
-                              <PopoverTrigger asChild>
+                              <PopoverTrigger
+                                asChild
+                                className={
+                                  form.formState.errors.entryDateToUK &&
+                                  "border-red-500"
+                                }
+                              >
                                 <Button
                                   variant={"outline"}
                                   className={cn(
@@ -732,7 +830,11 @@ export const StepOneForm = ({
                         <Input
                           {...field}
                           type="text"
-                          className="lg:w-[400px]"
+                          className={cn(
+                            "lg:w-[400px]",
+                            form.formState.errors.identificationNo &&
+                              "border-red-500"
+                          )}
                           disabled={isPending}
                         />
                       </FormControl>
@@ -763,6 +865,7 @@ export const StepOneForm = ({
                       : null
                   }
                   isPending={isPending}
+                  fileType="image"
                 />
               )}
 
@@ -776,7 +879,15 @@ export const StepOneForm = ({
                       <FormItem>
                         <FormLabel>Address Line 1</FormLabel>
                         <FormControl>
-                          <Input {...field} type="text" disabled={isPending} />
+                          <Input
+                            {...field}
+                            type="text"
+                            disabled={isPending}
+                            className={
+                              form.formState.errors.addressLine1 &&
+                              "border-red-500"
+                            }
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -790,7 +901,15 @@ export const StepOneForm = ({
                       <FormItem>
                         <FormLabel>Address Line 2</FormLabel>
                         <FormControl>
-                          <Input {...field} type="text" disabled={isPending} />
+                          <Input
+                            {...field}
+                            type="text"
+                            disabled={isPending}
+                            className={
+                              form.formState.errors.addressLine2 &&
+                              "border-red-500"
+                            }
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -808,7 +927,14 @@ export const StepOneForm = ({
                       <FormItem>
                         <FormLabel>Town/City</FormLabel>
                         <FormControl>
-                          <Input {...field} type="text" disabled={isPending} />
+                          <Input
+                            {...field}
+                            type="text"
+                            disabled={isPending}
+                            className={
+                              form.formState.errors.city && "border-red-500"
+                            }
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -822,7 +948,14 @@ export const StepOneForm = ({
                       <FormItem>
                         <FormLabel>Zip/Post code</FormLabel>
                         <FormControl>
-                          <Input {...field} type="text" disabled={isPending} />
+                          <Input
+                            {...field}
+                            type="text"
+                            disabled={isPending}
+                            className={
+                              form.formState.errors.postcode && "border-red-500"
+                            }
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -836,7 +969,11 @@ export const StepOneForm = ({
                       <FormItem>
                         <FormLabel>Home Telephone No.</FormLabel>
                         <FormControl className="w-full">
-                          <PhoneInput {...field} disabled={isPending} />
+                          <PhoneInput
+                            {...field}
+                            disabled={isPending}
+                            hasError={!!form.formState.errors.mobileNo}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -854,7 +991,11 @@ export const StepOneForm = ({
                       <FormItem>
                         <FormLabel>Mobile No.</FormLabel>
                         <FormControl className="w-full">
-                          <PhoneInput {...field} disabled={isPending} />
+                          <PhoneInput
+                            {...field}
+                            disabled={isPending}
+                            formError={!!form.formState.errors.mobileNo}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -868,7 +1009,14 @@ export const StepOneForm = ({
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input {...field} type="text" disabled={isPending} />
+                          <Input
+                            {...field}
+                            type="text"
+                            disabled={isPending}
+                            className={
+                              form.formState.errors.email && "border-red-500"
+                            }
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -965,7 +1113,10 @@ export const StepOneForm = ({
                                   }}
                                   value={otherOptionText}
                                   type="text"
-                                  className="lg:max-w-[400px]"
+                                  className={cn(
+                                    "lg:max-w-[400px]",
+                                    hasError && "border-red-500"
+                                  )}
                                 />
                               </FormControl>
                             )}

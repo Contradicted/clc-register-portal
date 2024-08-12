@@ -35,7 +35,11 @@ import { FormError } from "@/components/FormError";
 import { FormButtons } from "./FormButtons";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { SectionTwoSavedSchema, SectionTwoSchema } from "@/schemas";
+import {
+  SectionFourSchema,
+  SectionTwoSavedSchema,
+  SectionTwoSchema,
+} from "@/schemas";
 import { Textarea } from "@/components/ui/textarea";
 
 export const StepFourForm = ({
@@ -77,6 +81,7 @@ export const StepFourForm = ({
       stateBenefits: application?.stateBenefits || undefined,
       criminalRecord: application?.criminalRecord || undefined,
     },
+    resolver: zodResolver(SectionFourSchema),
   });
 
   const onSubmit = (values) => {
@@ -87,12 +92,26 @@ export const StepFourForm = ({
     setFormErrors("");
     const currentValues = form.getValues();
 
+    const isValid = SectionFourSchema.safeParse(currentValues);
+
+    if (!isValid.success) {
+      setError(isValid.error.formErrors.fieldErrors);
+      return;
+    }
+
     updateData(currentValues, accumulatedFiles);
     previousStep(currentValues, accumulatedFiles);
   };
 
   const onNext = () => {
     const currentValues = form.getValues();
+
+    const isValid = SectionFourSchema.safeParse(currentValues);
+
+    if (!isValid.success) {
+      setError(isValid.error.formErrors.fieldErrors);
+      return;
+    }
 
     updateData(currentValues, accumulatedFiles);
     nextStep(currentValues, accumulatedFiles);
@@ -202,7 +221,11 @@ export const StepFourForm = ({
                         </div>
                         <FormControl>
                           <Textarea
-                            className="resize-none min-h-40"
+                            className={cn(
+                              "resize-none min-h-40",
+                              form.formState.errors.reasonsForChoosingProgram &&
+                                "border-red-500"
+                            )}
                             disabled={isPending}
                             {...field}
                           />
@@ -226,7 +249,11 @@ export const StepFourForm = ({
                         </div>
                         <FormControl>
                           <Textarea
-                            className="resize-none min-h-40"
+                            className={cn(
+                              "resize-none min-h-40",
+                              form.formState.errors.futureEduPlans &&
+                                "border-red-500"
+                            )}
                             disabled={isPending}
                             {...field}
                           />
@@ -251,7 +278,11 @@ export const StepFourForm = ({
                         </div>
                         <FormControl>
                           <Textarea
-                            className="resize-none min-h-40"
+                            className={cn(
+                              "resize-none min-h-40",
+                              form.formState.errors.intentedEmployment &&
+                                "border-red-500"
+                            )}
                             disabled={isPending}
                             {...field}
                           />
@@ -276,7 +307,10 @@ export const StepFourForm = ({
                         </div>
                         <FormControl>
                           <Textarea
-                            className="resize-none min-h-40"
+                            className={cn(
+                              "resize-none min-h-40",
+                              form.formState.errors.hobbies && "border-red-500"
+                            )}
                             disabled={isPending}
                             {...field}
                           />
@@ -302,7 +336,11 @@ export const StepFourForm = ({
                         </div>
                         <FormControl>
                           <Textarea
-                            className="resize-none min-h-40"
+                            className={cn(
+                              "resize-none min-h-40",
+                              form.formState.errors.specialNeeds &&
+                                "border-red-500"
+                            )}
                             disabled={isPending}
                             {...field}
                           />
@@ -327,7 +365,11 @@ export const StepFourForm = ({
                         </div>
                         <FormControl>
                           <Textarea
-                            className="resize-none min-h-40"
+                            className={cn(
+                              "resize-none min-h-40",
+                              form.formState.errors.stateBenefits &&
+                                "border-red-500"
+                            )}
                             disabled={isPending}
                             {...field}
                           />
@@ -352,7 +394,11 @@ export const StepFourForm = ({
                         </div>
                         <FormControl>
                           <Textarea
-                            className="resize-none min-h-40"
+                            className={cn(
+                              "resize-none min-h-40",
+                              form.formState.errors.criminalRecord &&
+                                "border-red-500"
+                            )}
                             disabled={isPending}
                             {...field}
                           />

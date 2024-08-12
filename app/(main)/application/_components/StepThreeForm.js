@@ -35,7 +35,11 @@ import { FormError } from "@/components/FormError";
 import { FormButtons } from "./FormButtons";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { SectionTwoSavedSchema, SectionTwoSchema } from "@/schemas";
+import {
+  SectionThreeSchema,
+  SectionTwoSavedSchema,
+  SectionTwoSchema,
+} from "@/schemas";
 
 export const StepThreeForm = ({
   application,
@@ -90,6 +94,7 @@ export const StepThreeForm = ({
               },
             ],
     },
+    resolver: zodResolver(SectionThreeSchema),
   });
 
   const {
@@ -156,6 +161,13 @@ export const StepThreeForm = ({
     setFormErrors("");
     const currentValues = form.getValues();
 
+    const isValid = SectionThreeSchema.safeParse(currentValues);
+
+    if (!isValid.success) {
+      setError(isValid.error.formErrors.fieldErrors);
+      return;
+    }
+
     if (
       currentValues.addWorkExperience === "No" ||
       currentValues.addWorkExperience === undefined
@@ -177,6 +189,13 @@ export const StepThreeForm = ({
 
   const onNext = () => {
     const currentValues = form.getValues();
+
+    const isValid = SectionThreeSchema.safeParse(currentValues);
+
+    if (!isValid.success) {
+      setError(isValid.error.formErrors.fieldErrors);
+      return;
+    }
 
     if (
       currentValues.addWorkExperience === "No" ||
@@ -582,6 +601,7 @@ export const StepThreeForm = ({
                                   : null
                               }
                               isPending={isPending}
+                              fileType="file"
                             />
                           </FormItem>
                         )}

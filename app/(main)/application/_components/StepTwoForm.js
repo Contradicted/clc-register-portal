@@ -63,239 +63,243 @@ export const StepTwoForm = ({
     // console.log(accumulatedFiles);
 
     const form = useForm({
-        defaultValues: {
-            qualifications:
-                application?.qualifications?.length > 0
-                    ? application?.qualifications
-                    : [
-                          {
-                              title: '' || undefined,
-                              examiningBody: '' || undefined,
-                              dateAwarded: '' || undefined,
-                          },
-                      ],
-            addPendingQualifications:
-                fData?.addPendingQualifications === 'Yes'
-                    ? 'Yes'
-                    : fData?.addPendingQualifications === 'No'
-                    ? 'No'
-                    : application?.hasPendingResults === true
-                    ? 'Yes'
-                    : application?.hasPendingResults === false
-                    ? 'No'
-                    : undefined,
-            pendingQualifications:
-                application?.pendingQualifications?.length > 0
-                    ? application.pendingQualifications
-                    : [
-                          {
-                              title: '' || undefined,
-                              examiningBody: '' || undefined,
-                              dateOfResults: '',
-                              subjectsPassed: '' || undefined,
-                          },
-                      ],
-            isEnglishFirstLanguage:
-                fData?.isEnglishFirstLanguage === 'Yes'
-                    ? 'Yes'
-                    : fData?.isEnglishFirstLanguage === 'No'
-                    ? 'No'
-                    : application?.isEnglishFirstLanguage === true
-                    ? 'Yes'
-                    : application?.isEnglishFirstLanguage === false
-                    ? 'No'
-                    : undefined,
-        },
-    })
+      defaultValues: {
+        qualifications:
+          application?.qualifications?.length > 0
+            ? application?.qualifications
+            : [
+                {
+                  title: "" || undefined,
+                  examiningBody: "" || undefined,
+                  dateAwarded: "" || undefined,
+                },
+              ],
+        addPendingQualifications:
+          fData?.addPendingQualifications === "Yes"
+            ? "Yes"
+            : fData?.addPendingQualifications === "No"
+            ? "No"
+            : application?.hasPendingResults === true
+            ? "Yes"
+            : application?.hasPendingResults === false
+            ? "No"
+            : undefined,
+        pendingQualifications:
+          application?.pendingQualifications?.length > 0
+            ? application.pendingQualifications
+            : [
+                {
+                  title: "" || undefined,
+                  examiningBody: "" || undefined,
+                  dateOfResults: "",
+                  subjectsPassed: "" || undefined,
+                },
+              ],
+        isEnglishFirstLanguage:
+          fData?.isEnglishFirstLanguage === "Yes"
+            ? "Yes"
+            : fData?.isEnglishFirstLanguage === "No"
+            ? "No"
+            : application?.isEnglishFirstLanguage === true
+            ? "Yes"
+            : application?.isEnglishFirstLanguage === false
+            ? "No"
+            : undefined,
+      },
+      resolver: zodResolver(SectionTwoSchema),
+    });
 
     const {
-        fields: qualificationFields,
-        append: appendQualification,
-        update: updateQualification,
-        remove: removeQualification,
+      fields: qualificationFields,
+      append: appendQualification,
+      update: updateQualification,
+      remove: removeQualification,
     } = useFieldArray({
-        control: form.control,
-        name: 'qualifications',
-    })
+      control: form.control,
+      name: "qualifications",
+    });
 
     const {
-        fields: pendingQualificationFields,
-        append: appendPendingQualification,
-        update: updatePendingQualification,
-        remove: removePendingQualification,
+      fields: pendingQualificationFields,
+      append: appendPendingQualification,
+      update: updatePendingQualification,
+      remove: removePendingQualification,
     } = useFieldArray({
-        control: form.control,
-        name: 'pendingQualifications',
-    })
+      control: form.control,
+      name: "pendingQualifications",
+    });
 
     const handleDeleteQualification = (index) => {
-        const qualification = form.getValues(`qualifications.${index}`)
+      const qualification = form.getValues(`qualifications.${index}`);
 
-        if (qualification.id) {
-            setDeletedQualifications((prev) => [...prev, qualification.id])
-        }
-        removeQualification(index)
-        const newFileUploads = [...fileUploads]
-        newFileUploads.splice(index, 1)
-        setFileUploads(newFileUploads)
-    }
+      if (qualification.id) {
+        setDeletedQualifications((prev) => [...prev, qualification.id]);
+      }
+      removeQualification(index);
+      const newFileUploads = [...fileUploads];
+      newFileUploads.splice(index, 1);
+      setFileUploads(newFileUploads);
+    };
 
     const handleDeletePendingQualification = (index) => {
-        const pendingQualification = form.getValues(
-            `pendingQualifications.${index}`
-        )
+      const pendingQualification = form.getValues(
+        `pendingQualifications.${index}`
+      );
 
-        if (pendingQualification.id) {
-            setDeletedPendingQualifications((prev) => [
-                ...prev,
-                pendingQualification.id,
-            ])
-        }
+      if (pendingQualification.id) {
+        setDeletedPendingQualifications((prev) => [
+          ...prev,
+          pendingQualification.id,
+        ]);
+      }
 
-        removePendingQualification(index)
-    }
+      removePendingQualification(index);
+    };
 
     const handleFileChange = (index, file, removed) => {
-        const newFileUploads = [...fileUploads]
-        newFileUploads[index] = file
-        setFileUploads(newFileUploads)
+      const newFileUploads = [...fileUploads];
+      newFileUploads[index] = file;
+      setFileUploads(newFileUploads);
 
-        const updatedAccumulatedFiles = { ...accumulatedFiles }
-        const updatedIsRemoved = { ...isRemoved }
+      const updatedAccumulatedFiles = { ...accumulatedFiles };
+      const updatedIsRemoved = { ...isRemoved };
 
-        if (removed) {
-            if (updatedAccumulatedFiles[`qualification_file_${index}`]) {
-                updatedAccumulatedFiles[`qualification_file_${index}`].file =
-                    null
-            } else {
-                updatedAccumulatedFiles[`qualification_file_${index}`] = {
-                    file: null,
-                    alreadyExists: false,
-                }
-            }
-            updatedAccumulatedFiles[
-                `qualification_file_${index}_isRemoved`
-            ] = true
-            updatedIsRemoved[`qualification_file_${index}`] = true
+      if (removed) {
+        if (updatedAccumulatedFiles[`qualification_file_${index}`]) {
+          updatedAccumulatedFiles[`qualification_file_${index}`].file = null;
         } else {
-            updatedAccumulatedFiles[`qualification_file_${index}`] = {
-                file,
-                alreadyExists: false,
-            }
-            updatedAccumulatedFiles[
-                `qualification_file_${index}_isRemoved`
-            ] = false
-            updatedIsRemoved[`qualification_file_${index}`] = false
+          updatedAccumulatedFiles[`qualification_file_${index}`] = {
+            file: null,
+            alreadyExists: false,
+          };
         }
+        updatedAccumulatedFiles[`qualification_file_${index}_isRemoved`] = true;
+        updatedIsRemoved[`qualification_file_${index}`] = true;
+      } else {
+        updatedAccumulatedFiles[`qualification_file_${index}`] = {
+          file,
+          alreadyExists: false,
+        };
+        updatedAccumulatedFiles[
+          `qualification_file_${index}_isRemoved`
+        ] = false;
+        updatedIsRemoved[`qualification_file_${index}`] = false;
+      }
 
-        setAccumulatedFiles(updatedAccumulatedFiles)
-        setIsRemoved(updatedIsRemoved)
-    }
+      setAccumulatedFiles(updatedAccumulatedFiles);
+      setIsRemoved(updatedIsRemoved);
+    };
 
     const onSubmit = (values) => {
-        console.log('foo', values)
-    }
+      console.log("foo", values);
+    };
 
     const onPrevious = () => {
-        setFormErrors('')
-        const currentValues = form.getValues()
+      setFormErrors("");
+      const currentValues = form.getValues();
 
-        if (
-            currentValues.addPendingQualifications === 'No' ||
-            currentValues.addPendingQualifications === undefined
-        ) {
-            currentValues.pendingQualifications = []
-        }
+      if (
+        currentValues.addPendingQualifications === "No" ||
+        currentValues.addPendingQualifications === undefined
+      ) {
+        currentValues.pendingQualifications = [];
+      }
 
-        const isValid = SectionTwoSavedSchema.safeParse(currentValues)
+      const isValid = SectionTwoSchema.safeParse(currentValues);
 
-        if (!isValid.success) {
-            console.log(isValid)
-            setFormErrors(isValid.error.formErrors.fieldErrors)
-            return
-        }
+      if (!isValid.success) {
+        setFormErrors(isValid.error.formErrors.fieldErrors);
+        return;
+      }
 
-        updateData(currentValues, accumulatedFiles)
-        previousStep(currentValues, accumulatedFiles)
-    }
+      updateData(currentValues, accumulatedFiles);
+      previousStep(currentValues, accumulatedFiles);
+    };
 
     const onNext = () => {
-        const currentValues = form.getValues()
+      const currentValues = form.getValues();
 
-        if (
-            currentValues.addPendingQualifications === 'No' ||
-            currentValues.addPendingQualifications === undefined
-        ) {
-            currentValues.pendingQualifications = []
-        }
+      const isValid = SectionTwoSchema.safeParse(currentValues);
 
-        updateData(currentValues, accumulatedFiles)
-        nextStep(currentValues, accumulatedFiles)
-    }
+      if (!isValid.success) {
+        setFormErrors(isValid.error.formErrors.fieldErrors);
+        return;
+      }
+
+      if (
+        currentValues.addPendingQualifications === "No" ||
+        currentValues.addPendingQualifications === undefined
+      ) {
+        currentValues.pendingQualifications = [];
+      }
+
+      updateData(currentValues, accumulatedFiles);
+      nextStep(currentValues, accumulatedFiles);
+    };
 
     const saveForm = () => {
-        setError('')
-        setFormErrors('')
-        const stepTwoData = form.getValues()
+      setError("");
+      setFormErrors("");
+      const stepTwoData = form.getValues();
 
-        const currentValues = { ...fData, ...stepTwoData }
+      const currentValues = { ...fData, ...stepTwoData };
 
-        if (stepTwoData.addPendingQualifications === 'No') {
-            currentValues.pendingQualifications = []
+      if (stepTwoData.addPendingQualifications === "No") {
+        currentValues.pendingQualifications = [];
+      }
+
+      const formData = new FormData();
+      for (const key in accumulatedFiles) {
+        if (accumulatedFiles[key]) {
+          formData.append(key, accumulatedFiles[key].file);
+          formData.append(
+            `${key}_alreadyExists`,
+            accumulatedFiles[key].alreadyExists
+          );
         }
+      }
 
-        const formData = new FormData()
-        for (const key in accumulatedFiles) {
-            if (accumulatedFiles[key]) {
-                formData.append(key, accumulatedFiles[key].file)
-                formData.append(
-                    `${key}_alreadyExists`,
-                    accumulatedFiles[key].alreadyExists
-                )
-            }
-        }
+      // Conditional validation logic
+      const isValid = SectionTwoSavedSchema.safeParse(currentValues);
 
-        // Conditional validation logic
-        const isValid = SectionTwoSavedSchema.safeParse(currentValues)
+      if (!isValid.success) {
+        console.log(isValid);
+        setFormErrors(isValid.error.formErrors.fieldErrors);
+        return;
+      }
 
-        if (!isValid.success) {
-            console.log(isValid)
-            setFormErrors(isValid.error.formErrors.fieldErrors)
-            return
-        }
+      startTransition(() => {
+        save(
+          JSON.stringify(currentValues),
+          deletedQualifications,
+          deletedPendingQualifications,
+          deletedWorkExperiences,
+          formData
+        ).then((data) => {
+          if (data?.success) {
+            toast({
+              variant: "success",
+              title: data.success,
+            });
 
-        startTransition(() => {
-            save(
-                JSON.stringify(currentValues),
-                deletedQualifications,
-                deletedPendingQualifications,
-                deletedWorkExperiences,
-                formData
-            ).then((data) => {
-                if (data?.success) {
-                    toast({
-                        variant: 'success',
-                        title: data.success,
-                    })
+            router.push("/application-saved");
+          }
 
-                    router.push('/application-saved')
-                }
-
-                if (data?.error) {
-                    setError(data.error)
-                }
-            })
-        })
-    }
+          if (data?.error) {
+            setError(data.error);
+          }
+        });
+      });
+    };
 
     const hasNoQualificationFiles = () => {
-        return !Object.keys(accumulatedFiles).some(
-            (key) =>
-                key.startsWith('qualification_file_') &&
-                !key.endsWith('_isRemoved') &&
-                accumulatedFiles[key]?.file
-        )
-    }
+      return !Object.keys(accumulatedFiles).some(
+        (key) =>
+          key.startsWith("qualification_file_") &&
+          !key.endsWith("_isRemoved") &&
+          accumulatedFiles[key]?.file
+      );
+    };
 
     useEffect(() => {
       const updateFiles = async () => {
@@ -386,7 +390,11 @@ export const StepTwoForm = ({
                                 type="text"
                                 value={field.value}
                                 onChange={(e) => field.onChange(e.target.value)}
-                                className="lg:w-[400px]"
+                                className={cn(
+                                  "lg:w-[400px]",
+                                  form.formState.errors?.qualifications?.[index]
+                                    ?.title && "border-red-500"
+                                )}
                                 disabled={isPending}
                               />
                             </FormControl>
@@ -405,7 +413,11 @@ export const StepTwoForm = ({
                                 type="text"
                                 value={field.value}
                                 onChange={(e) => field.onChange(e.target.value)}
-                                className="lg:w-[400px]"
+                                className={cn(
+                                  "lg:w-[400px]",
+                                  form.formState.errors?.qualifications?.[index]
+                                    ?.examiningBody && "border-red-500"
+                                )}
                                 disabled={isPending}
                               />
                             </FormControl>
@@ -426,7 +438,10 @@ export const StepTwoForm = ({
                                       variant={"outline"}
                                       className={cn(
                                         "w-full justify-start text-left font-normal h-12 rounded-[10px] px-[25px]",
-                                        !field.value && "text-muted-foreground"
+                                        !field.value && "text-muted-foreground",
+                                        form.formState.errors?.qualifications?.[
+                                          index
+                                        ]?.dateAwarded && "border-red-500"
                                       )}
                                       disabled={isPending}
                                     >
@@ -519,6 +534,7 @@ export const StepTwoForm = ({
                                 // null
                               }
                               isPending={isPending}
+                              fileType="file"
                             />
                           </FormItem>
                         )}

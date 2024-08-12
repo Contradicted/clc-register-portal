@@ -1,6 +1,8 @@
 import { isAdult } from "@/lib/utils";
 import * as z from "zod";
 
+const nameRegex = /^[A-Za-z\s]+$/; // Allows only letters and spaces
+const identificationNoRegex = /^(?=.*[0-9])[A-Za-z0-9]+$/; // Must contain at least one number and can include letters
 const postcodeRegEx = /^[a-z]{1,2}[0-9][0-9a-z]? ?[0-9][abd-hjlnp-uw-z]{2}$/i;
 const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
 
@@ -104,12 +106,20 @@ export const SectionOneSchema = z
     title: z.string({
       required_error: "Title is required",
     }),
-    firstName: z.string({
-      required_error: "First name is required",
-    }),
-    lastName: z.string({
-      required_error: "Last name is required",
-    }),
+    firstName: z
+      .string({
+        required_error: "First name is required",
+      })
+      .regex(nameRegex, {
+        message: "First name cannot contain numbers",
+      }),
+    lastName: z
+      .string({
+        required_error: "Last name is required",
+      })
+      .regex(nameRegex, {
+        message: "Last name cannot contain numbers",
+      }),
     gender: z
       .string({
         required_error: "Gender is required",
@@ -139,9 +149,13 @@ export const SectionOneSchema = z
           message: "The date must be before today",
         }
       ),
-    placeOfBirth: z.string({
-      required_error: "Place of Birth is required",
-    }),
+    placeOfBirth: z
+      .string({
+        required_error: "Place of Birth is required",
+      })
+      .regex(nameRegex, {
+        message: "Place of Birth cannot contain numbers",
+      }),
     countryOfBirth: z.string({
       required_error: "Country of Birth is required",
     }),
@@ -161,15 +175,23 @@ export const SectionOneSchema = z
         }
       )
       .optional(),
-    identificationNo: z.string({
-      required_error: "Identification number is required",
-    }),
+    identificationNo: z
+      .string({
+        required_error: "Identification number is required",
+      })
+      .regex(identificationNoRegex, {
+        message: "Identification number must contain at least one number",
+      }),
     addressLine1: z.string({
       required_error: "Address Line 1 is required",
     }),
-    city: z.string({
-      required_error: "City is required",
-    }),
+    city: z
+      .string({
+        required_error: "City is required",
+      })
+      .regex(nameRegex, {
+        message: "City cannot contain numbers",
+      }),
     postcode: z
       .string({
         required_error: "Zip/Post code is required",
@@ -196,8 +218,8 @@ export const SectionOneSchema = z
   })
   .superRefine((data, ctx) => {
     if (
-      data.countryOfBirth !== "United Kingdom" ||
-      data.nationality !== "British"
+      data.countryOfBirth !== "United Kingdom" &&
+      data.nationality == "British"
     ) {
       if (!data.entryDateToUK) {
         ctx.addIssue({
@@ -218,6 +240,9 @@ export const SectionTwoSchema = z.object({
           })
           .min(1, {
             message: "Title is required",
+          })
+          .regex(nameRegex, {
+            message: "Title cannot contain numbers",
           }),
         examiningBody: z
           .string({
@@ -225,13 +250,13 @@ export const SectionTwoSchema = z.object({
           })
           .min(1, {
             message: "Examining Body is required",
+          })
+          .regex(nameRegex, {
+            message: "Examining body cannot contain numbers",
           }),
         dateAwarded: z
-          .string({
+          .date({
             required_error: "Date awarded is required",
-          })
-          .min(1, {
-            message: "Date awarded is required",
           })
           .refine(
             (date) => {
@@ -243,8 +268,123 @@ export const SectionTwoSchema = z.object({
           ),
       })
     )
-    .min(1, "At least one qualification is required")
-    .max(3, "Only 3 qualifications are allowed"),
+    .min(1, {
+      message: "At least 1 qualification is required",
+    })
+    .max(3, {
+      message: "Only 3 qualifications are allowed",
+    }),
+  addPendingQualifications: z.enum(["Yes", "No"], {
+    required_error: "Please tick an option",
+  }),
+  // pendingQualifications: z
+  //   .array(
+  //     z.object({
+  //       title: z
+  //         .string({
+  //           required_error: "Title is required",
+  //         })
+  //         .min(1, {
+  //           message: "Title is required",
+  //         })
+  //         .regex(nameRegex, {
+  //           message: "Title cannot contain numbers",
+  //         }),
+  //       examiningBody: z
+  //         .string({
+  //           required_error: "Examining Body is required",
+  //         })
+  //         .min(1, {
+  //           message: "Examining Body is required",
+  //         })
+  //         .regex(nameRegex, {
+  //           message: "Examining body cannot contain numbers",
+  //         }),
+  //       dateOfResults: z
+  //         .date({
+  //           required_error: "Date of Results is required",
+  //         })
+  //         .refine(
+  //           (date) => {
+  //             return new Date(date) > new Date(today);
+  //           },
+  //           {
+  //             message: "Date cannot be in the past",
+  //           }
+  //         ),
+  //       subjectsPassed: z
+  //         .string({
+  //           required_error: "Subjects passed is required",
+  //         })
+  //         .min(1, {
+  //           message: "Subjects passed is required",
+  //         }),
+  //     })
+  //   )
+  //   .optional(),
+  isEnglishFirstLanguage: z.string({
+    required_error: "Please tick an option",
+  }),
+});
+// .superRefine((data, ctx) => {
+//   if (data.addPendingQualifications === "Yes") {
+//     if (
+//       !data.pendingQualifications ||
+//       data.pendingQualifications.length === 0
+//     ) {
+//       ctx.addIssue({
+//         path: ["pendingQualifications"],
+//         message: "Please enter details for the pending qualification",
+//       });
+//     }
+//   }
+// });
+
+export const SectionThreeSchema = z.object({
+  addWorkExperience: z.enum(["Yes", "No"], {
+    required_error: "Please tick an option",
+  }),
+});
+
+export const SectionFourSchema = z.object({
+  reasonsForChoosingProgram: z.string({
+    required_error: "Reasons for choosing program is required",
+  }),
+  futureEduPlans: z.string({
+    required_error: "Future educational plans is required",
+  }),
+  intentedEmployment: z.string({
+    required_error: "Plans about intended employment is required",
+  }),
+  hobbies: z.string({
+    required_error: "Hobbies is required",
+  }),
+  specialNeeds: z.string({
+    required_error: "Please answer the question related to special needs",
+  }),
+  stateBenefits: z.string({
+    required_error: "Please answer the question related to state benefits",
+  }),
+  criminalRecord: z.string({
+    required_error: "Please answer the question related to criminal record",
+  }),
+});
+
+export const SectionFiveSchema = z.object({
+  ethnicity: z
+    .string({
+      required_error: "Please tick an option for ethnic origin",
+    })
+    .min(1, {
+      message: "Please tick an option for ethnic origin",
+    }),
+  religion: z
+    .string({
+      required_error: "Please tick an option for religion",
+    })
+    .min(1, {
+      message: "Please tick an option for religion",
+    }),
 });
 
 export const SectionTwoSavedSchema = z.object({

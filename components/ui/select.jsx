@@ -103,9 +103,10 @@ SelectItem.displayName = SelectPrimitive.Item.displayName
 const SelectSeparator = React.forwardRef(({ className, ...props }, ref) => (
   <SelectPrimitive.Separator
     ref={ref}
-    className={cn("-mx-1 my-1 h-px bg-muted", className)}
-    {...props} />
-))
+    className={cn("-mx-1 my-1 h-px bg-stroke", className)}
+    {...props}
+  />
+));
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName
 
 export {

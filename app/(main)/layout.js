@@ -1,4 +1,6 @@
 import { Header } from '@/components/Header'
+import "@/app/globals.css";
+
 
 const MainLayout = ({ children }) => {
     return (

@@ -60,6 +60,7 @@ export const submit = async (
   applicationValues.hasPendingResults = hasPendingResults === "Yes";
   applicationValues.hasWorkExperience = hasWorkExperience === "Yes";
 
+  // Resubmitting Application
   if (existingApplication && existingApplication.length > 0) {
     let uploadedPhotoFile;
     let uploadedPhotoFileUrl;
@@ -420,7 +421,8 @@ export const submit = async (
       applicationValues.email || existingApplication.email,
       applicationValues.firstName || existingApplication.firstName,
       applicationValues.lastName || existingApplication.lastName,
-      applicationValues.courseTitle || existingApplication.courseTitle
+      applicationValues.courseTitle || existingApplication.courseTitle,
+      existingApplication.id
     ).then(async () => {
       await db.application.update({
         where: {
@@ -543,7 +545,8 @@ export const submit = async (
       applicationValues.email,
       applicationValues.firstName,
       applicationValues.lastName,
-      applicationValues.courseTitle
+      applicationValues.courseTitle,
+      applicationID
     ).then(async () => {
       await db.application.update({
         where: {
@@ -919,7 +922,8 @@ export const submit = async (
       applicationValues.email || existingSavedApplication.email,
       applicationValues.firstName || existingSavedApplication.firstName,
       applicationValues.lastName || existingSavedApplication.lastName,
-      applicationValues.courseTitle || existingSavedApplication.courseTitle
+      applicationValues.courseTitle || existingSavedApplication.courseTitle,
+      existingSavedApplication.id
     ).then(async () => {
       await db.application.update({
         where: {

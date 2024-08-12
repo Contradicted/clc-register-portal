@@ -47,6 +47,15 @@ export const FormSteps = ({ currentStepIndex }) => {
                 "bg-transparent border-[1.5px] border-[#F5F5F5] font-medium text-[#929EAE]"
             )}
           >
+            Equal Opportunities Monitoring
+          </li>
+          <li
+            className={cn(
+              "bg-[#2AA996] font-semibold px-5 py-[10px] rounded-[5px] text-white text-[14px]",
+              currentStepIndex !== 5 &&
+                "bg-transparent border-[1.5px] border-[#F5F5F5] font-medium text-[#929EAE]"
+            )}
+          >
             Marketing Information
           </li>
         </ul>

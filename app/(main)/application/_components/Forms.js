@@ -7,14 +7,9 @@ import { StepTwoForm } from "./StepTwoForm";
 import { StepThreeForm } from "./StepThreeForm";
 import { StepFourForm } from "./StepFourForm";
 import { StepFiveForm } from "./StepFiveForm";
-import { useSearchParams } from "next/navigation";
+import { StepSixForm } from "./StepSixForm";
 
 export const Forms = ({ formData, userData }) => {
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
-
-  // console.log(formData);
-
   const {
     currentStepIndex,
     isFirstStep,
@@ -32,7 +27,7 @@ export const Forms = ({ formData, userData }) => {
     setAccumulatedFiles,
     setDeletedQualifications,
     setDeletedWorkExperiences,
-  } = useMultiStepForm(5, formData);
+  } = useMultiStepForm(6, formData);
 
   const forms = [
     <StepOneForm
@@ -88,6 +83,19 @@ export const Forms = ({ formData, userData }) => {
       deletedWorkExperiences={deletedWorkExperiences}
     />,
     <StepFiveForm
+      application={applicationData}
+      previousStep={previousStep}
+      nextStep={nextStep}
+      isLastStep={isLastStep}
+      accumulatedFiles={accumulatedFiles}
+      setAccumulatedFiles={setAccumulatedFiles}
+      fData={fData}
+      updateData={updateData}
+      deletedPendingQualifications={deletedPendingQualifications}
+      deletedQualifications={deletedQualifications}
+      deletedWorkExperiences={deletedWorkExperiences}
+    />,
+    <StepSixForm
       application={applicationData}
       previousStep={previousStep}
       nextStep={nextStep}
