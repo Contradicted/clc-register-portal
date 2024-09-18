@@ -23,7 +23,7 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@react-email/components": "^0.0.21",
     "@uploadthing/react": "^6.5.0",
-    "axios": "^1.7.3",
+    "axios": "^1.7.4",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.0",
     "clc-db": "github:Contradicted/clc-db",
