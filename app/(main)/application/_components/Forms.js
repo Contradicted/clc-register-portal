@@ -30,86 +30,86 @@ export const Forms = ({ formData, userData, activeCourses }) => {
     } = useMultiStepForm(6, formData)
 
     const forms = [
-        // <StepOneForm
-        //     activeCourses={activeCourses}
-        //     userDetails={userData}
-        //     isFirstStep={isFirstStep}
-        //     application={applicationData}
-        //     nextStep={nextStep}
-        //     fData={fData}
-        //     updateData={updateData}
-        //     accumulatedFiles={accumulatedFiles}
-        //     setAccumulatedFiles={setAccumulatedFiles}
-        //     deletedPendingQualifications={deletedPendingQualifications}
-        //     deletedQualifications={deletedQualifications}
-        //     deletedWorkExperiences={deletedWorkExperiences}
-        // />,
-        // <StepTwoForm
-        //     application={applicationData}
-        //     previousStep={previousStep}
-        //     nextStep={nextStep}
-        //     accumulatedFiles={accumulatedFiles}
-        //     setAccumulatedFiles={setAccumulatedFiles}
-        //     fData={fData}
-        //     updateData={updateData}
-        //     deletedQualifications={deletedQualifications}
-        //     deletedPendingQualifications={deletedPendingQualifications}
-        //     deletedWorkExperiences={deletedWorkExperiences}
-        //     setDeletedPendingQualifications={setDeletedPendingQualifications}
-        //     setDeletedQualifications={setDeletedQualifications}
-        // />,
-        // <StepThreeForm
-        //     application={applicationData}
-        //     previousStep={previousStep}
-        //     nextStep={nextStep}
-        //     accumulatedFiles={accumulatedFiles}
-        //     setAccumulatedFiles={setAccumulatedFiles}
-        //     fData={fData}
-        //     updateData={updateData}
-        //     deletedPendingQualifications={deletedPendingQualifications}
-        //     deletedQualifications={deletedQualifications}
-        //     deletedWorkExperiences={deletedWorkExperiences}
-        //     setDeletedWorkExperiences={setDeletedWorkExperiences}
-        // />,
-        // <StepFourForm
-        //     application={applicationData}
-        //     previousStep={previousStep}
-        //     nextStep={nextStep}
-        //     accumulatedFiles={accumulatedFiles}
-        //     setAccumulatedFiles={setAccumulatedFiles}
-        //     fData={fData}
-        //     updateData={updateData}
-        //     deletedPendingQualifications={deletedPendingQualifications}
-        //     deletedQualifications={deletedQualifications}
-        //     deletedWorkExperiences={deletedWorkExperiences}
-        // />,
-        // <StepFiveForm
-        //     application={applicationData}
-        //     previousStep={previousStep}
-        //     nextStep={nextStep}
-        //     isLastStep={isLastStep}
-        //     accumulatedFiles={accumulatedFiles}
-        //     setAccumulatedFiles={setAccumulatedFiles}
-        //     fData={fData}
-        //     updateData={updateData}
-        //     deletedPendingQualifications={deletedPendingQualifications}
-        //     deletedQualifications={deletedQualifications}
-        //     deletedWorkExperiences={deletedWorkExperiences}
-        // />,
-        <StepSixForm
-            application={applicationData}
-            previousStep={previousStep}
-            nextStep={nextStep}
-            isLastStep={isLastStep}
-            accumulatedFiles={accumulatedFiles}
-            setAccumulatedFiles={setAccumulatedFiles}
-            fData={fData}
-            updateData={updateData}
-            deletedPendingQualifications={deletedPendingQualifications}
-            deletedQualifications={deletedQualifications}
-            deletedWorkExperiences={deletedWorkExperiences}
-        />,
-    ]
+      <StepOneForm
+        activeCourses={activeCourses}
+        userDetails={userData}
+        isFirstStep={isFirstStep}
+        application={applicationData}
+        nextStep={nextStep}
+        fData={fData}
+        updateData={updateData}
+        accumulatedFiles={accumulatedFiles}
+        setAccumulatedFiles={setAccumulatedFiles}
+        deletedPendingQualifications={deletedPendingQualifications}
+        deletedQualifications={deletedQualifications}
+        deletedWorkExperiences={deletedWorkExperiences}
+      />,
+      <StepTwoForm
+        application={applicationData}
+        previousStep={previousStep}
+        nextStep={nextStep}
+        accumulatedFiles={accumulatedFiles}
+        setAccumulatedFiles={setAccumulatedFiles}
+        fData={fData}
+        updateData={updateData}
+        deletedQualifications={deletedQualifications}
+        deletedPendingQualifications={deletedPendingQualifications}
+        deletedWorkExperiences={deletedWorkExperiences}
+        setDeletedPendingQualifications={setDeletedPendingQualifications}
+        setDeletedQualifications={setDeletedQualifications}
+      />,
+      <StepThreeForm
+        application={applicationData}
+        previousStep={previousStep}
+        nextStep={nextStep}
+        accumulatedFiles={accumulatedFiles}
+        setAccumulatedFiles={setAccumulatedFiles}
+        fData={fData}
+        updateData={updateData}
+        deletedPendingQualifications={deletedPendingQualifications}
+        deletedQualifications={deletedQualifications}
+        deletedWorkExperiences={deletedWorkExperiences}
+        setDeletedWorkExperiences={setDeletedWorkExperiences}
+      />,
+      <StepFourForm
+        application={applicationData}
+        previousStep={previousStep}
+        nextStep={nextStep}
+        accumulatedFiles={accumulatedFiles}
+        setAccumulatedFiles={setAccumulatedFiles}
+        fData={fData}
+        updateData={updateData}
+        deletedPendingQualifications={deletedPendingQualifications}
+        deletedQualifications={deletedQualifications}
+        deletedWorkExperiences={deletedWorkExperiences}
+      />,
+      <StepFiveForm
+        application={applicationData}
+        previousStep={previousStep}
+        nextStep={nextStep}
+        isLastStep={isLastStep}
+        accumulatedFiles={accumulatedFiles}
+        setAccumulatedFiles={setAccumulatedFiles}
+        fData={fData}
+        updateData={updateData}
+        deletedPendingQualifications={deletedPendingQualifications}
+        deletedQualifications={deletedQualifications}
+        deletedWorkExperiences={deletedWorkExperiences}
+      />,
+      <StepSixForm
+        application={applicationData}
+        previousStep={previousStep}
+        nextStep={nextStep}
+        isLastStep={isLastStep}
+        accumulatedFiles={accumulatedFiles}
+        setAccumulatedFiles={setAccumulatedFiles}
+        fData={fData}
+        updateData={updateData}
+        deletedPendingQualifications={deletedPendingQualifications}
+        deletedQualifications={deletedQualifications}
+        deletedWorkExperiences={deletedWorkExperiences}
+      />,
+    ];
 
     return (
         <div className="h-full w-full pt-12 flex flex-col">

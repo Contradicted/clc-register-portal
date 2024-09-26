@@ -291,10 +291,11 @@ export const StepThreeForm = ({
                 return null;
               }
             }
+            return null;
           })
         );
         setFileUploads(initialFileUploads);
-        setAccumulatedFiles(accumulatedFiles);
+        setAccumulatedFiles(updatedAccumulatedFiles);
 
         application.workExperience.forEach((we, index) => {
           if (we.url) {
@@ -310,6 +311,8 @@ export const StepThreeForm = ({
     updateFiles();
     setIsLoading(false);
   }, [application, updateWorkExperience]);
+
+  console.log(application);
 
   return (
     <div className="w-full px-5 lg:px-[50px]">

@@ -4,19 +4,19 @@ import { ClipboardPen, Home } from 'lucide-react'
 import SidebarItem from './sidebar-item'
 
 const routes = [
-    {
-        id: 1,
-        label: 'Dashboard',
-        href: '/dashboard',
-        icon: Home,
-    },
-    {
-        id: 2,
-        label: 'Course Details',
-        href: '/course-details',
-        icon: ClipboardPen,
-    },
-]
+  {
+    id: 1,
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: Home,
+  },
+  {
+    id: 2,
+    label: "Course Details",
+    href: "#",
+    icon: ClipboardPen,
+  },
+];
 
 const SidebarRoutes = () => {
     return (

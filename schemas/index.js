@@ -86,156 +86,211 @@ export const EditUserDetailsSchema = z.object({
 })
 
 export const SectionOneSchema = z
-    .object({
-        courseTitle: z.string({
-            required_error: 'Course Title is required',
-        }),
-        studyMode: z
-            .string({
-                required_error: 'Study Mode is required',
-            })
-            .refine(
-                (value) => {
-                    return (
-                        value === 'Full-Time' ||
-                        value == 'Part-Time' ||
-                        value === 'Blended-Learning'
-                    )
-                },
-                {
-                    message:
-                        'Study mode must either be Full Time, Part Time or Blended Learning',
-                }
-            ),
-        title: z.string({
-            required_error: 'Title is required',
-        }),
-        firstName: z
-            .string({
-                required_error: 'First name is required',
-            })
-            .regex(nameRegex, {
-                message: 'First name cannot contain numbers',
-            }),
-        lastName: z
-            .string({
-                required_error: 'Last name is required',
-            })
-            .regex(nameRegex, {
-                message: 'Last name cannot contain numbers',
-            }),
-        gender: z
-            .string({
-                required_error: 'Gender is required',
-            })
-            .refine(
-                (value) => {
-                    return (
-                        value === 'Male' ||
-                        value === 'Female' ||
-                        value === 'Non-binary'
-                    )
-                },
-                {
-                    message: 'Gender must either be Male, Female or Non-binary',
-                }
-            ),
-        dateOfBirth: z
-            .date({
-                required_error: 'A date of birth is required',
-            })
-            .refine(isAdult, {
-                message: 'You must be aged 18 or older',
-            })
-            .refine(
-                (date) => {
-                    return date < new Date(Date.now())
-                },
-                {
-                    message: 'The date must be before today',
-                }
-            ),
-        placeOfBirth: z
-            .string({
-                required_error: 'Place of Birth is required',
-            })
-            .regex(nameRegex, {
-                message: 'Place of Birth cannot contain numbers',
-            }),
-        countryOfBirth: z.string({
-            required_error: 'Country of Birth is required',
-        }),
-        nationality: z.string({
-            required_error: 'Nationality is required',
-        }),
-        entryDateToUK: z
-            .date({
-                required_error: 'Entry date to UK is required',
-            })
-            .refine(
-                (date) => {
-                    return date < new Date(Date.now())
-                },
-                {
-                    message: 'The date must be before today',
-                }
-            )
-            .optional(),
-        identificationNo: z
-            .string({
-                required_error: 'Identification number is required',
-            })
-            .regex(identificationNoRegex, {
-                message:
-                    'Identification number must contain at least one number',
-            }),
-        addressLine1: z.string({
-            required_error: 'Address Line 1 is required',
-        }),
-        city: z
-            .string({
-                required_error: 'City is required',
-            })
-            .regex(nameRegex, {
-                message: 'City cannot contain numbers',
-            }),
-        postcode: z
-            .string({
-                required_error: 'Zip/Post code is required',
-            })
-            .regex(postcodeRegEx, {
-                message: 'Invalid postcode',
-            }),
-        homeTelephoneNo: z.string({
-            required_error: 'Home telephone number is required',
-        }),
-        mobileNo: z.string({
-            required_error: 'Mobile number is required',
-        }),
-        email: z
-            .string({
-                required_error: 'Email is required',
-            })
-            .email({
-                message: 'Please enter a valid email',
-            }),
-        tuitionFees: z.string({
-            required_error: 'Tuition fee is required',
-        }),
-    })
-    .superRefine((data, ctx) => {
-        if (
-            data.countryOfBirth !== 'United Kingdom' &&
-            data.nationality == 'British'
-        ) {
-            if (!data.entryDateToUK) {
-                ctx.addIssue({
-                    path: ['entryDateToUK'],
-                    message: 'Entry Date to UK is required',
-                })
-            }
+  .object({
+    courseTitle: z.string({
+      required_error: "Course Title is required",
+    }),
+    studyMode: z
+      .string({
+        required_error: "Study Mode is required",
+      })
+      .refine(
+        (value) => {
+          return value === "full_time" || value == "part_time";
+        },
+        {
+          message: "Study mode must either be Full Time, Part Time",
         }
-    })
+      ),
+    title: z.string({
+      required_error: "Title is required",
+    }),
+    firstName: z
+      .string({
+        required_error: "First name is required",
+      })
+      .regex(nameRegex, {
+        message: "First name cannot contain numbers",
+      }),
+    lastName: z
+      .string({
+        required_error: "Last name is required",
+      })
+      .regex(nameRegex, {
+        message: "Last name cannot contain numbers",
+      }),
+    gender: z
+      .string({
+        required_error: "Gender is required",
+      })
+      .refine(
+        (value) => {
+          return (
+            value === "Male" || value === "Female" || value === "Non-binary"
+          );
+        },
+        {
+          message: "Gender must either be Male, Female or Non-binary",
+        }
+      ),
+    dateOfBirth: z
+      .date({
+        required_error: "A date of birth is required",
+      })
+      .refine(isAdult, {
+        message: "You must be aged 18 or older",
+      })
+      .refine(
+        (date) => {
+          return date < new Date(Date.now());
+        },
+        {
+          message: "The date must be before today",
+        }
+      ),
+    placeOfBirth: z
+      .string({
+        required_error: "Place of Birth is required",
+      })
+      .regex(nameRegex, {
+        message: "Place of Birth cannot contain numbers",
+      }),
+    countryOfBirth: z.string({
+      required_error: "Country of Birth is required",
+    }),
+    nationality: z.string({
+      required_error: "Nationality is required",
+    }),
+    entryDateToUK: z
+      .date({
+        required_error: "Entry date to UK is required",
+      })
+      .refine(
+        (date) => {
+          return date < new Date(Date.now());
+        },
+        {
+          message: "The date must be before today",
+        }
+      )
+      .nullable()
+      .optional(),
+    immigration_status: z
+      .string()
+      .min(1, {
+        message: "Immigration status is required",
+      })
+      .refine(
+        (value) => {
+          return value === "settled" || value === "pre_settled";
+        },
+        {
+          message: "Immigration status must either be Settled or Pre Settled",
+        }
+      )
+      .nullable()
+      .optional(),
+    share_code: z
+      .string({
+        required_error: "Share code is required",
+      })
+      .refine(
+        (value) => {
+          // Remove spaces and check if it's 9 characters long
+          const cleanedValue = value.replace(/\s/g, "");
+          return /^[A-Za-z0-9]{9}$/.test(cleanedValue);
+        },
+        {
+          message:
+            "Share code must be 9 characters long and contain only letters and numbers",
+        }
+      )
+      .refine(
+        (value) => {
+          // Check if the share code follows the pattern: XXX-XXX-XXX (allowing spaces)
+          return /^[A-Za-z0-9]{3}[\s-]?[A-Za-z0-9]{3}[\s-]?[A-Za-z0-9]{3}$/.test(
+            value
+          );
+        },
+        {
+          message:
+            "Share code must be in the format XXX-XXX-XXX (spaces or hyphens optional)",
+        }
+      )
+      .nullable()
+      .optional(),
+    identificationNo: z
+      .string({
+        required_error: "Identification number is required",
+      })
+      .regex(identificationNoRegex, {
+        message: "Identification number must contain at least one number",
+      }),
+    addressLine1: z.string({
+      required_error: "Address Line 1 is required",
+    }),
+    city: z
+      .string({
+        required_error: "City is required",
+      })
+      .regex(nameRegex, {
+        message: "City cannot contain numbers",
+      }),
+    postcode: z
+      .string({
+        required_error: "Zip/Post code is required",
+      })
+      .regex(postcodeRegEx, {
+        message: "Invalid postcode",
+      }),
+    homeTelephoneNo: z.string({
+      required_error: "Home telephone number is required",
+    }),
+    mobileNo: z.string({
+      required_error: "Mobile number is required",
+    }),
+    email: z
+      .string({
+        required_error: "Email is required",
+      })
+      .email({
+        message: "Please enter a valid email",
+      }),
+    tuitionFees: z.string({
+      required_error: "Tuition fee is required",
+    }),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.countryOfBirth !== "United Kingdom" &&
+      data.nationality == "British"
+    ) {
+      if (!data.entryDateToUK) {
+        ctx.addIssue({
+          path: ["entryDateToUK"],
+          message: "Entry Date to UK is required",
+        });
+      }
+    }
+
+    if (data.nationality !== "British") {
+      if (!data.immigration_status) {
+        ctx.addIssue({
+          path: ["immigration_status"],
+          message: "Immigration status is required",
+        });
+      }
+    }
+
+    if (data.immigration_status === "pre_settled") {
+      if (!data.share_code) {
+        ctx.addIssue({
+          path: ["share_code"],
+          message: "Share code is required",
+        });
+      }
+    }
+  });
 
 export const SectionTwoSchema = z.object({
     qualifications: z
