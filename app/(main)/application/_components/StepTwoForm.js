@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import { CalendarIcon, Plus, X } from 'lucide-react'
-import { useEffect, useState, useTransition } from 'react'
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
@@ -292,14 +292,14 @@ export const StepTwoForm = ({
       });
     };
 
-    const hasNoQualificationFiles = () => {
+    const hasNoQualificationFiles = useCallback(() => {
       return !Object.keys(accumulatedFiles).some(
         (key) =>
           key.startsWith("qualification_file_") &&
           !key.endsWith("_isRemoved") &&
           accumulatedFiles[key]?.file
       );
-    };
+    }, [accumulatedFiles]);
 
     useEffect(() => {
       const updateFiles = async () => {
@@ -354,7 +354,14 @@ export const StepTwoForm = ({
       };
 
       updateFiles();
-    }, [application, updateQualification, updatePendingQualification]);
+    }, [
+      application,
+      updateQualification,
+      updatePendingQualification,
+      accumulatedFiles,
+      setAccumulatedFiles,
+      hasNoQualificationFiles,
+    ]);
 
     console.log(accumulatedFiles);
 

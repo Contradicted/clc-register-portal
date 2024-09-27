@@ -1,5 +1,5 @@
 import countries from "i18n-iso-countries";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import debounce from "lodash.debounce";
@@ -17,9 +17,10 @@ const PlaceOfBirthInput = ({
   ...props
 }) => {
   const [inputValue, setInputValue] = useState(defaultValue || "");
+  const geocodePlaceRef = useRef(null);
 
-  const geocodePlace = useCallback(
-    debounce(async (input) => {
+  useEffect(() => {
+    geocodePlaceRef.current = debounce(async (input) => {
       if (input.length < 3) return;
 
       try {
@@ -42,9 +43,14 @@ const PlaceOfBirthInput = ({
       } catch (error) {
         console.error("Error geocoding place:", error);
       }
-    }, 1000),
-    [onPlaceSelect]
-  );
+    }, 1000);
+  }, [onPlaceSelect]);
+
+  const geocodePlace = useCallback((input) => {
+    if (geocodePlaceRef.current) {
+      geocodePlaceRef.current(input);
+    }
+  }, []);
 
   const handleInputChange = (e) => {
     const newValue = e.target.value;

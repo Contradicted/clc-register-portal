@@ -769,7 +769,7 @@ export const StepSixForm = ({
                                     <li>
                                       familiarise yourself with CLC policies and
                                       regulations including the regulations
-                                      relating to the use of College's IS
+                                      relating to the use of College&apos;s IS
                                       Computer and the Virtual Learning
                                       Environment (VLE).
                                     </li>

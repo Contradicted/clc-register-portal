@@ -35,7 +35,7 @@ export default function ValidateToken() {
     }
 
     validateToken();
-  }, [router, token]);
+  }, [router, token, toast]);
 
   return <div>Validating token...</div>;
 }

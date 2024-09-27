@@ -151,6 +151,11 @@ export const StepOneForm = ({
   const { toast } = useToast();
   const router = useRouter();
 
+  const watchCountryOfBirth = form.watch("countryOfBirth");
+  const watchNationality = form.watch("nationality");
+  const watchImmigrationStatus = form.watch("immigration_status");
+  const watchCourseTitle = form.watch("courseTitle");
+
   const handlePlaceSelect = ({ placeOfBirth, countryName }) => {
     form.setValue("placeOfBirth", placeOfBirth);
     setDetectedCountry(countryName);
@@ -260,7 +265,9 @@ export const StepOneForm = ({
         console.error("Error loading file:", error);
       }
     }
+  }, [application, accumulatedFiles, setAccumulatedFiles]);
 
+  useEffect(() => {
     if (
       application &&
       application.immigration_url &&
@@ -287,50 +294,52 @@ export const StepOneForm = ({
     }
 
     setIsLoading(false);
-  }, [application]);
+  }, [application, accumulatedFiles.immigrationFile, setAccumulatedFiles]);
 
   useEffect(() => {
     if (defaultIsClicked) {
       form.setValue("tuitionFees", "Other");
       setOtherOptionText(otherOptionText || "");
     }
-  }, [application, form, defaultIsClicked]);
+  }, [form, defaultIsClicked, otherOptionText]);
 
   useEffect(() => {
-    const { countryOfBirth, nationality } = form.getValues();
-
-    if (countryOfBirth === "United Kingdom" && nationality === "British") {
+    if (
+      watchCountryOfBirth === "United Kingdom" &&
+      watchNationality === "British"
+    ) {
       setIsEntryDateRequired(false);
     } else if (
-      (countryOfBirth !== "United Kingdom" && nationality === "British") ||
-      (countryOfBirth !== "United Kingdom" && nationality !== "British")
+      (watchCountryOfBirth !== "United Kingdom" &&
+        watchNationality === "British") ||
+      (watchCountryOfBirth !== "United Kingdom" &&
+        watchNationality !== "British")
     ) {
       setIsEntryDateRequired(true);
     } else {
       setIsEntryDateRequired(false);
     }
-  }, [form.watch("countryOfBirth"), form.watch("nationality")]);
+  }, [watchCountryOfBirth, watchNationality]);
 
   useEffect(() => {
-    const { nationality } = form.getValues();
     setIsImmigrationRequired(
-      nationality !== "British" && nationality !== undefined
+      watchNationality !== "British" && watchNationality !== undefined
     );
 
-    if (nationality === "British") {
+    if (watchNationality === "British") {
       setAccumulatedFiles((prev) => ({
         ...prev,
         immigrationFile_isRemoved: true,
       }));
     }
-  }, [form.watch("nationality")]);
+  }, [watchNationality, setAccumulatedFiles]);
 
   useEffect(() => {
-    const { immigration_status } = form.getValues();
     setIsShareCodeRequired(
-      immigration_status !== "settled" && immigration_status !== undefined
+      watchImmigrationStatus !== "settled" &&
+        watchImmigrationStatus !== undefined
     );
-  }, [form.watch("immigration_status")]);
+  }, [watchImmigrationStatus]);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -376,7 +385,7 @@ export const StepOneForm = ({
     } else {
       setStudyModes([]);
     }
-  }, [form.watch("courseTitle"), courses]);
+  }, [watchCourseTitle, courses, form]);
 
   const saveForm = () => {
     setHasError(false);

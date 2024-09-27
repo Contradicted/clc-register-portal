@@ -31,6 +31,7 @@ export const Forms = ({ formData, userData, activeCourses }) => {
 
     const forms = [
       <StepOneForm
+        key="step-one"
         activeCourses={activeCourses}
         userDetails={userData}
         isFirstStep={isFirstStep}
@@ -45,6 +46,7 @@ export const Forms = ({ formData, userData, activeCourses }) => {
         deletedWorkExperiences={deletedWorkExperiences}
       />,
       <StepTwoForm
+        key="step-two"
         application={applicationData}
         previousStep={previousStep}
         nextStep={nextStep}
@@ -59,6 +61,7 @@ export const Forms = ({ formData, userData, activeCourses }) => {
         setDeletedQualifications={setDeletedQualifications}
       />,
       <StepThreeForm
+        key="step-three"
         application={applicationData}
         previousStep={previousStep}
         nextStep={nextStep}
@@ -72,6 +75,7 @@ export const Forms = ({ formData, userData, activeCourses }) => {
         setDeletedWorkExperiences={setDeletedWorkExperiences}
       />,
       <StepFourForm
+        key="step-four"
         application={applicationData}
         previousStep={previousStep}
         nextStep={nextStep}
@@ -84,6 +88,7 @@ export const Forms = ({ formData, userData, activeCourses }) => {
         deletedWorkExperiences={deletedWorkExperiences}
       />,
       <StepFiveForm
+        key="step-five"
         application={applicationData}
         previousStep={previousStep}
         nextStep={nextStep}
@@ -97,6 +102,7 @@ export const Forms = ({ formData, userData, activeCourses }) => {
         deletedWorkExperiences={deletedWorkExperiences}
       />,
       <StepSixForm
+        key="step-six"
         application={applicationData}
         previousStep={previousStep}
         nextStep={nextStep}

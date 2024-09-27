@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { CalendarIcon, Plus, X } from "lucide-react";
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -254,14 +254,14 @@ export const StepThreeForm = ({
     });
   };
 
-  const hasNoWorkExperienceFiles = () => {
+  const hasNoWorkExperienceFiles = useCallback(() => {
     return !Object.keys(accumulatedFiles).some(
       (key) =>
         key.startsWith("work_experience_file_") &&
         !key.endsWith("_isRemoved") &&
         accumulatedFiles[key]?.file
     );
-  };
+  }, [accumulatedFiles]);
 
   useEffect(() => {
     const updateFiles = async () => {
@@ -310,7 +310,13 @@ export const StepThreeForm = ({
 
     updateFiles();
     setIsLoading(false);
-  }, [application, updateWorkExperience]);
+  }, [
+    application,
+    updateWorkExperience,
+    accumulatedFiles,
+    setAccumulatedFiles,
+    hasNoWorkExperienceFiles,
+  ]);
 
   console.log(application);
 
