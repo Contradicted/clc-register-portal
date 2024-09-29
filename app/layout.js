@@ -10,6 +10,9 @@ import ClientLayout from '@/components/ClientLayout'
 export const metadata = {
   title: "CLC Admissions Portal",
   description: "CLC Admissions Portal",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 const font = Kumbh_Sans({
@@ -18,18 +21,18 @@ const font = Kumbh_Sans({
 });
 
 export default async function RootLayout({ children }) {
-    const session = await auth()
+  const session = await auth();
 
-    return (
-        <SessionProvider session={session}>
-            <html lang="en">
-                <PrimeReactProvider>
-                    <body className={font.className}>
-                        <ClientLayout>{children}</ClientLayout>
-                        <Toaster />
-                    </body>
-                </PrimeReactProvider>
-            </html>
-        </SessionProvider>
-    )
+  return (
+    <SessionProvider session={session}>
+      <html lang="en">
+        <PrimeReactProvider>
+          <body className={font.className}>
+            <ClientLayout>{children}</ClientLayout>
+            <Toaster />
+          </body>
+        </PrimeReactProvider>
+      </html>
+    </SessionProvider>
+  );
 }
