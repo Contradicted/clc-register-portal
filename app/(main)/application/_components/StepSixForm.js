@@ -223,7 +223,7 @@ export const StepSixForm = ({
           },
         });
 
-        router.replace("/dashboard");
+        router.push("/dashboard");
       });
     });
   };
