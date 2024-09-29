@@ -202,29 +202,36 @@ export const StepSixForm = ({
     }
 
     startSubmitTransition(() => {
-      submit(
-        JSON.stringify(currentValues),
-        deletedQualifications,
-        deletedWorkExperiences,
-        formData
-      ).then(async (data) => {
-        if (data?.success) {
-          toast({
-            variant: "success",
-            title: data.success,
+      try {
+        submit(
+          JSON.stringify(currentValues),
+          deletedQualifications,
+          deletedWorkExperiences,
+          formData
+        ).then(async (data) => {
+          if (data?.success) {
+            toast({
+              variant: "success",
+              title: data.success,
+            });
+          }
+
+          console.log("doing..");
+          await update({
+            ...session,
+            user: {
+              ...session.user,
+              hasApplication: true,
+            },
           });
-        }
+          console.log("done");
 
-        await update({
-          ...session,
-          user: {
-            ...session.user,
-            hasApplication: true,
-          },
+          router.push("/dashboard");
         });
-
-        router.push("/dashboard");
-      });
+      } catch (error) {
+        console.error("Error submitting application:", error);
+        setError("An error occurred while submitting your application.");
+      }
     });
   };
 
