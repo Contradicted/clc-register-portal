@@ -7,6 +7,11 @@ import { SessionProvider } from 'next-auth/react'
 import { PrimeReactProvider } from 'primereact/api'
 import ClientLayout from '@/components/ClientLayout'
 
+export const metadata = {
+  title: "CLC Admissions Portal",
+  description: "CLC Admissions Portal",
+};
+
 const font = Kumbh_Sans({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800", "900"],
