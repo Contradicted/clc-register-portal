@@ -51,3 +51,5 @@ export const religions = [
 ];
 
 export const popularCountries = ["United Kingdom", "Bangladesh", "Romania"];
+
+export const popularNationalities = ["British", "Bangladeshi", "Romanian"];

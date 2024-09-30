@@ -33,6 +33,7 @@
     "dayjs": "^1.11.11",
     "dotenv-expand": "^11.0.6",
     "i18n-iso-countries": "^7.11.3",
+    "i18n-nationality": "^1.4.0",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.371.0",
     "next": "14.2.2",
@@ -56,6 +57,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "autoprefixer": "^10.4.20",
     "eslint": "^8",
     "eslint-config-next": "14.2.2",
     "postcss": "^8",

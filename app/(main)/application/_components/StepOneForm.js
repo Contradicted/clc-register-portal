@@ -47,12 +47,15 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import PlaceOfBirthInput from './PlaceOfBirthInput'
 
 import countries from 'i18n-iso-countries'
+import nationalities from "i18n-nationality";
 import countriesEnglish from 'i18n-iso-countries/langs/en.json'
-import { popularCountries } from '@/constants'
+import nationalitiesEnglish from "i18n-nationality/langs/en.json";
+import { popularCountries, popularNationalities } from "@/constants";
 import { getActiveCourses } from '@/data/courses'
 import { Label } from "@/components/ui/label";
 
 countries.registerLocale(countriesEnglish);
+nationalities.registerLocale(nationalitiesEnglish);
 
 export const StepOneForm = ({
   activeCourses,
@@ -918,8 +921,32 @@ export const StepOneForm = ({
                             </SelectTrigger>
                             <SelectContent>
                               <SelectGroup>
-                                <SelectItem value="British">British</SelectItem>
-                                <SelectItem value="Spanish">Spanish</SelectItem>
+                                <SelectLabel>Popular Nationalities</SelectLabel>
+                                {popularNationalities.map((nationality) => (
+                                  <SelectItem
+                                    key={nationality}
+                                    value={nationality}
+                                  >
+                                    {nationality}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                              <SelectSeparator />
+                              <SelectGroup>
+                                <SelectLabel>All Countries</SelectLabel>
+                                {Object.entries(nationalities.getNames("en"))
+                                  .filter(
+                                    ([code, nationality]) =>
+                                      !popularNationalities.includes(
+                                        nationality
+                                      )
+                                  )
+                                  .sort((a, b) => a[1].localeCompare(b[1]))
+                                  .map(([code, nationality]) => (
+                                    <SelectItem key={code} value={nationality}>
+                                      {nationality}
+                                    </SelectItem>
+                                  ))}
                               </SelectGroup>
                             </SelectContent>
                           </Select>
