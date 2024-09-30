@@ -1,6 +1,12 @@
 import { format } from "date-fns";
 import { CalendarIcon, Plus, X } from "lucide-react";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -254,14 +260,14 @@ export const StepThreeForm = ({
     });
   };
 
-  const hasNoWorkExperienceFiles = useCallback(() => {
+  const hasNoWorkExperienceFiles = () => {
     return !Object.keys(accumulatedFiles).some(
       (key) =>
         key.startsWith("work_experience_file_") &&
         !key.endsWith("_isRemoved") &&
         accumulatedFiles[key]?.file
     );
-  }, [accumulatedFiles]);
+  };
 
   useEffect(() => {
     const updateFiles = async () => {
@@ -271,6 +277,7 @@ export const StepThreeForm = ({
         hasNoWorkExperienceFiles()
       ) {
         const updatedAccumulatedFiles = { ...accumulatedFiles };
+        let updateState = false;
 
         const initialFileUploads = await Promise.all(
           application.workExperience.map(async (we, index) => {
@@ -285,40 +292,39 @@ export const StepThreeForm = ({
                   file: file,
                   alreadyExists: true,
                 };
+                updateState = true;
                 return we.url;
               } catch (error) {
                 console.log("Something went wrong", error);
                 return null;
               }
             }
-            return null;
+            return (
+              updatedAccumulatedFiles[`work_experience_file_${index}`]?.file ||
+              null
+            );
           })
         );
-        setFileUploads(initialFileUploads);
-        setAccumulatedFiles(updatedAccumulatedFiles);
 
-        application.workExperience.forEach((we, index) => {
-          if (we.url) {
-            updateWorkExperience(index, {
-              ...we,
-              file: initialFileUploads[index],
-            });
-          }
-        });
+        if (updateState) {
+          setFileUploads(initialFileUploads);
+          setAccumulatedFiles(updatedAccumulatedFiles);
+
+          application.workExperience.forEach((we, index) => {
+            if (we.url) {
+              updateWorkExperience(index, {
+                ...we,
+                file: initialFileUploads[index],
+              });
+            }
+          });
+        }
       }
+      setIsLoading(false);
     };
 
     updateFiles();
-    setIsLoading(false);
-  }, [
-    application,
-    updateWorkExperience,
-    accumulatedFiles,
-    setAccumulatedFiles,
-    hasNoWorkExperienceFiles,
-  ]);
-
-  console.log(application);
+  }, [application, updateWorkExperience, hasNoWorkExperienceFiles]);
 
   return (
     <div className="w-full px-5 lg:px-[50px]">

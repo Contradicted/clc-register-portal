@@ -1,12 +1,17 @@
-import { getApplicationByUserID } from '@/data/application'
-import { currentUser } from '@/lib/auth'
-import { cn, getDisplayStatus } from '@/lib/utils'
+import { RefreshHandler } from "@/components/RefreshHandler";
+import { getApplicationByUserID } from "@/data/application";
+import { currentUser } from "@/lib/auth";
+import { cn, getDisplayStatus } from "@/lib/utils";
+import { cookies } from "next/headers";
+import Link from "next/link";
 
 export default async function DashboardPage() {
-    const user = await currentUser()
-    const application = await getApplicationByUserID(user.id)
+  const user = await currentUser();
+  const application = await getApplicationByUserID(user.id);
 
-    return (
+  return (
+    <>
+      <RefreshHandler />
       <div className="w-full">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-[50px]">
           <div className="lg:col-span-2">
@@ -61,6 +66,15 @@ export default async function DashboardPage() {
                       )}
                     >
                       {getDisplayStatus(app.status)}
+                      {getDisplayStatus(app.status) === "Waiting for Change" &&
+                        app.updateApplicationToken && (
+                          <Link
+                            href={`/application?token=${app.updateApplicationToken.token}`}
+                            className="ml-1 text-black transition-colors duration-200 ease-in-out"
+                          >
+                            - Click here
+                          </Link>
+                        )}
                     </p>
                   </div>
                 </div>
@@ -111,5 +125,6 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
-    );
+    </>
+  );
 }

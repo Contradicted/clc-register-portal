@@ -20,6 +20,7 @@ export default function ValidateToken() {
         console.log("foo", data);
 
         if (data.valid) {
+          console.log("yes");
           router.push("/application");
         } else {
           toast({
@@ -32,7 +33,7 @@ export default function ValidateToken() {
         console.log("didnt");
         router.push("/dashboard");
       }
-    }
+    } 
 
     validateToken();
   }, [router, token, toast]);

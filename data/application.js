@@ -10,6 +10,7 @@ export const getApplicationByUserID = async (userID) => {
             qualifications: true,
             pendingQualifications: true,
             workExperience: true,
+            updateApplicationToken: true,
           },
         });
 

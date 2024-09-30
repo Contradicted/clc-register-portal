@@ -440,12 +440,6 @@ export const submit = async (
                 },
               });
             }
-
-            await db.savedWorkExperience.delete({
-              where: {
-                id: we.id,
-              },
-            });
           }
         } else {
           let url = null;
@@ -476,7 +470,7 @@ export const submit = async (
     let signatureUrl = null;
 
     if (signature) {
-      const existingSignature = existingSavedApplication.signatureUrl;
+      const existingSignature = existingApplication[0].signatureUrl;
 
       if (existingSignature) {
         const fileKey = existingSignature.split("f/");
@@ -486,37 +480,39 @@ export const submit = async (
       const signatureBlob = await fetch(signature).then((res) => res.blob());
 
       const file = new UTFile(
-        signatureBlob,
-        `${existingSavedApplication.id}-signature.png`
+        [signatureBlob],
+        `${existingApplication[0].id}-signature.png`
       );
       const uploadedSignature = await utapi.uploadFiles([file]);
       signatureUrl = uploadedSignature[0].data.url;
 
       await db.application.update({
         where: {
-          id: existingApplication.id,
+          id: existingApplication[0].id,
         },
         data: {
           signatureUrl,
         },
       });
     } else {
+      const existingSignature = existingApplication[0].signatureUrl;
+
       await db.application.update({
         where: {
-          id: existingApplication.id,
+          id: existingApplication[0].id,
         },
         data: {
-          signatureUrl: null,
+          signatureUrl: existingSignature ? existingSignature : null,
         },
       });
     }
 
     await sendReSubmittedEmail(
-      applicationValues.email || existingApplication.email,
-      applicationValues.firstName || existingApplication.firstName,
-      applicationValues.lastName || existingApplication.lastName,
-      applicationValues.courseTitle || existingApplication.courseTitle,
-      existingApplication.id
+      applicationValues.email || existingApplication[0].email,
+      applicationValues.firstName || existingApplication[0].firstName,
+      applicationValues.lastName || existingApplication[0].lastName,
+      applicationValues.courseTitle || existingApplication[0].courseTitle,
+      existingApplication[0].id
     ).then(async () => {
       await db.application.update({
         where: {

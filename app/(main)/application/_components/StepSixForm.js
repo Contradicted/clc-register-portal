@@ -37,15 +37,15 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import Link from 'next/link'
 
 export const StepSixForm = ({
-    application,
-    previousStep,
-    isLastStep,
-    fData,
-    updateData,
-    deletedQualifications,
-    deletedPendingQualifications,
-    deletedWorkExperiences,
-    accumulatedFiles,
+  application,
+  previousStep,
+  isLastStep,
+  fData,
+  updateData,
+  deletedQualifications,
+  deletedPendingQualifications,
+  deletedWorkExperiences,
+  accumulatedFiles,
 }) => {
   const defaultIsClicked = application
     ? ![
@@ -185,7 +185,7 @@ export const StepSixForm = ({
       ...fData,
       ...stepSixData,
       marketing: isClicked ? otherOptionText : stepSixData.marketing,
-      signature: signatureData,
+      signature: signatureData !== signature ? signatureData : null,
       recruitment_agent: isRecruitmentAgent ? recruitmentAgentName : "",
       // otherOptionText: isClicked ? otherOptionText : "",
     };
@@ -216,7 +216,6 @@ export const StepSixForm = ({
             });
           }
 
-          console.log("doing..");
           await update({
             ...session,
             user: {
@@ -224,7 +223,8 @@ export const StepSixForm = ({
               hasApplication: true,
             },
           });
-          console.log("done");
+
+          localStorage.setItem("refreshDashboard", "true");
 
           router.push("/dashboard");
         });
@@ -830,4 +830,4 @@ export const StepSixForm = ({
       </Form>
     </div>
   );
-}
+};

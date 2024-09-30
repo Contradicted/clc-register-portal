@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const token = searchParams.get("token");
+  const { user } = await auth();
 
   if (!token) {
     return NextResponse.json({ error: "Token is required!" }, { status: 400 });
@@ -13,6 +14,12 @@ export async function GET(req) {
 
   try {
     const tokenDetails = await getUpdateApplicationTokenByToken(token);
+
+    if (user.email !== tokenDetails.email)
+      return NextResponse.json(
+        { error: "Token does not match user!", valid: false },
+        { status: 400 }
+      );
 
     if (tokenDetails && new Date(tokenDetails.expires) > new Date()) {
       return NextResponse.json({ valid: true });
