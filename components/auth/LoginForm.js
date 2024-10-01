@@ -125,7 +125,7 @@ export function LoginForm() {
                       Forgot your password?
                     </Link>
                   </div>
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full text-white">
                     {isPending ? (
                       <LoaderCircle className="animate-spin" />
                     ) : (
@@ -137,7 +137,7 @@ export function LoginForm() {
                   New to City of London College?{" "}
                   <Link
                     href="/auth/register"
-                    className="font-medium text-black"
+                    className="font-medium text-black hover:text-black/95"
                   >
                     Create an account
                   </Link>

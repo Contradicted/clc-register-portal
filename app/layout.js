@@ -8,8 +8,8 @@ import { auth } from "@/auth";
 import NextAuthProvider from "@/providers/NextAuthProvider";
 
 export const metadata = {
-  title: "CLC Admissions Portal",
-  description: "CLC Admissions Portal",
+  title: "City of London College - Admissions Portal",
+  description: "Admissions Portal for City of London College",
   icons: {
     icon: "/favicon.ico",
   },
