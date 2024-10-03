@@ -101,8 +101,8 @@ export const UserDetailsEditForm = ({ userDetails }) => {
         <FormError message={formErrors || error} className="mb-5" />
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="border-[1.5px] border-[#F5F5F5] rounded-[10px] p-5 flex">
-            <div className="gap-4 w-[400px] space-y-4">
-              <div className="grid gap-4 w-[250px]">
+            <div className="gap-4 md:w-[400px] space-y-4">
+              <div className="grid gap-4 md:w-[250px]">
                 <div className="grid gap-2">
                   <FormField
                     control={form.control}

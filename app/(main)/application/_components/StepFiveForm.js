@@ -15,13 +15,7 @@ import { FormButtons } from './FormButtons'
 import { FormError } from '@/components/FormError'
 import { save } from '@/actions/save'
 import { useToast } from '@/components/ui/use-toast'
-import { useRouter } from 'next/navigation'
-import { submit } from '@/actions/submit'
-import { DEFAULT_LOGIN_REDIRECT } from '@/routes'
-import { currentUser } from '@/lib/auth'
-import { useCurrentUser } from '@/hooks/useCurrentUser'
-import { useSession } from 'next-auth/react'
-import { sendRecievedApplicationEmail } from '@/lib/mail'
+import { useRouter } from "next/navigation";
 import { ethnicities, religions } from "@/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SectionFiveSchema } from "@/schemas";
@@ -66,15 +60,11 @@ export const StepFiveForm = ({
   );
 
   const [isPending, startTransition] = useTransition();
-  const [isSubmitPending, startSubmitTransition] = useTransition();
   const [formErrors, setFormErrors] = useState();
   const [error, setError] = useState();
 
   const { toast } = useToast();
   const router = useRouter();
-  const { data: session, update } = useSession();
-
-  // console.log(isEthnClicked);
 
   const form = useForm({
     defaultValues: {
@@ -244,156 +234,156 @@ export const StepFiveForm = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-5">
           <div className="flex flex-col text-left">
-            <h1 className="font-semibold text-[20px]">
+            <h1 className="font-semibold text-[18px] sm:text-[20px]">
               Equal Opportunities Monitoring
             </h1>
-            <span className="text-[14px] text-[#929EAE]">
+            <span className="text-[12px] sm:text-[14px] text-[#929EAE]">
               Your response will not influence the outcome of your application.
               You do not have to answer this question if you do not wish.
             </span>
           </div>
 
-          <div className="w-full h-full lg:flex lg:flex-col lg:px-10 mt-5">
-            <div>
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <div className="flex flex-col gap-2 w-full space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="ethnicity"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                              console.log(value);
-                              if (value === "Other") {
-                                setIsEthnClicked(true);
-                              } else {
-                                setIsEthnClicked(false);
-                                setOtherEthnText("");
-                              }
-                            }}
-                            value={isEthnClicked ? "Other" : field.value}
-                            className="grid grid-cols-1 space-y-2 space-x-3 md:grid-cols-2 lg:grid-cols-3"
-                            disabled={isPending || isSubmitPending}
-                          >
-                            <FormLabel className="font-bold underline mb-1 col-span-full">
-                              Ethnic origin
-                            </FormLabel>
-                            {ethnicities.map((ethn, index) => (
-                              <FormItem
-                                key={index}
-                                className="flex items-center space-x-3 space-y-0"
-                              >
-                                <FormControl>
-                                  <RadioGroupItem value={ethn.value} />
-                                </FormControl>
-                                <FormLabel className="font-medium">
-                                  {ethn.label}
-                                </FormLabel>
-                              </FormItem>
-                            ))}
-                            <div className="col-span-full">
-                              <FormItem className="flex items-center space-x-3 space-y-0">
-                                <FormControl>
-                                  <RadioGroupItem
-                                    value="Other"
-                                    checked={isEthnClicked}
-                                    onClick={() => setIsEthnClicked(true)}
-                                  />
-                                </FormControl>
-                                <FormLabel className="font-medium">
-                                  Other
-                                </FormLabel>
-                              </FormItem>
-                              {isEthnClicked && (
-                                <FormControl>
-                                  <Input
-                                    value={otherEthnText}
-                                    type="text"
-                                    className="mt-2 lg:max-w-[400px]"
-                                    onChange={(e) => {
-                                      setOtherEthnText(e.target.value);
-                                    }}
-                                  />
-                                </FormControl>
-                              )}
-                            </div>
-                          </RadioGroup>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+          <div className="mt-5 flex justify-center">
+            <div className="w-full max-w-[1160px] space-y-6">
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="ethnicity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            console.log(value);
+                            if (value === "Other") {
+                              setIsEthnClicked(true);
+                            } else {
+                              setIsEthnClicked(false);
+                              setOtherEthnText("");
+                            }
+                          }}
+                          value={isEthnClicked ? "Other" : field.value}
+                          className="grid grid-cols-1 space-y-2 space-x-3 md:grid-cols-2 lg:grid-cols-3"
+                          disabled={isPending}
+                        >
+                          <FormLabel className="font-bold underline mb-1 col-span-full">
+                            Ethnic origin
+                          </FormLabel>
+                          {ethnicities.map((ethn, index) => (
+                            <FormItem
+                              key={index}
+                              className="flex items-center space-x-3 space-y-0"
+                            >
+                              <FormControl>
+                                <RadioGroupItem value={ethn.value} />
+                              </FormControl>
+                              <FormLabel className="font-medium">
+                                {ethn.label}
+                              </FormLabel>
+                            </FormItem>
+                          ))}
+                          <div className="col-span-full">
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem
+                                  value="Other"
+                                  checked={isEthnClicked}
+                                  onClick={() => setIsEthnClicked(true)}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-medium">
+                                Other
+                              </FormLabel>
+                            </FormItem>
+                            {isEthnClicked && (
+                              <FormControl>
+                                <Input
+                                  value={otherEthnText}
+                                  type="text"
+                                  className="mt-2 sm:max-w-[400px]"
+                                  onChange={(e) => {
+                                    setOtherEthnText(e.target.value);
+                                  }}
+                                />
+                              </FormControl>
+                            )}
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-                  <FormField
-                    control={form.control}
-                    name="religion"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                              if (value === "Other") {
-                                setIsReligionClicked(true);
-                              } else {
-                                setIsReligionClicked(false);
-                                setOtherReligionText("");
-                              }
-                            }}
-                            value={isReligionClicked ? "Other" : field.value}
-                            className="grid grid-cols-1 space-y-2 space-x-3 md:grid-cols-2 lg:grid-cols-3"
-                            disabled={isPending || isSubmitPending}
-                          >
-                            <FormLabel className="font-bold underline mb-1 col-span-full">
-                              Religion
-                            </FormLabel>
-                            {religions.map((religion, index) => (
-                              <FormItem
-                                key={index}
-                                className="flex items-center space-x-3 space-y-0"
-                              >
-                                <FormControl>
-                                  <RadioGroupItem value={religion.value} />
-                                </FormControl>
-                                <FormLabel className="font-medium">
-                                  {religion.label}
-                                </FormLabel>
-                              </FormItem>
-                            ))}
-                            <div className="col-span-full">
-                              <FormItem className="flex items-center space-x-3 space-y-0">
-                                <FormControl>
-                                  <RadioGroupItem
-                                    value="Other"
-                                    checked={isReligionClicked}
-                                    onClick={() => setIsReligionClicked(true)}
-                                  />
-                                </FormControl>
-                                <FormLabel className="font-medium">
-                                  Other
-                                </FormLabel>
-                              </FormItem>
-                              {isReligionClicked && (
-                                <FormControl>
-                                  <Input
-                                    value={otherReligionText}
-                                    type="text"
-                                    className="mt-2 lg:max-w-[400px]"
-                                    onChange={(e) => {
-                                      setOtherReligionText(e.target.value);
-                                    }}
-                                  />
-                                </FormControl>
-                              )}
-                            </div>
-                          </RadioGroup>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="religion"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            if (value === "Other") {
+                              setIsReligionClicked(true);
+                            } else {
+                              setIsReligionClicked(false);
+                              setOtherReligionText("");
+                            }
+                          }}
+                          value={isReligionClicked ? "Other" : field.value}
+                          className="grid grid-cols-1 space-y-2 space-x-3 md:grid-cols-2 lg:grid-cols-3"
+                          disabled={isPending}
+                        >
+                          <FormLabel className="font-bold underline mb-1 col-span-full">
+                            Religion
+                          </FormLabel>
+                          {religions.map((religion, index) => (
+                            <FormItem
+                              key={index}
+                              className="flex items-center space-x-3 space-y-0"
+                            >
+                              <FormControl>
+                                <RadioGroupItem value={religion.value} />
+                              </FormControl>
+                              <FormLabel className="font-medium">
+                                {religion.label}
+                              </FormLabel>
+                            </FormItem>
+                          ))}
+                          <div className="col-span-full">
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem
+                                  value="Other"
+                                  checked={isReligionClicked}
+                                  onClick={() => setIsReligionClicked(true)}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-medium">
+                                Other
+                              </FormLabel>
+                            </FormItem>
+                            {isReligionClicked && (
+                              <FormControl>
+                                <Input
+                                  value={otherReligionText}
+                                  type="text"
+                                  className="mt-2 sm:max-w-[400px]"
+                                  onChange={(e) => {
+                                    setOtherReligionText(e.target.value);
+                                  }}
+                                />
+                              </FormControl>
+                            )}
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
           </div>

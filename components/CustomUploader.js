@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { generateReactHelpers } from "@uploadthing/react/hooks";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 
 export const { useUploadThing } = generateReactHelpers();
 
@@ -16,6 +16,7 @@ export const MultiUploader = ({
   defaultFile,
   defaultPreviewUrl,
   isPending,
+  isLoading,
   fileType,
 }) => {
   const [file, setFile] = useState(defaultFile);
@@ -169,17 +170,25 @@ export const MultiUploader = ({
       {previewUrl ? (
         <div className="mb-6 border-2 border-dashed border-[#384EB7]/30 rounded-md p-4 flex justify-between items-center text-sm transition hover:border-indigo-600 cursor-pointer">
           <div className="flex items-center gap-x-2">
-            <Image
-              src={previewUrl}
-              alt="Preview"
-              width={200}
-              height={200}
-              className="preview-image"
-              onError={() => setPreviewUrl(null)}
-            />
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Image
+                src={previewUrl}
+                alt="Preview"
+                width={200}
+                height={200}
+                className="preview-image"
+                onError={() => setPreviewUrl(null)}
+              />
+            )}
           </div>
           <div>
-            <Button onClick={removeImage} variant="destructive">
+            <Button
+              onClick={removeImage}
+              variant="destructive"
+              disabled={isPending}
+            >
               <X className="w-5 h-5" />
             </Button>
           </div>
@@ -206,7 +215,7 @@ export const MultiUploader = ({
               Drag and drop files or{" "}
               <span className="text-[#483EA8] underline">Browse</span>
             </p>
-            <p className="text-[12px] text-[#676767]">
+            <p className="text-[12px] text-[#676767] px-2 md:px-0">
               Supported formats: {formats}
             </p>
           </div>

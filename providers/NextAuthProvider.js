@@ -5,8 +5,6 @@ import { useMemo } from "react";
 
 export default function NextAuthProvider({ children, session, sessionKey }) {
   const memoizedSessionKey = useMemo(() => {
-    console.log("session changed >>> ", session);
-
     return sessionKey;
   }, [session]);
 

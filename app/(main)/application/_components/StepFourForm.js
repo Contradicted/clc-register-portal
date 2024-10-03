@@ -197,216 +197,204 @@ export const StepFourForm = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-5">
           <div className="flex flex-col text-left">
-            <h1 className="font-semibold text-[20px]">Further Information</h1>
-            <span className="text-[14px] text-[#929EAE]">
+            <h1 className="font-semibold text-[18px] sm:text-[20px]">
+              Further Information
+            </h1>
+            <span className="text-[12px] sm:text-[14px] text-[#929EAE]">
               Please use this section to tell us about yourself and your reasons
               for choosing to study this course
             </span>
           </div>
 
-          <div className="w-full h-full lg:flex lg:flex-col lg:px-10 mt-5">
-            <div>
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <div className="flex flex-col gap-2 w-full">
-                  <FormField
-                    control={form.control}
-                    name="reasonsForChoosingProgram"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex flex-col space-y-[5px]">
-                          <FormLabel>
-                            Please give reasons for choosing this programme of
-                            study
-                          </FormLabel>
-                        </div>
-                        <FormControl>
-                          <Textarea
-                            className={cn(
-                              "resize-none min-h-40",
-                              form.formState.errors.reasonsForChoosingProgram &&
-                                "border-red-500"
-                            )}
-                            disabled={isPending}
-                            {...field}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+          <div className="mt-5 flex justify-center">
+            <div className="w-full max-w-[1160px] space-y-6">
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="reasonsForChoosingProgram"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex flex-col space-y-[5px]">
+                        <FormLabel>
+                          Please give reasons for choosing this programme of
+                          study
+                        </FormLabel>
+                      </div>
+                      <FormControl>
+                        <Textarea
+                          className={cn(
+                            "resize-none min-h-40",
+                            form.formState.errors.reasonsForChoosingProgram &&
+                              "border-red-500"
+                          )}
+                          disabled={isPending}
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <div className="flex flex-col gap-2 w-full">
-                  <FormField
-                    control={form.control}
-                    name="futureEduPlans"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex flex-col space-y-[5px]">
-                          <FormLabel>
-                            What are your future education plans?
-                          </FormLabel>
-                        </div>
-                        <FormControl>
-                          <Textarea
-                            className={cn(
-                              "resize-none min-h-40",
-                              form.formState.errors.futureEduPlans &&
-                                "border-red-500"
-                            )}
-                            disabled={isPending}
-                            {...field}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="futureEduPlans"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex flex-col space-y-[5px]">
+                        <FormLabel>
+                          What are your future education plans?
+                        </FormLabel>
+                      </div>
+                      <FormControl>
+                        <Textarea
+                          className={cn(
+                            "resize-none min-h-40",
+                            form.formState.errors.futureEduPlans &&
+                              "border-red-500"
+                          )}
+                          disabled={isPending}
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <div className="flex flex-col gap-2 w-full">
-                  <FormField
-                    control={form.control}
-                    name="intentedEmployment"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex flex-col space-y-[5px]">
-                          <FormLabel>
-                            What kind of employment do you intend to seek on
-                            completion of your studies?
-                          </FormLabel>
-                        </div>
-                        <FormControl>
-                          <Textarea
-                            className={cn(
-                              "resize-none min-h-40",
-                              form.formState.errors.intentedEmployment &&
-                                "border-red-500"
-                            )}
-                            disabled={isPending}
-                            {...field}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="intentedEmployment"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex flex-col space-y-[5px]">
+                        <FormLabel>
+                          What kind of employment do you intend to seek on
+                          completion of your studies?
+                        </FormLabel>
+                      </div>
+                      <FormControl>
+                        <Textarea
+                          className={cn(
+                            "resize-none min-h-40",
+                            form.formState.errors.intentedEmployment &&
+                              "border-red-500"
+                          )}
+                          disabled={isPending}
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <div className="flex flex-col gap-2 w-full">
-                  <FormField
-                    control={form.control}
-                    name="hobbies"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex flex-col space-y-[5px]">
-                          <FormLabel>
-                            Please write a brief statement about your interests
-                            and hobbies
-                          </FormLabel>
-                        </div>
-                        <FormControl>
-                          <Textarea
-                            className={cn(
-                              "resize-none min-h-40",
-                              form.formState.errors.hobbies && "border-red-500"
-                            )}
-                            disabled={isPending}
-                            {...field}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="hobbies"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex flex-col space-y-[5px]">
+                        <FormLabel>
+                          Please write a brief statement about your interests
+                          and hobbies
+                        </FormLabel>
+                      </div>
+                      <FormControl>
+                        <Textarea
+                          className={cn(
+                            "resize-none min-h-40",
+                            form.formState.errors.hobbies && "border-red-500"
+                          )}
+                          disabled={isPending}
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <div className="flex flex-col gap-2 w-full">
-                  <FormField
-                    control={form.control}
-                    name="specialNeeds"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex flex-col space-y-[5px]">
-                          <FormLabel>
-                            To help us provide assistance where possible, please
-                            state briefly if you have any special needs
-                            requiring support of facilities
-                          </FormLabel>
-                        </div>
-                        <FormControl>
-                          <Textarea
-                            className={cn(
-                              "resize-none min-h-40",
-                              form.formState.errors.specialNeeds &&
-                                "border-red-500"
-                            )}
-                            disabled={isPending}
-                            {...field}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="specialNeeds"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex flex-col space-y-[5px]">
+                        <FormLabel>
+                          To help us provide assistance where possible, please
+                          state briefly if you have any special needs requiring
+                          support of facilities
+                        </FormLabel>
+                      </div>
+                      <FormControl>
+                        <Textarea
+                          className={cn(
+                            "resize-none min-h-40",
+                            form.formState.errors.specialNeeds &&
+                              "border-red-500"
+                          )}
+                          disabled={isPending}
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <div className="flex flex-col gap-2 w-full">
-                  <FormField
-                    control={form.control}
-                    name="stateBenefits"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex flex-col space-y-[5px]">
-                          <FormLabel>
-                            Are you currently on any state benefits? If so,
-                            please explain the type of benefits
-                          </FormLabel>
-                        </div>
-                        <FormControl>
-                          <Textarea
-                            className={cn(
-                              "resize-none min-h-40",
-                              form.formState.errors.stateBenefits &&
-                                "border-red-500"
-                            )}
-                            disabled={isPending}
-                            {...field}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="stateBenefits"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex flex-col space-y-[5px]">
+                        <FormLabel>
+                          Are you currently on any state benefits? If so, please
+                          explain the type of benefits
+                        </FormLabel>
+                      </div>
+                      <FormControl>
+                        <Textarea
+                          className={cn(
+                            "resize-none min-h-40",
+                            form.formState.errors.stateBenefits &&
+                              "border-red-500"
+                          )}
+                          disabled={isPending}
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <div className="flex flex-col gap-2 w-full">
-                  <FormField
-                    control={form.control}
-                    name="criminalRecord"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex flex-col space-y-[5px]">
-                          <FormLabel>
-                            Do you have any criminal record(s) within or outside
-                            the UK? If yes, please state
-                          </FormLabel>
-                        </div>
-                        <FormControl>
-                          <Textarea
-                            className={cn(
-                              "resize-none min-h-40",
-                              form.formState.errors.criminalRecord &&
-                                "border-red-500"
-                            )}
-                            disabled={isPending}
-                            {...field}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <div className="w-full">
+                <FormField
+                  control={form.control}
+                  name="criminalRecord"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex flex-col space-y-[5px]">
+                        <FormLabel>
+                          Do you have any criminal record(s) within or outside
+                          the UK? If yes, please state
+                        </FormLabel>
+                      </div>
+                      <FormControl>
+                        <Textarea
+                          className={cn(
+                            "resize-none min-h-40",
+                            form.formState.errors.criminalRecord &&
+                              "border-red-500"
+                          )}
+                          disabled={isPending}
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
           </div>

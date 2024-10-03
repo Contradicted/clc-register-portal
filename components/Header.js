@@ -11,7 +11,7 @@ export const Header = () => {
             alt="logo"
             height="200"
             width="200"
-            className="w-fit"
+            className="w-[130px] h-auto md:w-[200px]"
           />
         </div>
         <LogoutButton>Log out</LogoutButton>

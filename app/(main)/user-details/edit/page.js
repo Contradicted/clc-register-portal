@@ -19,7 +19,6 @@ const UserDetailsEditPage = async () => {
         <div className="px-5 mx-auto mt-[60px] lg:min-w-[700px]">
           <UserDetailsEditForm userDetails={userDetails} />
         </div>
-
       </div>
     </div>
   );

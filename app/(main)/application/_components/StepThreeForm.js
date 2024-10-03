@@ -181,14 +181,6 @@ export const StepThreeForm = ({
       currentValues.workExperience = [];
     }
 
-    // const isValid = SectionTwoSavedSchema.safeParse(currentValues);
-
-    // if (!isValid.success) {
-    //   console.log(isValid);
-    //   setFormErrors(isValid.error.formErrors.fieldErrors);
-    //   return;
-    // }
-
     updateData(currentValues, accumulatedFiles);
     previousStep(currentValues, accumulatedFiles);
   };
@@ -332,16 +324,18 @@ export const StepThreeForm = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-5">
           <div className="flex flex-col text-left">
-            <h1 className="font-semibold text-[20px]">Work Experience</h1>
-            <span className="text-[14px] text-[#929EAE]">
+            <h1 className="font-semibold text-[18px] sm:text-[20px]">
+              Work Experience
+            </h1>
+            <span className="text-[12px] sm:text-[14px] text-[#929EAE]">
               Please enter details related to your work experience
             </span>
           </div>
 
-          <div className="w-full h-full lg:flex lg:flex-col lg:px-10 mt-5">
-            <div>
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <div className="flex flex-col gap-2 w-full">
+          <div className="mt-5 flex justify-center">
+            <div className="w-full max-w-[1160px]">
+              <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap">
+                <div className="w-full">
                   <FormField
                     control={form.control}
                     name="addWorkExperience"
@@ -384,198 +378,216 @@ export const StepThreeForm = ({
 
               {isWorkExperienceClicked &&
                 workExperienceFields.map((item, index) => (
-                  <div
-                    key={item.id}
-                    className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row flex-wrap"
-                  >
-                    <FormField
-                      control={form.control}
-                      name={`workExperience.${index}.title`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Job Title</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              type="text"
-                              className="lg:w-[400px]"
-                              disabled={isPending}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`workExperience.${index}.nameOfOrganisation`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Name of Organisation</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              type="text"
-                              className="lg:w-[400px]"
-                              disabled={isPending}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <div className="flex flex-col gap-2 lg:w-[290px]">
-                      <FormField
-                        control={form.control}
-                        name={`workExperience.${index}.natureOfJob`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nature of Job</FormLabel>
-                            <FormControl>
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                                value={field.value}
-                                disabled={isPending}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select an option" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectGroup>
-                                    <SelectItem value="Full-Time">
-                                      Full Time
-                                    </SelectItem>
-                                    <SelectItem value="Part-Time">
-                                      Part Time
-                                    </SelectItem>
-                                  </SelectGroup>
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
+                  <>
+                    <div
+                      key={item.id}
+                      className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 lg:flex-nowrap mt-6"
+                    >
+                      <div className="w-full sm:w-[400px]">
+                        <FormField
+                          control={form.control}
+                          name={`workExperience.${index}.title`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Job Title</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  type="text"
+                                  disabled={isPending}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="w-full sm:w-[400px]">
+                        <FormField
+                          control={form.control}
+                          name={`workExperience.${index}.nameOfOrganisation`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Name of Organisation</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  type="text"
+                                  disabled={isPending}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="w-full sm:w-[290px]">
+                        <FormField
+                          control={form.control}
+                          name={`workExperience.${index}.natureOfJob`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nature of Job</FormLabel>
+                              <FormControl>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                  value={field.value}
+                                  disabled={isPending}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select an option" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectGroup>
+                                      <SelectItem value="Full-Time">
+                                        Full Time
+                                      </SelectItem>
+                                      <SelectItem value="Part-Time">
+                                        Part Time
+                                      </SelectItem>
+                                    </SelectGroup>
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-2 lg:w-[290px]">
-                      <FormField
-                        control={form.control}
-                        name={`workExperience.${index}.jobStartDate`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Job Start Date</FormLabel>
-                            <FormControl>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                      "w-full justify-start text-left font-normal h-12 rounded-[10px] px-[25px]",
-                                      !field.value && "text-muted-foreground"
-                                    )}
-                                    disabled={isPending}
-                                  >
-                                    {field.value ? (
-                                      format(
-                                        new Date(field.value),
-                                        "dd-MM-yyyy"
-                                      )
-                                    ) : (
-                                      <span>Pick a date</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                  <Calendar
-                                    mode="single"
-                                    selected={new Date(field.value)}
-                                    captionLayout="dropdown-buttons"
-                                    fromYear={1920}
-                                    toYear={now.getFullYear()}
-                                    onSelect={(date) =>
-                                      field.onChange(new Date(date))
-                                    }
-                                    disabled={(date) =>
-                                      date > new Date() ||
-                                      date < new Date("1900-01-01")
-                                    }
-                                    initialFocus
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-2 lg:w-[290px]">
-                      <FormField
-                        control={form.control}
-                        name={`workExperience.${index}.jobEndDate`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Job End Date</FormLabel>
-                            <FormControl>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                      "w-full justify-start text-left font-normal h-12 rounded-[10px] px-[25px]",
-                                      !field.value && "text-muted-foreground"
-                                    )}
-                                    disabled={isPending}
-                                  >
-                                    {field.value ? (
-                                      format(
-                                        new Date(field.value),
-                                        "dd-MM-yyyy"
-                                      )
-                                    ) : (
-                                      <span>Pick a date</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                  <Calendar
-                                    mode="single"
-                                    selected={new Date(field.value)}
-                                    captionLayout="dropdown-buttons"
-                                    fromYear={1920}
-                                    toYear={now.getFullYear()}
-                                    onSelect={(date) =>
-                                      field.onChange(new Date(date))
-                                    }
-                                    disabled={(date) => {
-                                      const jobStartDate = form.getValues(
-                                        `workExperience.${index}.jobStartDate`
-                                      );
 
-                                      return (
-                                        date < new Date(jobStartDate) ||
+                    <div
+                      key={item.id}
+                      className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6"
+                    >
+                      <div className="w-full sm:w-[290px]">
+                        <FormField
+                          control={form.control}
+                          name={`workExperience.${index}.jobStartDate`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Job Start Date</FormLabel>
+                              <FormControl>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant={"outline"}
+                                      className={cn(
+                                        "w-full justify-start text-left font-normal h-12 rounded-[10px] px-[25px]",
+                                        !field.value && "text-muted-foreground"
+                                      )}
+                                      disabled={isPending}
+                                    >
+                                      {field.value ? (
+                                        format(
+                                          new Date(field.value),
+                                          "dd-MM-yyyy"
+                                        )
+                                      ) : (
+                                        <span>Pick a date</span>
+                                      )}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                      mode="single"
+                                      selected={new Date(field.value)}
+                                      captionLayout="dropdown-buttons"
+                                      fromYear={1920}
+                                      toYear={now.getFullYear()}
+                                      onSelect={(date) =>
+                                        field.onChange(new Date(date))
+                                      }
+                                      disabled={(date) =>
+                                        date > new Date() ||
                                         date < new Date("1900-01-01")
-                                      );
-                                    }}
-                                    initialFocus
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
+                                      }
+                                      initialFocus
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="w-full sm:w-[290px]">
+                        <FormField
+                          control={form.control}
+                          name={`workExperience.${index}.jobEndDate`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Job End Date</FormLabel>
+                              <FormControl>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant={"outline"}
+                                      className={cn(
+                                        "w-full justify-start text-left font-normal h-12 rounded-[10px] px-[25px]",
+                                        !field.value && "text-muted-foreground"
+                                      )}
+                                      disabled={isPending}
+                                    >
+                                      {field.value ? (
+                                        format(
+                                          new Date(field.value),
+                                          "dd-MM-yyyy"
+                                        )
+                                      ) : (
+                                        <span>Pick a date</span>
+                                      )}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                      mode="single"
+                                      selected={new Date(field.value)}
+                                      captionLayout="dropdown-buttons"
+                                      fromYear={1920}
+                                      toYear={now.getFullYear()}
+                                      onSelect={(date) =>
+                                        field.onChange(new Date(date))
+                                      }
+                                      disabled={(date) => {
+                                        const jobStartDate = form.getValues(
+                                          `workExperience.${index}.jobStartDate`
+                                        );
+
+                                        return (
+                                          date < new Date(jobStartDate) ||
+                                          date < new Date("1900-01-01")
+                                        );
+                                      }}
+                                      initialFocus
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      {index > 0 && (
+                        <div className="w-full sm:w-auto sm:self-end">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteWorkExperience(index)}
+                            disabled={isPending}
+                            className="w-full sm:w-auto mt-2 sm:mb-2"
+                          >
+                            <span className="sm:hidden">
+                              Delete Work Experience
+                            </span>
+                            <X className="hidden sm:block size-4" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                    {index > 0 && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteWorkExperience(index)}
-                        className="lg:place-self-end lg:mb-2"
-                      >
-                        <X className="size-4" />
-                      </Button>
-                    )}
-                    <div className="w-full">
+
+                    <div className="mt-6 w-full">
                       <FormField
                         control={form.control}
                         name={`workExperience.${index}.file`}
@@ -622,13 +634,14 @@ export const StepThreeForm = ({
                         )}
                       />
                     </div>
-                  </div>
+                  </>
                 ))}
 
               {isWorkExperienceClicked && workExperienceFields.length < 3 && (
                 <Button
                   type="button"
                   variant="add"
+                  disabled={isPending}
                   size="sm"
                   onClick={() =>
                     appendWorkExperience({

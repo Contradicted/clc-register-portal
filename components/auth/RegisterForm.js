@@ -85,176 +85,155 @@ export function RegisterForm() {
     }
 
     return (
-        <div className="h-full w-full lg:grid lg:grid-cols-2 flex items-center justify-center">
-            <div className="flex items-center justify-center py-12">
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)}>
-                        <div className="mx-auto grid w-[440px] gap-6">
-                            <div className="grid gap-2">
-                                <h1 className="text-3xl font-semibold text-black">
-                                    Create an account
-                                </h1>
-                                <p className="text-balance text-muted-foreground">
-                                    Welcome! Please enter your details to
-                                    register
-                                </p>
-                            </div>
-                            <FormError message={formErrors || error} />
-                            <div className="grid gap-4">
-                                <div className="grid gap-2">
-                                    <FormField
-                                        control={form.control}
-                                        name="title"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Title</FormLabel>
-                                                <FormControl>
-                                                    <Select
-                                                        onValueChange={
-                                                            field.onChange
-                                                        }
-                                                        defaultValue={
-                                                            field.value
-                                                        }
-                                                        value={field.value}
-                                                        disabled={isPending}
-                                                    >
-                                                        <SelectTrigger className="w-[270px]">
-                                                            <SelectValue placeholder="Select an option" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectGroup>
-                                                                <SelectItem value="Mr">
-                                                                    Mr
-                                                                </SelectItem>
-                                                                <SelectItem value="Mrs">
-                                                                    Mrs
-                                                                </SelectItem>
-                                                                <SelectItem value="Ms">
-                                                                    Ms
-                                                                </SelectItem>
-                                                            </SelectGroup>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <FormField
-                                        control={form.control}
-                                        name="firstName"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    First Name
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        {...field}
-                                                        type="text"
-                                                        placeholder="John"
-                                                        disabled={isPending}
-                                                    />
-                                                </FormControl>
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <FormField
-                                        control={form.control}
-                                        name="lastName"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Last Name</FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        {...field}
-                                                        type="text"
-                                                        placeholder="Doe"
-                                                        disabled={isPending}
-                                                    />
-                                                </FormControl>
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <div className="grid gap-2">
-                                        <FormField
-                                            control={form.control}
-                                            name="email"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Email</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            {...field}
-                                                            type="email"
-                                                            placeholder="m@example.com"
-                                                            disabled={isPending}
-                                                        />
-                                                    </FormControl>
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                    <div className="grid gap-2">
-                                        <FormField
-                                            control={form.control}
-                                            name="password"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>
-                                                        Password
-                                                    </FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            {...field}
-                                                            type="password"
-                                                            placeholder="*******"
-                                                            disabled={isPending}
-                                                        />
-                                                    </FormControl>
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                    <Button
-                                        type="submit"
-                                        className="w-full mt-6"
-                                    >
-                                        {isPending ? (
-                                            <LoaderCircle className="animate-spin" />
-                                        ) : (
-                                            <p>Create an account</p>
-                                        )}
-                                    </Button>
-                                </div>
-                                <div className="text-center text-sm text-muted-foreground">
-                                    Already registered?{' '}
-                                    <Link
-                                        href="/auth/login"
-                                        className="font-medium text-black"
-                                    >
-                                        Sign in
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </Form>
-            </div>
-            <div className="hidden bg-muted lg:flex lg:h-full lg:items-center lg:justify-center">
-                <Image
-                    src="/logo.svg"
-                    alt="Image"
-                    width={isWide ? 850 : 1000}
-                    height={isWide ? 850 : 1000}
-                    className="p-10 dark:brightness-[0.2] dark:grayscale"
-                />
-            </div>
+      <div className="h-full w-full lg:grid lg:grid-cols-2 flex items-center justify-center">
+        <div className="flex items-center justify-center py-12">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className="mx-auto grid sm:w-[440px] gap-6">
+                <div className="grid gap-2">
+                  <h1 className="text-3xl font-semibold text-black">
+                    Create an account
+                  </h1>
+                  <p className="text-balance text-muted-foreground">
+                    Welcome! Please enter your details to register
+                  </p>
+                </div>
+                <FormError message={formErrors || error} />
+                <div className="grid gap-4">
+                  <div className="grid gap-2">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Title</FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              value={field.value}
+                              disabled={isPending}
+                            >
+                              <SelectTrigger className="w-[270px]">
+                                <SelectValue placeholder="Select an option" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectGroup>
+                                  <SelectItem value="Mr">Mr</SelectItem>
+                                  <SelectItem value="Mrs">Mrs</SelectItem>
+                                  <SelectItem value="Ms">Ms</SelectItem>
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <FormField
+                      control={form.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>First Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="text"
+                              placeholder="John"
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <FormField
+                      control={form.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Last Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="text"
+                              placeholder="Doe"
+                              disabled={isPending}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <div className="grid gap-2">
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type="email"
+                                placeholder="m@example.com"
+                                disabled={isPending}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type="password"
+                                placeholder="*******"
+                                disabled={isPending}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <Button type="submit" className="w-full mt-6">
+                      {isPending ? (
+                        <LoaderCircle className="animate-spin" />
+                      ) : (
+                        <p>Create an account</p>
+                      )}
+                    </Button>
+                  </div>
+                  <div className="text-center text-sm text-muted-foreground">
+                    Already registered?{" "}
+                    <Link href="/auth/login" className="font-medium text-black">
+                      Sign in
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </Form>
         </div>
-    )
+        <div className="hidden bg-muted lg:flex lg:h-full lg:items-center lg:justify-center">
+          <Image
+            src="/logo.svg"
+            alt="Image"
+            width={isWide ? 850 : 1000}
+            height={isWide ? 850 : 1000}
+            className="p-10 dark:brightness-[0.2] dark:grayscale"
+          />
+        </div>
+      </div>
+    );
 }

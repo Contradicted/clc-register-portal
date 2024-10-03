@@ -371,67 +371,77 @@ export const StepTwoForm = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="mt-5">
             <div className="flex flex-col text-left">
-              <h1 className="font-semibold text-[20px]">Qualifications</h1>
-              <span className="text-[14px] text-[#929EAE]">
+              <h1 className="font-semibold text-[18px] sm:text-[20px]">
+                Qualifications
+              </h1>
+              <span className="text-[12px] sm:text-[14px] text-[#929EAE]">
                 Please enter your qualifications achieved to date
               </span>
             </div>
 
-            <div className="w-full h-full lg:flex lg:flex-col lg:px-10 lg:items-center mt-5">
-              <div>
+            <div className="mt-5 flex justify-center">
+              <div className="w-full max-w-[1160px]">
                 {qualificationFields.map((item, index) => (
-                  <div
-                    key={item.id}
-                    className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-col w-full"
-                  >
-                    <div className="flex flex-col lg:flex-row gap-4 w-full">
-                      <FormField
-                        control={form.control}
-                        name={`qualifications.${index}.title`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Qualification Title</FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                type="text"
-                                value={field.value}
-                                onChange={(e) => field.onChange(e.target.value)}
-                                className={cn(
-                                  "lg:w-[400px]",
-                                  form.formState.errors?.qualifications?.[index]
-                                    ?.title && "border-red-500"
-                                )}
-                                disabled={isPending}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`qualifications.${index}.examiningBody`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Examining/Awarding Body</FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                type="text"
-                                value={field.value}
-                                onChange={(e) => field.onChange(e.target.value)}
-                                className={cn(
-                                  "lg:w-[400px]",
-                                  form.formState.errors?.qualifications?.[index]
-                                    ?.examiningBody && "border-red-500"
-                                )}
-                                disabled={isPending}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <div className="flex flex-col gap-2 lg:w-[290px]">
+                  <>
+                    <div
+                      key={item.id}
+                      className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap"
+                    >
+                      <div className="w-full sm:w-[400px]">
+                        <FormField
+                          control={form.control}
+                          name={`qualifications.${index}.title`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Qualification Title</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  type="text"
+                                  value={field.value}
+                                  onChange={(e) =>
+                                    field.onChange(e.target.value)
+                                  }
+                                  className={cn(
+                                    form.formState.errors?.qualifications?.[
+                                      index
+                                    ]?.title && "border-red-500"
+                                  )}
+                                  disabled={isPending}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="w-full sm:w-[400px]">
+                        <FormField
+                          control={form.control}
+                          name={`qualifications.${index}.examiningBody`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Exam Body</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  type="text"
+                                  value={field.value}
+                                  onChange={(e) =>
+                                    field.onChange(e.target.value)
+                                  }
+                                  className={cn(
+                                    form.formState.errors?.qualifications?.[
+                                      index
+                                    ]?.examiningBody && "border-red-500"
+                                  )}
+                                  disabled={isPending}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="w-full sm:w-[290px]">
                         <FormField
                           control={form.control}
                           name={`qualifications.${index}.dateAwarded`}
@@ -486,24 +496,33 @@ export const StepTwoForm = ({
                           )}
                         />
                       </div>
+
                       {index > 0 && (
                         <Button
                           variant="destructive"
                           size="sm"
+                          disabled={isPending}
                           onClick={() => handleDeleteQualification(index)}
-                          className="lg:place-self-end lg:mb-2"
+                          className="w-full sm:w-fit sm:place-self-end sm:mb-2"
                         >
-                          <X className="size-4" />
+                          <span className="sm:hidden">
+                            Delete Qualification
+                          </span>
+                          <X className="hidden sm:block size-4" />
                         </Button>
                       )}
                     </div>
-                    <div className="w-full">
+
+                    {/* Row 2 */}
+                    <div className="mt-6 w-full">
                       <FormField
                         control={form.control}
                         name={`qualifications.${index}.file`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Upload Qualification File</FormLabel>
+                            <FormLabel className="underline">
+                              Upload Qualification File
+                            </FormLabel>
                             <MultiUploader
                               onChange={(file, removed) =>
                                 handleFileChange(index, file, removed)
@@ -547,7 +566,7 @@ export const StepTwoForm = ({
                         )}
                       />
                     </div>
-                  </div>
+                  </>
                 ))}
 
                 {qualificationFields.length < 3 && (
@@ -555,6 +574,7 @@ export const StepTwoForm = ({
                     type="button"
                     variant="add"
                     size="sm"
+                    disabled={isPending}
                     onClick={() =>
                       appendQualification({
                         title: "",
@@ -569,8 +589,8 @@ export const StepTwoForm = ({
                   </Button>
                 )}
 
-                <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                  <div className="flex flex-col gap-2 w-full">
+                <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap">
+                  <div className="w-full">
                     <FormField
                       control={form.control}
                       name="addPendingQualifications"
@@ -617,126 +637,142 @@ export const StepTwoForm = ({
 
                 {isPendingExamClicked &&
                   pendingQualificationFields.map((item, index) => (
-                    <div
-                      key={item.id}
-                      className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row flex-wrap"
-                    >
-                      <FormField
-                        control={form.control}
-                        name={`pendingQualifications.${index}.title`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Qualification Title</FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                type="text"
-                                className="lg:w-[400px]"
-                                disabled={isPending}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`pendingQualifications.${index}.examiningBody`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Examining/Awarding Body</FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                type="text"
-                                className="lg:w-[400px]"
-                                disabled={isPending}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      <div className="flex flex-col gap-2 lg:w-[290px]">
-                        <FormField
-                          control={form.control}
-                          name={`pendingQualifications.${index}.dateOfResults`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Date of Results</FormLabel>
-                              <FormControl>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <Button
-                                      variant={"outline"}
-                                      className={cn(
-                                        "w-full justify-start text-left font-normal h-12 rounded-[10px] px-[25px]",
-                                        !field.value && "text-muted-foreground"
-                                      )}
-                                      disabled={isPending}
-                                    >
-                                      {field.value ? (
-                                        format(
-                                          new Date(field.value),
-                                          "dd-MM-yyyy"
-                                        )
-                                      ) : (
-                                        <span>Pick a date</span>
-                                      )}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                      mode="single"
-                                      selected={new Date(field.value)}
-                                      captionLayout="dropdown-buttons"
-                                      fromYear={1920}
-                                      toYear={now.getFullYear()}
-                                      onSelect={(date) =>
-                                        field.onChange(new Date(date))
-                                      }
-                                      disabled={(date) =>
-                                        date <= new Date() ||
-                                        date < new Date("1900-01-01")
-                                      }
-                                      initialFocus
-                                    />
-                                  </PopoverContent>
-                                </Popover>
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
+                    <>
+                      <div
+                        key={item.id}
+                        className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6"
+                      >
+                        <div className="w-full sm:w-[400px]">
+                          <FormField
+                            control={form.control}
+                            name={`pendingQualifications.${index}.title`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Qualification Title</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    type="text"
+                                    disabled={isPending}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="w-full sm:w-[400px]">
+                          <FormField
+                            control={form.control}
+                            name={`pendingQualifications.${index}.examiningBody`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Exam Body</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    type="text"
+                                    disabled={isPending}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="w-full sm:w-[290px]">
+                          <FormField
+                            control={form.control}
+                            name={`pendingQualifications.${index}.dateOfResults`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Date of Results</FormLabel>
+                                <FormControl>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                          "w-full justify-start text-left font-normal h-12 rounded-[10px] px-[25px]",
+                                          !field.value &&
+                                            "text-muted-foreground"
+                                        )}
+                                        disabled={isPending}
+                                      >
+                                        {field.value ? (
+                                          format(
+                                            new Date(field.value),
+                                            "dd-MM-yyyy"
+                                          )
+                                        ) : (
+                                          <span>Pick a date</span>
+                                        )}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                      </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">
+                                      <Calendar
+                                        mode="single"
+                                        selected={new Date(field.value)}
+                                        captionLayout="dropdown-buttons"
+                                        fromYear={1920}
+                                        toYear={now.getFullYear()}
+                                        onSelect={(date) =>
+                                          field.onChange(new Date(date))
+                                        }
+                                        disabled={(date) =>
+                                          date <= new Date() ||
+                                          date < new Date("1900-01-01")
+                                        }
+                                        initialFocus
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
                       </div>
-                      <FormField
-                        control={form.control}
-                        name={`pendingQualifications.${index}.subjectsPassed`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Subjects Passed</FormLabel>
-                            <FormControl>
-                              <Input
-                                {...field}
-                                type="text"
-                                className="lg:w-[400px]"
-                                disabled={isPending}
-                              />
-                            </FormControl>
-                          </FormItem>
+
+                      <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6">
+                        <div className="w-full sm:w-[400px]">
+                          <FormField
+                            control={form.control}
+                            name={`pendingQualifications.${index}.subjectsPassed`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Subjects Passed</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    type="text"
+                                    disabled={isPending}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {index > 0 && (
+                          <div className="w-full sm:w-auto sm:self-end">
+                            <Button
+                              variant="destructive"
+                              disabled={isPending}
+                              size="sm"
+                              onClick={() =>
+                                handleDeletePendingQualification(index)
+                              }
+                              className="w-full sm:w-auto mt-2 sm:mb-2"
+                            >
+                              <span className="sm:hidden">
+                                Delete Pending Qualification
+                              </span>
+                              <X className="hidden sm:block size-4" />
+                            </Button>
+                          </div>
                         )}
-                      />
-                      {index > 0 && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() =>
-                            handleDeletePendingQualification(index)
-                          }
-                          className="lg:place-self-end lg:mb-2"
-                        >
-                          <X className="size-4" />
-                        </Button>
-                      )}
-                    </div>
+                      </div>
+                    </>
                   ))}
 
                 {isPendingExamClicked &&
@@ -753,15 +789,15 @@ export const StepTwoForm = ({
                           subjectsPassed: "",
                         })
                       }
-                      className="mb-10 mt-2"
+                      className="mb-10 mt-8"
                     >
                       <Plus className="h-4 w-5" />
                       Add Pending Qualification
                     </Button>
                   )}
 
-                <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                  <div className="flex flex-col gap-2 w-full">
+                <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6">
+                  <div className="w-full">
                     <FormField
                       control={form.control}
                       name="isEnglishFirstLanguage"

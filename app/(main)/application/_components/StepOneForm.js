@@ -239,7 +239,9 @@ export const StepOneForm = ({
               file: { file, alreadyExists: true },
             }));
           });
+        setIsLoading(false);
       } catch (error) {
+        setIsLoading(false);
         console.error("Error loading file:", error);
       }
     }
@@ -264,7 +266,10 @@ export const StepOneForm = ({
               idFile: { file, alreadyExists: true },
             }));
           });
+
+        setIsLoading(false);
       } catch (error) {
+        setIsLoading(false);
         console.error("Error loading file:", error);
       }
     }
@@ -291,7 +296,9 @@ export const StepOneForm = ({
               immigrationFile: { file, alreadyExists: true },
             }));
           });
+        setIsLoading(false);
       } catch (error) {
+        setIsLoading(false);
         console.error("Error loading file:", error);
       }
     }
@@ -461,20 +468,22 @@ export const StepOneForm = ({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-5">
           <div className="flex flex-col text-left">
-            <h1 className="font-semibold text-[20px]">Course Details</h1>
-            <span className="text-[14px] text-[#929EAE]">
+            <h1 className="font-semibold text-[18px] sm:text-[20px]">
+              Course Details
+            </h1>
+            <span className="text-[12px] sm:text-[14px] text-[#929EAE]">
               Please enter details related to your course
             </span>
           </div>
 
-          <div className="lg:flex lg:justify-center mt-5">
-            <div className="grid gap-10 sm:grid-cols-2">
-              <div className="grid lg:w-[400px]">
+          <div className="mt-5">
+            <div className="flex flex-col sm:flex-row justify-center items-start gap-6 sm:gap-10 max-w-3xl mx-auto">
+              <div className="w-full sm:w-1/2">
                 <FormField
                   control={form.control}
                   name="courseTitle"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="w-full">
                       <FormLabel>Course Title</FormLabel>
                       <FormControl>
                         <Select
@@ -484,11 +493,11 @@ export const StepOneForm = ({
                           disabled={isPending}
                         >
                           <SelectTrigger
-                            className={
-                              form.formState.errors.courseTitle
-                                ? "border-red-500"
-                                : ""
-                            }
+                            className={cn(
+                              "w-full",
+                              form.formState.errors.courseTitle &&
+                                "border-red-500"
+                            )}
                           >
                             <SelectValue placeholder="Select a course" />
                           </SelectTrigger>
@@ -496,43 +505,13 @@ export const StepOneForm = ({
                             <SelectGroup>
                               {courses.map((course) => (
                                 <SelectItem
-                                  className="w-fit"
+                                  className="w-full"
                                   key={course.id}
                                   value={course.name}
                                 >
                                   {course.name}
                                 </SelectItem>
                               ))}
-                              {/* <SelectItem value="Higher National Certificate (HNC) in Business (level 4)">
-                                                                Higher National
-                                                                Certificate
-                                                                (HNC) in
-                                                                Business (level
-                                                                4)
-                                                            </SelectItem>
-                                                            <SelectItem value="Higher National Diploma (HND) in Business (level 5)">
-                                                                Higher National
-                                                                Diploma (HND) in
-                                                                Business (level
-                                                                5)
-                                                            </SelectItem>
-                                                            <SelectItem value="Higher National Certificate (HNC) in Computing (level 4)">
-                                                                Higher National
-                                                                Certificate
-                                                                (HNC) in
-                                                                Computing (level
-                                                                4)
-                                                            </SelectItem>
-                                                            <SelectItem value="Higher National Diploma (HND) in Computing (level 5)">
-                                                                Higher National
-                                                                Diploma (HND) in
-                                                                Computing (level
-                                                                5)
-                                                            </SelectItem>
-                                                            <SelectItem value="Third Year (Top Up)">
-                                                                Third Year (Top
-                                                                Up)
-                                                            </SelectItem> */}
                             </SelectGroup>
                           </SelectContent>
                         </Select>
@@ -541,12 +520,12 @@ export const StepOneForm = ({
                   )}
                 />
               </div>
-              <div className="grid gap-2">
+              <div className="w-full sm:w-1/2">
                 <FormField
                   control={form.control}
                   name="studyMode"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="w-full">
                       <FormLabel>Study Mode</FormLabel>
                       <FormControl>
                         <Select
@@ -556,11 +535,11 @@ export const StepOneForm = ({
                           disabled={isPending}
                         >
                           <SelectTrigger
-                            className={
-                              form.formState.errors.studyMode
-                                ? "border-red-500"
-                                : ""
-                            }
+                            className={cn(
+                              "w-full",
+                              form.formState.errors.courseTitle &&
+                                "border-red-500"
+                            )}
                           >
                             <SelectValue placeholder="Select an option" />
                           </SelectTrigger>
@@ -574,15 +553,6 @@ export const StepOneForm = ({
                                   {formatStudyMode(mode.study_mode)}
                                 </SelectItem>
                               ))}
-                              {/* <SelectItem value="Full-Time">
-                                                                Full Time
-                                                            </SelectItem>
-                                                            <SelectItem value="Part-Time">
-                                                                Part Time
-                                                            </SelectItem>
-                                                            <SelectItem value="Blended-Learning">
-                                                                Blended Learning
-                                                            </SelectItem> */}
                             </SelectGroup>
                           </SelectContent>
                         </Select>
@@ -595,156 +565,169 @@ export const StepOneForm = ({
           </div>
 
           {/* Personal Information */}
-          <div className="flex flex-col text-left mt-[50px]">
-            <h1 className="font-semibold text-[20px]">Personal Details</h1>
-            <span className="text-[14px] text-[#929EAE]">
+          <div className="flex flex-col text-left mt-8 sm:mt-[50px]">
+            <h1 className="font-semibold text-[18px] sm:text-[20px]">
+              Personal Details
+            </h1>
+            <span className="text-[12px] sm:text-[14px] text-[#929EAE]">
               Please enter your personal information
             </span>
           </div>
 
-          <div className="w-full h-full lg:flex lg:flex-col lg:px-10 lg:items-center mt-5">
-            <div>
-              {/* Row 1 */}
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title</FormLabel>
-                      <FormControl>
+          <div className="mt-5 flex justify-center">
+            <div className="w-full max-w-[1160px]">
+              {/* Row 1 - Personal Details */}
+              <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap">
+                <div className="w-full sm:w-[290px]">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>Title</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                           value={field.value}
                           disabled={isPending}
                         >
-                          <SelectTrigger
-                            className={cn(
-                              "lg:w-[290px]",
-                              form.formState.errors.title && "border-red-500"
-                            )}
-                          >
-                            <SelectValue placeholder="Select an option" />
-                          </SelectTrigger>
+                          <FormControl>
+                            <SelectTrigger
+                              className={cn(
+                                "w-full",
+                                form.formState.errors.title && "border-red-500"
+                              )}
+                            >
+                              <SelectValue placeholder="Select an option" />
+                            </SelectTrigger>
+                          </FormControl>
                           <SelectContent>
-                            <SelectGroup>
-                              <SelectItem value="Mr">Mr</SelectItem>
-                              <SelectItem value="Mrs">Mrs</SelectItem>
-                              <SelectItem value="Ms">Ms</SelectItem>
-                            </SelectGroup>
+                            <SelectItem value="Mr">Mr</SelectItem>
+                            <SelectItem value="Mrs">Mrs</SelectItem>
+                            <SelectItem value="Ms">Ms</SelectItem>
                           </SelectContent>
                         </Select>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="text"
-                          className={cn(
-                            "lg:w-[400px]",
-                            form.formState.errors.firstName && "border-red-500"
-                          )}
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="text"
-                          className={cn(
-                            "lg:w-[400px]",
-                            form.formState.errors.lastName && "border-red-500"
-                          )}
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              {!isLoading && (
-                <div className="flex flex-col gap-4">
-                  <Label className="underline">Profile Photo Upload</Label>
-                  <MultiUploader
-                    onChange={(file, removed) => {
-                      setFile(file);
-                      setIsRemoved(removed);
-
-                      const newAccumulatedFiles = {
-                        ...accumulatedFiles,
-                      };
-                      newAccumulatedFiles.file = {
-                        file,
-                        alreadyExists: false,
-                      };
-                      setAccumulatedFiles(newAccumulatedFiles);
-                    }}
-                    defaultFile={accumulatedFiles.file?.file || file}
-                    defaultPreviewUrl={
-                      accumulatedFiles.file?.alreadyExists
-                        ? application?.photoUrl
-                        : accumulatedFiles.file?.file
-                        ? URL.createObjectURL(accumulatedFiles.file.file)
-                        : null
-                    }
-                    isPending={isPending}
-                    fileType="image"
+                      </FormItem>
+                    )}
                   />
                 </div>
-              )}
-              {/* Row 2 */}
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <FormField
-                  control={form.control}
-                  name="gender"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Gender</FormLabel>
-                      <FormControl>
+                <div className="w-full sm:w-[400px]">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            className={cn(
+                              "w-full",
+                              form.formState.errors.firstName &&
+                                "border-red-500"
+                            )}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="w-full sm:w-[400px]">
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            className={cn(
+                              "w-full",
+                              form.formState.errors.lastName && "border-red-500"
+                            )}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Row 2 - Profile Photo Upload */}
+              <div className="mt-6">
+                <FormItem>
+                  <FormLabel className="underline">
+                    Profile Picture Upload
+                  </FormLabel>
+                  <FormControl>
+                    <MultiUploader
+                      onChange={(file, removed) => {
+                        setFile(file);
+                        setIsRemoved(removed);
+
+                        const newAccumulatedFiles = {
+                          ...accumulatedFiles,
+                        };
+                        newAccumulatedFiles.file = {
+                          file,
+                          alreadyExists: false,
+                        };
+                        setAccumulatedFiles(newAccumulatedFiles);
+                      }}
+                      defaultFile={accumulatedFiles.file?.file || file}
+                      defaultPreviewUrl={
+                        accumulatedFiles.file?.alreadyExists
+                          ? application?.photoUrl
+                          : accumulatedFiles.file?.file
+                          ? URL.createObjectURL(accumulatedFiles.file.file)
+                          : null
+                      }
+                      isPending={isPending}
+                      isLoading={isLoading}
+                      fileType="image"
+                    />
+                  </FormControl>
+                </FormItem>
+              </div>
+
+              {/* Row 3 */}
+              <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6">
+                <div className="w-full sm:w-[290px]">
+                  <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>Gender</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                           value={field.value}
                           disabled={isPending}
                         >
-                          <SelectTrigger
-                            className={cn(
-                              "lg:w-[290px]",
-                              form.formState.errors.gender && "border-red-500"
-                            )}
-                          >
-                            <SelectValue placeholder="Select an option" />
-                          </SelectTrigger>
+                          <FormControl>
+                            <SelectTrigger
+                              className={cn(
+                                "w-full",
+                                form.formState.errors.gender && "border-red-500"
+                              )}
+                            >
+                              <SelectValue placeholder="Select an option" />
+                            </SelectTrigger>
+                          </FormControl>
                           <SelectContent>
-                            <SelectGroup>
-                              <SelectItem value="Male">Male</SelectItem>
-                              <SelectItem value="Female">Female</SelectItem>
-                            </SelectGroup>
+                            <SelectItem value="Male">Male</SelectItem>
+                            <SelectItem value="Female">Female</SelectItem>
                           </SelectContent>
                         </Select>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <div className="flex flex-col gap-2 lg:w-[290px]">
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="w-full sm:w-[290px]">
                   <FormField
                     control={form.control}
                     name="dateOfBirth"
@@ -799,101 +782,93 @@ export const StepOneForm = ({
                     )}
                   />
                 </div>
-                <FormField
-                  control={form.control}
-                  name="placeOfBirth"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Place of Birth (City/Town)</FormLabel>
-                      <FormControl>
-                        {/* <Input
-                          {...field}
-                          type="text"
-                          className={cn(
-                            "lg:w-[400px]",
-                            form.formState.errors.placeOfBirth &&
-                              "border-red-500"
-                          )}
-                          disabled={isPending}
-                        /> */}
-
-                        <PlaceOfBirthInput
-                          {...field}
-                          defaultValue={application?.placeOfBirth}
-                          onPlaceSelect={handlePlaceSelect}
-                          className={cn(
-                            "lg:w-[400px]",
-                            form.formState.errors.placeOfBirth &&
-                              "border-red-500"
-                          )}
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                      {detectedCountry && field.value !== detectedCountry && (
-                        <p className="text-yellow-500 text-sm absolute">
-                          Detected country: {detectedCountry}
-                        </p>
-                      )}
-                    </FormItem>
-                  )}
-                />
+                <div className="w-full sm:w-[400px]">
+                  <FormField
+                    control={form.control}
+                    name="placeOfBirth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Place of Birth</FormLabel>
+                        <FormControl>
+                          <PlaceOfBirthInput
+                            {...field}
+                            defaultValue={application?.placeOfBirth}
+                            onPlaceSelect={handlePlaceSelect}
+                            className={cn(
+                              "lg:w-[400px]",
+                              form.formState.errors.placeOfBirth &&
+                                "border-red-500"
+                            )}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        {detectedCountry && field.value !== detectedCountry && (
+                          <p className="text-yellow-500 text-sm absolute">
+                            Detected country: {detectedCountry}
+                          </p>
+                        )}
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
-              {/* Row 3 */}
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <FormField
-                  control={form.control}
-                  name="countryOfBirth"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Country of Birth</FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          value={field.value}
-                          disabled={isPending}
-                        >
-                          <SelectTrigger
-                            className={cn(
-                              "lg:w-[290px]",
-                              detectedCountry &&
-                                field.value !== detectedCountry &&
-                                "border-yellow-500"
-                            )}
+              {/* Row 4 */}
+              <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6">
+                <div className="w-full sm:w-[290px]">
+                  <FormField
+                    control={form.control}
+                    name="countryOfBirth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Country of Birth</FormLabel>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            value={field.value}
+                            disabled={isPending}
                           >
-                            <SelectValue placeholder="Select an option" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Popular Countries</SelectLabel>
-                              {popularCountries.map((country) => (
-                                <SelectItem key={country} value={country}>
-                                  {country}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                            <SelectSeparator />
-                            <SelectGroup>
-                              <SelectLabel>All Countries</SelectLabel>
-                              {Object.entries(countries.getNames("en"))
-                                .filter(
-                                  ([code, name]) =>
-                                    !popularCountries.includes(name)
-                                )
-                                .map(([code, name]) => (
-                                  <SelectItem key={code} value={name}>
-                                    {name}
+                            <SelectTrigger
+                              className={cn(
+                                detectedCountry &&
+                                  field.value !== detectedCountry &&
+                                  "border-yellow-500"
+                              )}
+                            >
+                              <SelectValue placeholder="Select an option" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectLabel>Popular Countries</SelectLabel>
+                                {popularCountries.map((country) => (
+                                  <SelectItem key={country} value={country}>
+                                    {country}
                                   </SelectItem>
                                 ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <div className="flex flex-col gap-2 lg:w-[290px]">
+                              </SelectGroup>
+                              <SelectSeparator />
+                              <SelectGroup>
+                                <SelectLabel>All Countries</SelectLabel>
+                                {Object.entries(countries.getNames("en"))
+                                  .filter(
+                                    ([code, name]) =>
+                                      !popularCountries.includes(name)
+                                  )
+                                  .map(([code, name]) => (
+                                    <SelectItem key={code} value={name}>
+                                      {name}
+                                    </SelectItem>
+                                  ))}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="w-full sm:w-[290px]">
                   <FormField
                     control={form.control}
                     name="nationality"
@@ -912,7 +887,6 @@ export const StepOneForm = ({
                           >
                             <SelectTrigger
                               className={cn(
-                                "lg:w-[290px]",
                                 form.formState.errors.nationality &&
                                   "border-red-500"
                               )}
@@ -955,9 +929,8 @@ export const StepOneForm = ({
                     )}
                   />
                 </div>
-
                 {isEntryDateRequired && (
-                  <div className="flex flex-col gap-2 lg:w-[290px]">
+                  <div className="w-full sm:w-[290px]">
                     <FormField
                       control={form.control}
                       name="entryDateToUK"
@@ -1015,109 +988,114 @@ export const StepOneForm = ({
                 )}
               </div>
 
-              {/* Row 4 */}
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
+              {/* Row 5 */}
+              <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6">
                 {isImmigrationRequired && (
                   <>
-                    <FormField
-                      control={form.control}
-                      name="immigration_status"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Immigration Status</FormLabel>
-                          <FormControl>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                              value={field.value}
-                              disabled={isPending}
-                            >
-                              <SelectTrigger
-                                className={cn(
-                                  "lg:w-[290px]",
-                                  form.formState.errors.immigration_status &&
-                                    "border-red-500"
-                                )}
-                              >
-                                <SelectValue placeholder="Select an option" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  <SelectItem value="settled">
-                                    Settled (Indefinite Leave)
-                                  </SelectItem>
-                                  <SelectItem value="pre_settled">
-                                    Pre Settled (Limited Leave)
-                                  </SelectItem>
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-
-                    {isShareCodeRequired && (
+                    <div className="w-full sm:w-[290px]">
                       <FormField
                         control={form.control}
-                        name="share_code"
+                        name="immigration_status"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Share Code</FormLabel>
+                            <FormLabel>Immigration Status</FormLabel>
                             <FormControl>
-                              <Input
-                                {...field}
-                                type="text"
-                                placeholder="Eg. XXX XXX XXX"
-                                className={cn(
-                                  "lg:w-[290px]",
-                                  form.formState.errors.share_code &&
-                                    "border-red-500"
-                                )}
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                value={field.value}
                                 disabled={isPending}
-                                onChange={(e) => {
-                                  const value = e.target.value
-                                    .toUpperCase()
-                                    .replace(/[^A-Z0-9]/g, "");
-                                  const formattedValue = value
-                                    .replace(/(.{3})/g, "$1 ")
-                                    .trim();
-                                  field.onChange(formattedValue);
-                                }}
-                                maxLength={11}
-                              />
+                              >
+                                <SelectTrigger
+                                  className={cn(
+                                    form.formState.errors.immigration_status &&
+                                      "border-red-500"
+                                  )}
+                                >
+                                  <SelectValue placeholder="Select an option" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectGroup>
+                                    <SelectItem value="settled">
+                                      Settled (Indefinite Leave)
+                                    </SelectItem>
+                                    <SelectItem value="pre_settled">
+                                      Pre Settled (Limited Leave)
+                                    </SelectItem>
+                                  </SelectGroup>
+                                </SelectContent>
+                              </Select>
                             </FormControl>
                           </FormItem>
                         )}
                       />
+                    </div>
+
+                    {isShareCodeRequired && (
+                      <div className="w-full sm:w-[290px]">
+                        <FormField
+                          control={form.control}
+                          name="share_code"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Share Code</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  type="text"
+                                  placeholder="Eg. XXX XXX XXX"
+                                  className={cn(
+                                    form.formState.errors.share_code &&
+                                      "border-red-500"
+                                  )}
+                                  disabled={isPending}
+                                  onChange={(e) => {
+                                    const value = e.target.value
+                                      .toUpperCase()
+                                      .replace(/[^A-Z0-9]/g, "");
+                                    const formattedValue = value
+                                      .replace(/(.{3})/g, "$1 ")
+                                      .trim();
+                                    field.onChange(formattedValue);
+                                  }}
+                                  maxLength={11}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                     )}
                   </>
                 )}
-                <FormField
-                  control={form.control}
-                  name="identificationNo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Passport / National ID Card No.</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="text"
-                          className={cn(
-                            "lg:w-[400px]",
-                            form.formState.errors.identificationNo &&
-                              "border-red-500"
-                          )}
-                          disabled={isPending}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+
+                <div className="w-full sm:w-[400px]">
+                  <FormField
+                    control={form.control}
+                    name="identificationNo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Passport / National ID Card No.</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="text"
+                            className={cn(
+                              form.formState.errors.identificationNo &&
+                                "border-red-500"
+                            )}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
+              {/* Row 6 */}
               {isImmigrationRequired && !isLoading && (
-                <div className="flex flex-col gap-4 mb-5">
+                <div className="mt-6 space-y-2">
                   <Label className="underline">
                     Immigration Document Upload
                   </Label>
@@ -1152,8 +1130,10 @@ export const StepOneForm = ({
                   />
                 </div>
               )}
+
+              {/* Row 7 */}
               {!isLoading && (
-                <div className="flex flex-col gap-4 mb-5">
+                <div className="mt-6 space-y-2">
                   <Label className="underline">
                     Passport / National ID Card Upload
                   </Label>
@@ -1184,9 +1164,10 @@ export const StepOneForm = ({
                   />
                 </div>
               )}
-              {/* Row 5 */}
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <div className="flex flex-col gap-2 w-full">
+
+              {/* Row 8 */}
+              <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6">
+                <div className="w-full sm:w-1/2">
                   <FormField
                     control={form.control}
                     name="addressLine1"
@@ -1208,7 +1189,7 @@ export const StepOneForm = ({
                     )}
                   />
                 </div>
-                <div className="flex flex-col gap-2 w-full">
+                <div className="w-full sm:w-1/2">
                   <FormField
                     control={form.control}
                     name="addressLine2"
@@ -1231,9 +1212,10 @@ export const StepOneForm = ({
                   />
                 </div>
               </div>
-              {/* Row 6 */}
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <div className="flex flex-col gap-2 w-full">
+
+              {/* Row 9 */}
+              <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6">
+                <div className="w-full">
                   <FormField
                     control={form.control}
                     name="city"
@@ -1254,7 +1236,7 @@ export const StepOneForm = ({
                     )}
                   />
                 </div>
-                <div className="flex flex-col gap-2 w-full">
+                <div className="w-full">
                   <FormField
                     control={form.control}
                     name="postcode"
@@ -1275,7 +1257,7 @@ export const StepOneForm = ({
                     )}
                   />
                 </div>
-                <div className="flex flex-col gap-2 w-full">
+                <div className="w-full">
                   <FormField
                     control={form.control}
                     name="homeTelephoneNo"
@@ -1286,21 +1268,25 @@ export const StepOneForm = ({
                           <PhoneInput
                             {...field}
                             disabled={isPending}
-                            hasError={!!form.formState.errors.mobileNo}
+                            // hasError={!!form.formState.errors.homeTelephoneNo}
                             className={
                               form.formState.errors.homeTelephoneNo &&
                               "border-red-500"
                             }
                           />
                         </FormControl>
+                        <FormDescription className="text-xs italic text-muted-foreground">
+                          Select country code from dropdown or enter manually
+                        </FormDescription>
                       </FormItem>
                     )}
                   />
                 </div>
               </div>
-              {/* Row 7 */}
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <div className="flex flex-col gap-2 lg:w-[363px]">
+
+              {/* Row 10 */}
+              <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6">
+                <div className="w-full sm:w-[360px]">
                   <FormField
                     control={form.control}
                     name="mobileNo"
@@ -1314,11 +1300,15 @@ export const StepOneForm = ({
                             formError={!!form.formState.errors.mobileNo}
                           />
                         </FormControl>
+                        <FormDescription className="text-xs italic text-muted-foreground">
+                          Select country code from dropdown or enter manually
+                        </FormDescription>
                       </FormItem>
                     )}
                   />
                 </div>
-                <div className="flex flex-col gap-2 lg:w-[400px]">
+
+                <div className="w-full sm:w-[400px]">
                   <FormField
                     control={form.control}
                     name="email"
@@ -1340,8 +1330,114 @@ export const StepOneForm = ({
                   />
                 </div>
               </div>
-              {/* Row 8 */}
-              <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
+
+              {/* Row 11 */}
+              <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6">
+                <div className="w-full">
+                  <FormField
+                    control={form.control}
+                    name="tuitionFees"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex flex-col space-y-[5px]">
+                          <FormLabel>Tuition Fees</FormLabel>
+                          <FormDescription>
+                            How will you fund your studies?
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              if (value === "Other") {
+                                setIsClicked(true);
+                              } else {
+                                setIsClicked(false);
+                                setOtherOptionText("");
+                              }
+                            }}
+                            value={isClicked ? "Other" : field.value}
+                            className="flex flex-col space-y-1"
+                            disabled={isPending}
+                          >
+                            <FormItem className="flex items-center space-x-3 space-y-0 mt-3">
+                              <FormControl>
+                                <RadioGroupItem value="Parents" />
+                              </FormControl>
+                              <FormLabel className="font-medium">
+                                Parents
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="Family Members" />
+                              </FormControl>
+                              <FormLabel className="font-medium">
+                                Family Members
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="Employers" />
+                              </FormControl>
+                              <FormLabel className="font-medium">
+                                Employers
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="Self" />
+                              </FormControl>
+                              <FormLabel className="font-medium">
+                                Self
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="Student Loan Company England (SLC)" />
+                              </FormControl>
+                              <FormLabel className="font-medium">
+                                Student Loan Company England (SLC)
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem
+                                  value="Other"
+                                  checked={isClicked}
+                                  onClick={() => setIsClicked(true)}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-medium">
+                                Other
+                              </FormLabel>
+                            </FormItem>
+                            {isClicked && (
+                              <FormControl>
+                                <Input
+                                  onChange={(e) => {
+                                    setOtherOptionText(e.target.value);
+                                  }}
+                                  value={otherOptionText}
+                                  type="text"
+                                  className={cn(
+                                    "sm:max-w-[400px]",
+                                    hasError && "border-red-500"
+                                  )}
+                                />
+                              </FormControl>
+                            )}
+                          </RadioGroup>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Row 8 */}
+            {/* <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
                 <div className="flex flex-col gap-2 w-full">
                   <FormField
                     control={form.control}
@@ -1442,8 +1538,7 @@ export const StepOneForm = ({
                     )}
                   />
                 </div>
-              </div>
-            </div>
+              </div> */}
           </div>
 
           <FormButtons
