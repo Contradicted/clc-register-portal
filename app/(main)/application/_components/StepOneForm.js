@@ -493,11 +493,11 @@ export const StepOneForm = ({
                           disabled={isPending}
                         >
                           <SelectTrigger
-                            className={cn(
-                              "w-full",
-                              form.formState.errors.courseTitle &&
-                                "border-red-500"
-                            )}
+                            className={
+                              form.formState.errors.courseTitle
+                                ? "border-red-500"
+                                : ""
+                            }
                           >
                             <SelectValue placeholder="Select a course" />
                           </SelectTrigger>
@@ -535,11 +535,11 @@ export const StepOneForm = ({
                           disabled={isPending}
                         >
                           <SelectTrigger
-                            className={cn(
-                              "w-full",
-                              form.formState.errors.courseTitle &&
-                                "border-red-500"
-                            )}
+                            className={
+                              form.formState.errors.studyMode
+                                ? "border-red-500"
+                                : ""
+                            }
                           >
                             <SelectValue placeholder="Select an option" />
                           </SelectTrigger>
@@ -585,28 +585,30 @@ export const StepOneForm = ({
                     render={({ field }) => (
                       <FormItem className="w-full">
                         <FormLabel>Title</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          value={field.value}
-                          disabled={isPending}
-                        >
-                          <FormControl>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            value={field.value}
+                            disabled={isPending}
+                          >
                             <SelectTrigger
                               className={cn(
-                                "w-full",
+                                "lg:w-[290px]",
                                 form.formState.errors.title && "border-red-500"
                               )}
                             >
                               <SelectValue placeholder="Select an option" />
                             </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Mr">Mr</SelectItem>
-                            <SelectItem value="Mrs">Mrs</SelectItem>
-                            <SelectItem value="Ms">Ms</SelectItem>
-                          </SelectContent>
-                        </Select>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectItem value="Mr">Mr</SelectItem>
+                                <SelectItem value="Mrs">Mrs</SelectItem>
+                                <SelectItem value="Ms">Ms</SelectItem>
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
                       </FormItem>
                     )}
                   />
@@ -621,6 +623,7 @@ export const StepOneForm = ({
                         <FormControl>
                           <Input
                             {...field}
+                            type="text"
                             className={cn(
                               "w-full",
                               form.formState.errors.firstName &&
@@ -643,6 +646,7 @@ export const StepOneForm = ({
                         <FormControl>
                           <Input
                             {...field}
+                            type="text"
                             className={cn(
                               "w-full",
                               form.formState.errors.lastName && "border-red-500"
@@ -658,39 +662,32 @@ export const StepOneForm = ({
 
               {/* Row 2 - Profile Photo Upload */}
               <div className="mt-6">
-                <FormItem>
-                  <FormLabel className="underline">
-                    Profile Picture Upload
-                  </FormLabel>
-                  <FormControl>
-                    <MultiUploader
-                      onChange={(file, removed) => {
-                        setFile(file);
-                        setIsRemoved(removed);
+                <Label className="underline">Profile Photo Upload</Label>
+                <MultiUploader
+                  onChange={(file, removed) => {
+                    setFile(file);
+                    setIsRemoved(removed);
 
-                        const newAccumulatedFiles = {
-                          ...accumulatedFiles,
-                        };
-                        newAccumulatedFiles.file = {
-                          file,
-                          alreadyExists: false,
-                        };
-                        setAccumulatedFiles(newAccumulatedFiles);
-                      }}
-                      defaultFile={accumulatedFiles.file?.file || file}
-                      defaultPreviewUrl={
-                        accumulatedFiles.file?.alreadyExists
-                          ? application?.photoUrl
-                          : accumulatedFiles.file?.file
-                          ? URL.createObjectURL(accumulatedFiles.file.file)
-                          : null
-                      }
-                      isPending={isPending}
-                      isLoading={isLoading}
-                      fileType="image"
-                    />
-                  </FormControl>
-                </FormItem>
+                    const newAccumulatedFiles = {
+                      ...accumulatedFiles,
+                    };
+                    newAccumulatedFiles.file = {
+                      file,
+                      alreadyExists: false,
+                    };
+                    setAccumulatedFiles(newAccumulatedFiles);
+                  }}
+                  defaultFile={accumulatedFiles.file?.file || file}
+                  defaultPreviewUrl={
+                    accumulatedFiles.file?.alreadyExists
+                      ? application?.photoUrl
+                      : accumulatedFiles.file?.file
+                      ? URL.createObjectURL(accumulatedFiles.file.file)
+                      : null
+                  }
+                  isPending={isPending}
+                  fileType="image"
+                />
               </div>
 
               {/* Row 3 */}
@@ -702,27 +699,29 @@ export const StepOneForm = ({
                     render={({ field }) => (
                       <FormItem className="w-full">
                         <FormLabel>Gender</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          value={field.value}
-                          disabled={isPending}
-                        >
-                          <FormControl>
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            value={field.value}
+                            disabled={isPending}
+                          >
                             <SelectTrigger
                               className={cn(
-                                "w-full",
+                                "lg:w-[290px]",
                                 form.formState.errors.gender && "border-red-500"
                               )}
                             >
                               <SelectValue placeholder="Select an option" />
                             </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Male">Male</SelectItem>
-                            <SelectItem value="Female">Female</SelectItem>
-                          </SelectContent>
-                        </Select>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectItem value="Male">Male</SelectItem>
+                                <SelectItem value="Female">Female</SelectItem>
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
                       </FormItem>
                     )}
                   />
@@ -788,14 +787,13 @@ export const StepOneForm = ({
                     name="placeOfBirth"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Place of Birth</FormLabel>
+                        <FormLabel>Place of Birth (City/Town)</FormLabel>
                         <FormControl>
                           <PlaceOfBirthInput
                             {...field}
                             defaultValue={application?.placeOfBirth}
                             onPlaceSelect={handlePlaceSelect}
                             className={cn(
-                              "lg:w-[400px]",
                               form.formState.errors.placeOfBirth &&
                                 "border-red-500"
                             )}
@@ -1268,7 +1266,7 @@ export const StepOneForm = ({
                           <PhoneInput
                             {...field}
                             disabled={isPending}
-                            // hasError={!!form.formState.errors.homeTelephoneNo}
+                            hasError={!!form.formState.errors.mobileNo}
                             className={
                               form.formState.errors.homeTelephoneNo &&
                               "border-red-500"
@@ -1421,7 +1419,7 @@ export const StepOneForm = ({
                                   value={otherOptionText}
                                   type="text"
                                   className={cn(
-                                    "sm:max-w-[400px]",
+                                    "lg:max-w-[400px]",
                                     hasError && "border-red-500"
                                   )}
                                 />
@@ -1435,110 +1433,6 @@ export const StepOneForm = ({
                 </div>
               </div>
             </div>
-
-            {/* Row 8 */}
-            {/* <div className="flex flex-col mb-10 lg:items-center gap-10 lg:flex-row">
-                <div className="flex flex-col gap-2 w-full">
-                  <FormField
-                    control={form.control}
-                    name="tuitionFees"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex flex-col space-y-[5px]">
-                          <FormLabel>Tuition Fees</FormLabel>
-                          <FormDescription>
-                            How will you fund your studies?
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                              if (value === "Other") {
-                                setIsClicked(true);
-                              } else {
-                                setIsClicked(false);
-                                setOtherOptionText("");
-                              }
-                            }}
-                            value={isClicked ? "Other" : field.value}
-                            className="flex flex-col space-y-1"
-                            disabled={isPending}
-                          >
-                            <FormItem className="flex items-center space-x-3 space-y-0 mt-3">
-                              <FormControl>
-                                <RadioGroupItem value="Parents" />
-                              </FormControl>
-                              <FormLabel className="font-medium">
-                                Parents
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="Family Members" />
-                              </FormControl>
-                              <FormLabel className="font-medium">
-                                Family Members
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="Employers" />
-                              </FormControl>
-                              <FormLabel className="font-medium">
-                                Employers
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="Self" />
-                              </FormControl>
-                              <FormLabel className="font-medium">
-                                Self
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem value="Student Loan Company England (SLC)" />
-                              </FormControl>
-                              <FormLabel className="font-medium">
-                                Student Loan Company England (SLC)
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <RadioGroupItem
-                                  value="Other"
-                                  checked={isClicked}
-                                  onClick={() => setIsClicked(true)}
-                                />
-                              </FormControl>
-                              <FormLabel className="font-medium">
-                                Other
-                              </FormLabel>
-                            </FormItem>
-                            {isClicked && (
-                              <FormControl>
-                                <Input
-                                  onChange={(e) => {
-                                    setOtherOptionText(e.target.value);
-                                  }}
-                                  value={otherOptionText}
-                                  type="text"
-                                  className={cn(
-                                    "lg:max-w-[400px]",
-                                    hasError && "border-red-500"
-                                  )}
-                                />
-                              </FormControl>
-                            )}
-                          </RadioGroup>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div> */}
           </div>
 
           <FormButtons
