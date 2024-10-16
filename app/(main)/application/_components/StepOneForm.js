@@ -1,61 +1,90 @@
 'use client'
 
 import { format } from 'date-fns'
-import { CalendarIcon, Loader2, LoaderCircle } from 'lucide-react'
-import { useEffect, useState, useTransition } from 'react'
-import { useForm } from 'react-hook-form'
+import { CalendarIcon, InfoIcon, Loader2, LoaderCircle } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 
-import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormDescription,
-    FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectSeparator,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import { cn, formatStudyMode } from '@/lib/utils'
-import { PhoneInput } from '@/components/ui/phone-input'
-import { FormButtons } from './FormButtons'
-import { FormError } from '@/components/FormError'
-import { save } from '@/actions/save'
-import { useToast } from '@/components/ui/use-toast'
-import { useRouter } from 'next/navigation'
-import { MultiUploader } from '@/components/CustomUploader'
-import { useMultiStepForm } from '@/hooks/useMultiStepForm'
-import { SectionOneSchema } from '@/schemas'
-import { zodResolver } from '@hookform/resolvers/zod'
-import PlaceOfBirthInput from './PlaceOfBirthInput'
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn, formatStudyMode } from "@/lib/utils";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { FormButtons } from "./FormButtons";
+import { FormError } from "@/components/FormError";
+import { save } from "@/actions/save";
+import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
+import { MultiUploader } from "@/components/CustomUploader";
+import { useMultiStepForm } from "@/hooks/useMultiStepForm";
+import { SectionOneSchema } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import PlaceOfBirthInput from "./PlaceOfBirthInput";
 
-import countries from 'i18n-iso-countries'
+import countries from "i18n-iso-countries";
 import nationalities from "i18n-nationality";
-import countriesEnglish from 'i18n-iso-countries/langs/en.json'
+import countriesEnglish from "i18n-iso-countries/langs/en.json";
 import nationalitiesEnglish from "i18n-nationality/langs/en.json";
 import { popularCountries, popularNationalities } from "@/constants";
-import { getActiveCourses } from '@/data/courses'
+import { getActiveCourses } from "@/data/courses";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 countries.registerLocale(countriesEnglish);
 nationalities.registerLocale(nationalitiesEnglish);
+
+const PhotoGuidelines = ({ setIsModalOpen }) => (
+  <div className="space-y-2 text-sm text-muted-foreground">
+    <p>Your photo should:</p>
+    <ul className="list-disc list-inside">
+      <li>Show your full face, front view</li>
+      <li>Have a plain, light background</li>
+      <li>Be clear and in focus</li>
+    </ul>
+    <Button
+      type="button"
+      variant="link"
+      onClick={() => setIsModalOpen(true)}
+      className="px-0"
+    >
+      View full guidelines
+    </Button>
+  </div>
+);
 
 export const StepOneForm = ({
   activeCourses,
@@ -90,7 +119,8 @@ export const StepOneForm = ({
   const [immigrationFile, setImmigrationFile] = useState(null);
   const [isClicked, setIsClicked] = useState(defaultIsClicked);
   const [isPending, startTransition] = useTransition();
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState();
   const [hasError, setHasError] = useState(false);
   const [isRemoved, setIsRemoved] = useState(false);
@@ -114,6 +144,7 @@ export const StepOneForm = ({
     defaultValues: {
       courseTitle: application?.courseTitle || undefined,
       studyMode: application?.studyMode || undefined,
+      campus: application?.campus || undefined,
       title: userDetails?.title || application?.title || undefined,
       firstName: userDetails?.firstName || application?.firstName || undefined,
       lastName: userDetails?.lastName || application?.lastName || undefined,
@@ -561,6 +592,39 @@ export const StepOneForm = ({
                   )}
                 />
               </div>
+              <div className="w-full sm:w-1/2">
+                <FormField
+                  control={form.control}
+                  name="campus"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>Campus</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          value={field.value}
+                          disabled={isPending}
+                        >
+                          <SelectTrigger
+                            className={
+                              form.formState.errors.campus
+                                ? "border-red-500"
+                                : ""
+                            }
+                          >
+                            <SelectValue placeholder="Select a campus" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="London">London</SelectItem>
+                            <SelectItem value="Bristol">Bristol</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           </div>
 
@@ -663,6 +727,7 @@ export const StepOneForm = ({
               {/* Row 2 - Profile Photo Upload */}
               <div className="mt-6">
                 <Label className="underline">Profile Photo Upload</Label>
+                <PhotoGuidelines setIsModalOpen={setIsModalOpen} />
                 <MultiUploader
                   onChange={(file, removed) => {
                     setFile(file);
@@ -688,6 +753,76 @@ export const StepOneForm = ({
                   isPending={isPending}
                   fileType="image"
                 />
+                <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                  <DialogContent className="sm:max-w-[600px]">
+                    <DialogHeader>
+                      <DialogTitle>Profile Photo Guidelines</DialogTitle>
+                      <DialogDescription />
+                    </DialogHeader>
+                    <ScrollArea className="max-h-[80vh] pr-4">
+                      <div className="space-y-4">
+                        <h5 className="font-medium">
+                          What your digital photo must show
+                        </h5>
+                        <p className="text-sm text-muted-foreground">
+                          The digital photo must:
+                        </p>
+                        <ul className="text-sm text-muted-foreground list-disc list-inside">
+                          <li>contain no other objects or people</li>
+                          <li>
+                            be taken against a plain light-coloured background
+                          </li>
+                          <li>be in clear contrast to the background</li>
+                          <li>not have &apos;red eye&apos;</li>
+                        </ul>
+                        <p className="text-sm text-muted-foreground">
+                          If you&apos;re using a photo taken on your own device,
+                          include your head, shoulders and upper body. Do not
+                          crop your photo - it will be done for you.
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          In your photo you must:
+                        </p>
+                        <ul className="text-sm text-muted-foreground list-disc list-inside">
+                          <li>
+                            be facing forwards and looking straight at the
+                            camera
+                          </li>
+                          <li>have a plain expression and your mouth closed</li>
+                          <li>have your eyes open and visible</li>
+                          <li>not have hair in front of your eyes</li>
+                          <li>
+                            not have a head covering (unless it&apos;s for
+                            religious or medical reasons)
+                          </li>
+                          <li>not have anything covering your face</li>
+                          <li>
+                            not have any shadows on your face or behind you
+                          </li>
+                        </ul>
+                        <p className="text-sm text-muted-foreground">
+                          Do not wear glasses in your photo unless you have to
+                          do so. If you must wear glasses, they cannot be
+                          sunglasses or tinted glasses, and you must make sure
+                          your eyes are not covered by the frames or any glare,
+                          reflection or shadow.
+                        </p>
+
+                        <Image
+                          src="/photo-guidance.jpeg"
+                          alt="Photo guidelines"
+                          width={500}
+                          height={0}
+                          sizes="100vw"
+                          style={{
+                            width: "100%",
+                            height: "auto",
+                          }}
+                        />
+                      </div>
+                    </ScrollArea>
+                  </DialogContent>
+                </Dialog>
               </div>
 
               {/* Row 3 */}
@@ -831,7 +966,9 @@ export const StepOneForm = ({
                               className={cn(
                                 detectedCountry &&
                                   field.value !== detectedCountry &&
-                                  "border-yellow-500"
+                                  "border-yellow-500",
+                                form.formState.errors.countryOfBirth &&
+                                  "border-red-500"
                               )}
                             >
                               <SelectValue placeholder="Select an option" />
@@ -1244,6 +1381,16 @@ export const StepOneForm = ({
                         <FormControl>
                           <Input
                             {...field}
+                            onChange={(e) => {
+                              let value = e.target.value
+                                .toUpperCase()
+                                .replace(/\s/g, "");
+                              if (value.length > 4) {
+                                value =
+                                  value.slice(0, -3) + " " + value.slice(-3);
+                              }
+                              field.onChange(value);
+                            }}
                             type="text"
                             disabled={isPending}
                             className={

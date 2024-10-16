@@ -105,6 +105,9 @@ export const SectionOneSchema = z
     title: z.string({
       required_error: "Title is required",
     }),
+    campus: z.string({
+      required_error: "Campus is required",
+    }),
     firstName: z
       .string({
         required_error: "First name is required",

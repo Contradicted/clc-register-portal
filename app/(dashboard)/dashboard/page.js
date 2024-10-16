@@ -34,6 +34,14 @@ export default async function DashboardPage() {
                   </div>
                   <div className="flex gap-3 text-[#78778B] font-medium">
                     <div className="flex items-start w-full max-w-[25%]">
+                      <p>Campus</p>
+                    </div>
+                    <p className="flex justify-end flex-wrap w-full text-right">
+                      {app.campus}
+                    </p>
+                  </div>
+                  <div className="flex gap-3 text-[#78778B] font-medium">
+                    <div className="flex items-start w-full max-w-[25%]">
                       <p>Applicant</p>
                     </div>
                     <p className="flex justify-end flex-wrap w-full">

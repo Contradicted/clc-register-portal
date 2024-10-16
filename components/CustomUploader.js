@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { generateReactHelpers } from "@uploadthing/react/hooks";
 import { cn } from "@/lib/utils";
-import { Loader2, X } from "lucide-react";
+import { FileIcon, Loader2, X } from "lucide-react";
 
 export const { useUploadThing } = generateReactHelpers();
 
@@ -32,6 +32,15 @@ export const MultiUploader = ({
       ? "PDF, DOC, DOCX, JPEG, PNG, JPG, WEBP"
       : "";
 
+  useEffect(() => {
+    if (defaultFile && !file) {
+      setFile(defaultFile);
+    }
+    if (defaultPreviewUrl && !previewUrl) {
+      setPreviewUrl(defaultPreviewUrl);
+    }
+  }, [defaultFile, defaultPreviewUrl, file, previewUrl]);
+
   const handleDrop = useCallback(
     (acceptedFiles) => {
       const file = acceptedFiles[0];
@@ -40,8 +49,12 @@ export const MultiUploader = ({
         setError(null); // Clear any previous errors
         onChange(file, false);
         setFile(file);
-        const previewURL = URL.createObjectURL(file);
-        setPreviewUrl(previewURL);
+        if (file.type.startsWith("image/")) {
+          const previewURL = URL.createObjectURL(file);
+          setPreviewUrl(previewURL);
+        } else {
+          setPreviewUrl(null); // Clear image preview for non-image files
+        }
         setIsRemoved(false);
       }
     },
@@ -61,11 +74,11 @@ export const MultiUploader = ({
 
   useEffect(() => {
     return () => {
-      if (previewUrl) {
+      if (previewUrl && !defaultPreviewUrl) {
         URL.revokeObjectURL(previewUrl);
       }
     };
-  }, [previewUrl]);
+  }, [previewUrl, defaultPreviewUrl]);
 
   const { getRootProps, getInputProps, isDragActive, fileRejections } =
     useDropzone({
@@ -74,19 +87,17 @@ export const MultiUploader = ({
       accept:
         fileType === "image"
           ? {
-              "image/*": [".png", ".jpg", ".jpeg", ".webp"],
+              "image/*": [".png", ".jpg", ".jpeg", ".webp", ".svg"],
             }
           : fileType === "file"
           ? {
-              "file/*": [
-                ".pdf",
-                ".doc",
-                ".docx",
-                ".png",
-                ".jpg",
-                ".jpeg",
-                ".webp",
-              ],
+              "image/png": [".png"],
+              "image/jpeg": [".jpg", ".jpeg"],
+              "image/webp": [".webp"],
+              "application/pdf": [".pdf"],
+              "application/msword": [".doc"],
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                [".docx"],
             }
           : undefined,
       validator: (file) => {
@@ -167,20 +178,25 @@ export const MultiUploader = ({
 
   return (
     <div className="upload-container" disabled={isPending}>
-      {previewUrl ? (
+      {file ? (
         <div className="mb-6 border-2 border-dashed border-[#384EB7]/30 rounded-md p-4 flex justify-between items-center text-sm transition hover:border-indigo-600 cursor-pointer">
           <div className="flex items-center gap-x-2">
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
+            ) : file.type.startsWith("image/") ? (
               <Image
-                src={previewUrl}
+                src={previewUrl || defaultPreviewUrl}
                 alt="Preview"
                 width={200}
                 height={200}
                 className="preview-image"
                 onError={() => setPreviewUrl(null)}
               />
+            ) : (
+              <div className="flex items-center">
+                <FileIcon className="w-5 h-5 mr-2" />
+                <span>{file.name}</span>
+              </div>
             )}
           </div>
           <div>
@@ -192,7 +208,6 @@ export const MultiUploader = ({
               <X className="w-5 h-5" />
             </Button>
           </div>
-          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         </div>
       ) : (
         <div

@@ -62,8 +62,6 @@ export const StepTwoForm = ({
   const { toast } = useToast();
   const router = useRouter();
 
-  // console.log(accumulatedFiles);
-
   const form = useForm({
     defaultValues: {
       qualifications:
