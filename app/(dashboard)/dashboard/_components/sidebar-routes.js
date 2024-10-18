@@ -10,12 +10,12 @@ const routes = [
     href: "/dashboard",
     icon: Home,
   },
-  {
-    id: 2,
-    label: "Course Details",
-    href: "#",
-    icon: ClipboardPen,
-  },
+  // {
+  //   id: 2,
+  //   label: "Course Details",
+  //   href: "#",
+  //   icon: ClipboardPen,
+  // },
 ];
 
 const SidebarRoutes = () => {

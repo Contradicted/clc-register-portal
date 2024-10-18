@@ -121,11 +121,16 @@ export function LoginForm() {
                   <Link
                     href="/auth/reset-password"
                     className="ml-auto inline-block text-sm underline my-2 hover:text-gray-500"
+                    disabled={isPending}
                   >
                     Forgot your password?
                   </Link>
                 </div>
-                <Button type="submit" className="w-full text-white">
+                <Button
+                  type="submit"
+                  className="w-full text-white"
+                  disabled={isPending}
+                >
                   {isPending ? (
                     <LoaderCircle className="animate-spin" />
                   ) : (

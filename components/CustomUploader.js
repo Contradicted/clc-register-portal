@@ -187,10 +187,17 @@ export const MultiUploader = ({
               <Image
                 src={previewUrl || defaultPreviewUrl}
                 alt="Preview"
-                width={200}
-                height={200}
-                className="preview-image"
+                width={0}
+                height={0}
+                className="preview-image object-contain"
                 onError={() => setPreviewUrl(null)}
+                style={{
+                  width: "auto",
+                  height: "auto",
+                  maxWidth: "200px",
+                  maxHeight: "200px",
+                  objectFit: "contain",
+                }}
               />
             ) : (
               <div className="flex items-center">
@@ -220,10 +227,14 @@ export const MultiUploader = ({
           <input {...getInputProps()} />
           <Image
             src="/upload-icon.svg"
-            height={70}
-            width={70}
+            height={0}
+            width={0}
             alt="upload-icon"
             className="mb-[20px]"
+            style={{
+              width: "70px",
+              height: "70px",
+            }}
           />
           <div className="flex flex-col space-y-2 text-center">
             <p className="font-semibold text-[#0F0F0F]">

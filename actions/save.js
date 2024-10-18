@@ -57,6 +57,29 @@ export const save = async (
     ...applicationValues
   } = parsedValues;
 
+  // console.log(
+  //   "workExperience",
+  //   workExperience,
+  //   "workExperienceLength",
+  //   workExperience.length,
+  //   "hasWorkExperience",
+  //   hasWorkExperience,
+  //   "validWorkExperience",
+  //   workExperience.some((we, index) => {
+  //     const fileIndex = `work_experience_file_${index}`;
+  //     const file = photo.get(fileIndex);
+
+  //     return (
+  //       we.title ||
+  //       we.nameOfOrganisation ||
+  //       we.natureOfJob ||
+  //       we.jobStartDate ||
+  //       we.jobEndDate ||
+  //       (file && file !== "null")
+  //     );
+  //   })
+  // );
+
   // Check if course exists
   if (
     parsedValues.hasOwnProperty("courseTitle") &&
@@ -78,19 +101,23 @@ export const save = async (
       parsedValues.isEnglishFirstLanguage === "Yes";
   }
 
-  applicationValues.hasPendingResults =
-    hasPendingResults === "Yes"
-      ? true
-      : hasPendingResults === "No"
-      ? false
-      : null;
+  if (hasPendingResults !== undefined) {
+    applicationValues.hasPendingResults =
+      hasPendingResults === "Yes"
+        ? true
+        : hasPendingResults === "No"
+        ? false
+        : null;
+  }
 
-  applicationValues.hasWorkExperience =
-    hasWorkExperience === "Yes"
-      ? true
-      : hasWorkExperience === "No"
-      ? false
-      : null;
+  if (hasWorkExperience !== undefined) {
+    applicationValues.hasWorkExperience =
+      hasWorkExperience === "Yes"
+        ? true
+        : hasWorkExperience === "No"
+        ? false
+        : null;
+  }
 
   const existingSavedApplication = await getSavedApplicationByUserID(user.id);
 
@@ -156,26 +183,20 @@ export const save = async (
 
     // Handle identification file
     if (idFile && idFile !== "null" && !idFileExists) {
-      const existingIdFile = uploadedFiles.files.some(
-        (uploadedFile) => uploadedFile.name === idFile.name
-      );
-
-      if (!existingIdFile) {
-        if (existingSavedApplication.identificationNoUrl) {
-          const idFileKey =
-            existingSavedApplication.identificationFileUrl.split("f/");
-          await utapi.deleteFiles(idFileKey);
-        }
-        const uploadedIdFile = await utapi.uploadFiles(idFile);
-        await db.savedApplication.update({
-          where: {
-            id: existingSavedApplication.id,
-          },
-          data: {
-            identificationNoUrl: uploadedIdFile.data.url,
-          },
-        });
+      if (existingSavedApplication.identificationNoUrl) {
+        const idFileKey =
+          existingSavedApplication.identificationNoUrl.split("f/");
+        await utapi.deleteFiles(idFileKey);
       }
+      const uploadedIdFile = await utapi.uploadFiles(idFile);
+      await db.savedApplication.update({
+        where: {
+          id: existingSavedApplication.id,
+        },
+        data: {
+          identificationNoUrl: uploadedIdFile.data.url,
+        },
+      });
     } else if (idFile === "null" || !idFile || isIdFileRemoved) {
       if (existingSavedApplication.identificationNoUrl) {
         const idFileKey =
@@ -198,29 +219,21 @@ export const save = async (
       immigrationFile !== "null" &&
       !immigrationFileExists
     ) {
-      const existingImmigrationFile = uploadedFiles.files.some(
-        (uploadedFile) => uploadedFile.name === immigrationFile.name
-      );
-
-      if (!existingImmigrationFile) {
-        if (existingSavedApplication.immigration_url) {
-          const immigrationFileKey =
-            existingSavedApplication.immigration_url.split("f/");
-          await utapi.deleteFiles(immigrationFileKey);
-        }
-        const uploadedImmigrationFile = await utapi.uploadFiles(
-          immigrationFile
-        );
-        await db.savedApplication.update({
-          where: {
-            id: existingSavedApplication.id,
-          },
-          data: {
-            immigration_url: uploadedImmigrationFile.data.url,
-            immigration_name: uploadedImmigrationFile.data.name,
-          },
-        });
+      if (existingSavedApplication.immigration_url) {
+        const immigrationFileKey =
+          existingSavedApplication.immigration_url.split("f/");
+        await utapi.deleteFiles(immigrationFileKey);
       }
+      const uploadedImmigrationFile = await utapi.uploadFiles(immigrationFile);
+      await db.savedApplication.update({
+        where: {
+          id: existingSavedApplication.id,
+        },
+        data: {
+          immigration_url: uploadedImmigrationFile.data.url,
+          immigration_name: uploadedImmigrationFile.data.name,
+        },
+      });
     } else if (
       immigrationFile === "null" ||
       !immigrationFile ||
@@ -265,93 +278,85 @@ export const save = async (
     }
 
     // Handle qualifications
-    if (qualifications) {
-      for (let i = 0; i < qualifications.length; i++) {
-        const qual = qualifications[i];
-        const fileIndex = `qualification_file_${i}`;
-        const fileExists = `qualification_file_${i}_alreadyExists`;
-        const fileUrl = photo.get(fileIndex);
+    if (qualifications && qualifications.length > 0) {
+      const validQualifications = qualifications.filter((qual, index) => {
+        const fileIndex = `qualification_file_${index}`;
+        const file = photo.get(fileIndex);
 
-        if (qual.id) {
-          const existingQualification = await db.savedQualification.findUnique({
-            where: { id: qual.id },
-          });
+        return (
+          qual.title ||
+          qual.examiningBody ||
+          qual.dateAwarded ||
+          (file && file !== "null")
+        );
+      });
 
-          if (existingQualification) {
-            if (fileUrl === "null") {
-              if (existingQualification.url) {
-                const fileKey = existingQualification.url.split("f/");
-                await utapi.deleteFiles(fileKey);
+      if (validQualifications.length > 0) {
+        for (let i = 0; i < validQualifications.length; i++) {
+          const qual = validQualifications[i];
+          const fileIndex = `qualification_file_${i}`;
+          const fileUrl = photo.get(fileIndex);
+          const isFileRemoved = photo.get(`${fileIndex}_isRemoved`) === "true";
+          const fileExists = photo.get(`${fileIndex}_alreadyExists`) === "true";
+
+          if (qual.id) {
+            // Updating existing qualification
+            const existingQualification =
+              await db.savedQualification.findUnique({
+                where: { id: qual.id },
+              });
+
+            if (existingQualification) {
+              let updateData = {
+                title: qual.title,
+                examiningBody: qual.examiningBody,
+                dateAwarded: qual.dateAwarded,
+              };
+
+              // Handle file update or removal
+              if (isFileRemoved) {
+                // Remove existing file
+                if (existingQualification.url) {
+                  const fileKey = existingQualification.url.split("f/")[1];
+                  await utapi.deleteFiles([fileKey]);
+                }
+                updateData.url = null;
+                updateData.fileName = null;
+              } else if (fileUrl && fileUrl !== "null" && !fileExists) {
+                // Upload new file
+                const uploadedFile = await utapi.uploadFiles(fileUrl);
+                // Remove old file if it exists
+                if (existingQualification.url) {
+                  const fileKey = existingQualification.url.split("f/")[1];
+                  await utapi.deleteFiles([fileKey]);
+                }
+                updateData.url = uploadedFile.data.url;
+                updateData.fileName = uploadedFile.data.name;
               }
 
+              // Update the qualification
               await db.savedQualification.update({
-                where: {
-                  id: qual.id,
-                },
-                data: {
-                  title: qual.title,
-                  examiningBody: qual.examiningBody,
-                  dateAwarded: qual.dateAwarded,
-                  url: null,
-                  fileName: null,
-                },
-              });
-            } else if (
-              fileUrl &&
-              fileUrl !== "null" &&
-              !(typeof fileUrl === "string") &&
-              !fileExists
-            ) {
-              const uploadedFile = await utapi.uploadFiles(fileUrl);
-              if (existingQualification.url) {
-                const fileKey = existingQualification.url.split("f/");
-                await utapi.deleteFiles(fileKey);
-              }
-              await db.savedQualification.update({
-                where: {
-                  id: qual.id,
-                },
-                data: {
-                  title: qual.title,
-                  examiningBody: qual.examiningBody,
-                  dateAwarded: qual.dateAwarded,
-                  url: uploadedFile.data.url,
-                  fileName: uploadedFile.data.name,
-                },
-              });
-            } else {
-              await db.savedQualification.update({
-                where: {
-                  id: qual.id,
-                },
-                data: {
-                  title: qual.title,
-                  examiningBody: qual.examiningBody,
-                  dateAwarded: qual.dateAwarded,
-                },
+                where: { id: qual.id },
+                data: updateData,
               });
             }
-          }
-        } else {
-          let url = null;
-          let name = null;
-
-          if (fileUrl && fileUrl !== "null") {
-            const uploadedFile = await utapi.uploadFiles(fileUrl);
-            url = uploadedFile.data.url;
-            name = fileUrl.name;
-          }
-
-          await db.savedQualification.create({
-            data: {
+          } else {
+            // Creating new qualification
+            let createData = {
               title: qual.title,
               examiningBody: qual.examiningBody,
               dateAwarded: qual.dateAwarded,
               applicationID: existingSavedApplication.id,
-              fileName: name,
-              url,
-            },
-          });
+            };
+
+            if (fileUrl && fileUrl !== "null") {
+              const uploadedFile = await utapi.uploadFiles(fileUrl);
+              createData.url = uploadedFile.data.url;
+              createData.fileName = uploadedFile.data.name;
+            }
+
+            await db.savedQualification.create({ data: createData });
+          }
         }
       }
     }
@@ -383,32 +388,45 @@ export const save = async (
     }
 
     // Handle pending qualifications
-    if (pendingQualifications) {
-      for (let i = 0; i < pendingQualifications.length; i++) {
-        const qual = pendingQualifications[i];
+    if (applicationValues.hasPendingResults) {
+      const validPendingQualifications = pendingQualifications.filter(
+        (qual, index) => {
+          return (
+            qual.title ||
+            qual.examiningBody ||
+            qual.dateOfResults ||
+            qual.subjectsPassed
+          );
+        }
+      );
 
-        if (qual.id) {
-          await db.savedPendingQualification.update({
-            where: {
-              id: qual.id,
-            },
-            data: {
-              title: qual.title,
-              examiningBody: qual.examiningBody,
-              dateOfResults: qual.dateOfResults,
-              subjectsPassed: qual.subjectsPassed,
-            },
-          });
-        } else {
-          await db.savedPendingQualification.create({
-            data: {
-              title: qual.title,
-              examiningBody: qual.examiningBody,
-              dateOfResults: qual.dateOfResults,
-              subjectsPassed: qual.subjectsPassed,
-              applicationID: existingSavedApplication.id,
-            },
-          });
+      if (validPendingQualifications.length > 0) {
+        for (let i = 0; i < validPendingQualifications.length; i++) {
+          const qual = validPendingQualifications[i];
+
+          if (qual.id) {
+            await db.savedPendingQualification.update({
+              where: {
+                id: qual.id,
+              },
+              data: {
+                title: qual.title,
+                examiningBody: qual.examiningBody,
+                dateOfResults: qual.dateOfResults,
+                subjectsPassed: qual.subjectsPassed,
+              },
+            });
+          } else {
+            await db.savedPendingQualification.create({
+              data: {
+                title: qual.title,
+                examiningBody: qual.examiningBody,
+                dateOfResults: qual.dateOfResults,
+                subjectsPassed: qual.subjectsPassed,
+                applicationID: existingSavedApplication.id,
+              },
+            });
+          }
         }
       }
     }
@@ -459,102 +477,98 @@ export const save = async (
     }
 
     // Handle work experiences
-    if (workExperience) {
-      for (let i = 0; i < workExperience.length; i++) {
-        const we = workExperience[i];
-        const fileIndex = `work_experience_file_${i}`;
-        const fileExists = `work_experience_file_${i}_alreadyExists`;
-        const fileUrl = photo.get(fileIndex);
+    if (applicationValues.hasWorkExperience) {
+      const validWorkExperiences = workExperience.filter((we, index) => {
+        const fileIndex = `work_experience_file_${index}`;
+        const file = photo.get(fileIndex);
 
-        if (we.id) {
-          const existingWorkExperience =
-            await db.savedWorkExperience.findUnique({
-              where: { id: we.id },
-            });
+        return (
+          we.title ||
+          we.nameOfOrganisation ||
+          we.natureOfJob ||
+          we.jobStartDate ||
+          we.jobEndDate ||
+          (file && file !== "null")
+        );
+      });
 
-          if (existingWorkExperience) {
-            if (fileUrl === "null") {
-              if (existingWorkExperience.url) {
-                const fileKey = existingWorkExperience.url.split("f/");
-                await utapi.deleteFiles(fileKey);
-              }
+      if (
+        applicationValues.hasWorkExperience &&
+        validWorkExperiences.length > 0
+      ) {
+        for (let i = 0; i < validWorkExperiences.length; i++) {
+          const we = validWorkExperiences[i];
+          const fileIndex = `work_experience_file_${i}`;
+          const isFileAlreadyExists =
+            photo.get(`${fileIndex}_alreadyExists`) === "true";
+          const isFileRemoved = photo.get(`${fileIndex}_isRemoved`) === "true";
+          const fileUrl = photo.get(fileIndex);
 
-              await db.savedWorkExperience.update({
-                where: {
-                  id: we.id,
-                },
-                data: {
+          try {
+            if (we.id) {
+              // Update existing work experience
+              const existingWorkExperience =
+                await db.savedWorkExperience.findUnique({
+                  where: { id: we.id },
+                });
+
+              if (existingWorkExperience) {
+                let updateData = {
                   title: we.title,
                   nameOfOrganisation: we.nameOfOrganisation,
                   natureOfJob: we.natureOfJob,
                   jobStartDate: we.jobStartDate,
                   jobEndDate: we.jobEndDate,
-                  url: null,
-                  fileName: null,
-                },
-              });
-            } else if (
-              fileUrl &&
-              fileUrl !== "null" &&
-              !(typeof fileUrl === "string") &&
-              !fileExists
-            ) {
-              const uploadedFile = await utapi.uploadFiles(fileUrl);
-              if (existingWorkExperience.url) {
-                const fileKey = existingWorkExperience.url.split("f/");
-                await utapi.deleteFiles(fileKey);
+                };
+
+                if (isFileRemoved) {
+                  if (existingWorkExperience.url) {
+                    const fileKey = existingWorkExperience.url.split("f/")[1];
+                    await utapi.deleteFiles([fileKey]);
+                  }
+                  updateData.url = null;
+                  updateData.fileName = null;
+                } else if (
+                  fileUrl &&
+                  fileUrl !== "null" &&
+                  !isFileAlreadyExists
+                ) {
+                  if (existingWorkExperience.url) {
+                    const fileKey = existingWorkExperience.url.split("f/")[1];
+                    await utapi.deleteFiles([fileKey]);
+                  }
+                  const uploadedFile = await utapi.uploadFiles(fileUrl);
+                  updateData.url = uploadedFile.data.url;
+                  updateData.fileName = uploadedFile.data.name;
+                }
+
+                await db.savedWorkExperience.update({
+                  where: { id: we.id },
+                  data: updateData,
+                });
               }
-              await db.savedWorkExperience.update({
-                where: {
-                  id: we.id,
-                },
-                data: {
-                  title: we.title,
-                  nameOfOrganisation: we.nameOfOrganisation,
-                  natureOfJob: we.natureOfJob,
-                  jobStartDate: we.jobStartDate,
-                  jobEndDate: we.jobEndDate,
-                  url: uploadedFile.data.url,
-                  fileName: uploadedFile.data.name,
-                },
-              });
             } else {
-              await db.savedWorkExperience.update({
-                where: {
-                  id: we.id,
-                },
-                data: {
-                  title: we.title,
-                  nameOfOrganisation: we.nameOfOrganisation,
-                  natureOfJob: we.natureOfJob,
-                  jobStartDate: we.jobStartDate,
-                  jobEndDate: we.jobEndDate,
-                },
-              });
+              // Create new work experience
+              let createData = {
+                title: we.title || null,
+                nameOfOrganisation: we.nameOfOrganisation || null,
+                natureOfJob: we.natureOfJob || null,
+                jobStartDate: we.jobStartDate || null,
+                jobEndDate: we.jobEndDate || null,
+                applicationID: existingSavedApplication.id,
+              };
+
+              if (fileUrl && fileUrl !== "null") {
+                const uploadedFile = await utapi.uploadFiles(fileUrl);
+                createData.url = uploadedFile.data.url;
+                createData.fileName = uploadedFile.data.name;
+              }
+
+              await db.savedWorkExperience.create({ data: createData });
             }
+          } catch (error) {
+            console.error(`Error processing work experience ${i}:`, error);
           }
-        } else {
-          let url = null;
-          let name = null;
-
-          if (fileUrl && fileUrl !== "null") {
-            const uploadedFile = await utapi.uploadFiles(fileUrl);
-            url = uploadedFile.data.url;
-            name = fileUrl.name;
-          }
-
-          await db.savedWorkExperience.create({
-            data: {
-              title: we.title,
-              nameOfOrganisation: we.nameOfOrganisation,
-              natureOfJob: we.natureOfJob,
-              jobStartDate: we.jobStartDate,
-              jobEndDate: we.jobEndDate,
-              applicationID: existingSavedApplication.id,
-              fileName: name,
-              url,
-            },
-          });
         }
       }
     }

@@ -12,127 +12,126 @@ export default async function DashboardPage() {
   return (
     <>
       <RefreshHandler />
-      <div className="w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-[50px]">
-          <div className="lg:col-span-2">
+      <div className="w-full px-2 mt-6 lg:px-0 lg:mt-0">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
             {application.map((app, index) => (
               <div
-                className="bg-[#F8F8F8] rounded-[10px] p-5 lg:col-span-2 h-fit max-w-3xl"
+                className="bg-[#F8F8F8] rounded-[10px] p-4 sm:p-6 h-fit"
                 key={index}
               >
-                <div className="flex flex-col space-y-5">
-                  <h3 className="font-semibold text-[18px]">
+                <div className="flex flex-col space-y-4">
+                  <h3 className="font-semibold text-lg sm:text-xl">
                     Your application
                   </h3>
-                  <div className="flex gap-3 text-[#78778B] font-medium">
-                    <div className="flex items-start w-full max-w-[25%]">
-                      <p>Course Title</p>
-                    </div>
-                    <p className="flex justify-end flex-wrap w-full text-right">
-                      {app.courseTitle}
-                    </p>
-                  </div>
-                  <div className="flex gap-3 text-[#78778B] font-medium">
-                    <div className="flex items-start w-full max-w-[25%]">
-                      <p>Campus</p>
-                    </div>
-                    <p className="flex justify-end flex-wrap w-full text-right">
-                      {app.campus}
-                    </p>
-                  </div>
-                  <div className="flex gap-3 text-[#78778B] font-medium">
-                    <div className="flex items-start w-full max-w-[25%]">
-                      <p>Applicant</p>
-                    </div>
-                    <p className="flex justify-end flex-wrap w-full">
-                      {user.firstName + " " + user.lastName}
-                    </p>
-                  </div>
-                  <div className="flex gap-3 text-[#78778B] font-medium">
-                    <div className="flex items-start w-full max-w-[25%]">
-                      <p>Entry month/year</p>
-                    </div>
-                    <p className="flex justify-end flex-wrap w-full">
-                      September 2023/4
-                    </p>
-                  </div>
-                  <div className="flex gap-3 text-[#78778B] font-medium">
-                    <div className="flex items-start w-full max-w-[25%]">
-                      <p>Status</p>
-                    </div>
-                    <p
-                      className={cn(
-                        "flex justify-end flex-wrap w-full text-[#008080]",
-                        getDisplayStatus(app.status) === "Approved" &&
-                          "text-[#27AE60]",
-                        getDisplayStatus(app.status) === "Rejected" &&
-                          "text-[#DC143c]",
-                        getDisplayStatus(app.status) === "Waiting_for_Change" &&
-                          "text-[#f39c12]",
-                        getDisplayStatus(app.status) === "Re-Submitted" &&
-                          "text-[#00CED1]"
-                      )}
+                  {[
+                    { label: "Course Title", value: app.courseTitle },
+                    { label: "Campus", value: app.campus },
+                    {
+                      label: "Applicant",
+                      value: `${user.firstName} ${user.lastName}`,
+                    },
+                    { label: "Entry month/year", value: "September 2023/4" },
+                    {
+                      label: "Status",
+                      value: getDisplayStatus(app.status),
+                      isStatus: true,
+                      updateToken: app.updateApplicationToken?.token,
+                    },
+                  ].map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex flex-col sm:flex-row sm:items-center text-sm sm:text-base"
                     >
-                      {getDisplayStatus(app.status)}
-                      {getDisplayStatus(app.status) === "Waiting for Change" &&
-                        app.updateApplicationToken && (
-                          <Link
-                            href={`/application?token=${app.updateApplicationToken.token}`}
-                            className="ml-1 text-black transition-colors duration-200 ease-in-out"
-                          >
-                            - Click here
-                          </Link>
+                      <div className="font-medium text-[#78778B] w-full sm:w-1/3">
+                        {item.label}
+                      </div>
+                      <div
+                        className={cn(
+                          "w-full sm:w-2/3 sm:text-right",
+                          item.isStatus && getStatusColor(item.value)
                         )}
-                    </p>
-                  </div>
+                      >
+                        {item.value}
+                        {item.isStatus &&
+                          item.value === "Waiting for Change" &&
+                          item.updateToken && (
+                            <Link
+                              href={`/application?token=${item.updateToken}`}
+                              className="ml-1 text-black transition-colors duration-200 ease-in-out"
+                            >
+                              - Click here
+                            </Link>
+                          )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
           </div>
-          <div className="border border-[#EDF2F7] rounded-lg py-6 px-8 h-fit place-self-end">
-            <h2 className="text-[#1A202C] font-semibold text-xl mb-7">
+          <div className="border border-[#EDF2F7] rounded-lg p-4 sm:p-6 h-fit lg:place-self-end">
+            <h2 className="text-[#1A202C] font-semibold text-lg sm:text-xl mb-4 sm:mb-6">
               Need assistance?
             </h2>
-            <div className="flex flex-col space-y-5">
-              <div className="flex flex-col space-y-0.5">
-                <h5 className="text-[#23262F] font-medium">
-                  Admissions Office
-                </h5>
-                <p className="text-[#777E90] text-sm font-light">
-                  3 Boyd Street, Aldgate East, <br />
-                  London, E1 1FQ, <br />
-                  United Kingdom
-                </p>
-              </div>
-
-              <div className="flex flex-col space-y-0.5">
-                <h5 className="text-[#23262F] font-medium">Opening Hours</h5>
-                <p className="text-[#777E90] text-sm font-light">
-                  <span className="font-bold">Monday - Friday: </span>
-                  09:00 - 20:00
-                </p>
-                <p className="text-[#777E90] text-sm font-light">
-                  <span className="font-bold">Saturday - Sunday: </span>
-                  10:00 - 16:00
-                </p>
-                <p className="text-[#777E90] text-sm font-light">
-                  Closed on
-                  <span className="font-bold"> Public Holidays</span>
-                </p>
-              </div>
-
-              <div className="flex flex-col space-y-1.5 pt-[40px]">
-                <p className="text-[#23262F] font-medium">
-                  Email: admissions@clc.ac.uk
-                </p>
-                <p className="text-[#23262F] font-medium">
-                  Tel: +44 (0)20 7247 2177
-                </p>
-              </div>
+            <div className="flex flex-col space-y-4">
+              {[
+                {
+                  title: "Admissions Office",
+                  content: [
+                    "3 Boyd Street, Aldgate East,",
+                    "London, E1 1FQ,",
+                    "United Kingdom",
+                  ],
+                },
+                {
+                  title: "Opening Hours",
+                  content: [
+                    "<span class='font-bold'>Monday - Friday: </span>09:00 - 20:00",
+                    "<span class='font-bold'>Saturday - Sunday: </span>10:00 - 16:00",
+                    "Closed on <span class='font-bold'>Public Holidays</span>",
+                  ],
+                },
+                {
+                  title: "Contact",
+                  content: [
+                    "Email: admissions@clc.ac.uk",
+                    "Tel: +44 (0)20 7247 2177",
+                  ],
+                },
+              ].map((section, index) => (
+                <div key={index} className="flex flex-col space-y-1">
+                  <h5 className="text-[#23262F] font-medium">
+                    {section.title}
+                  </h5>
+                  {section.content.map((line, i) => (
+                    <p
+                      key={i}
+                      className="text-[#777E90] text-sm"
+                      dangerouslySetInnerHTML={{ __html: line }}
+                    />
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
     </>
   );
+}
+
+function getStatusColor(status) {
+  switch (status) {
+    case "Approved":
+      return "text-[#27AE60]";
+    case "Rejected":
+      return "text-[#DC143c]";
+    case "Waiting for Change":
+      return "text-[#f39c12]";
+    case "Re-Submitted":
+      return "text-[#00CED1]";
+    default:
+      return "text-[#008080]";
+  }
 }

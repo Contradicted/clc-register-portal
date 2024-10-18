@@ -6,34 +6,44 @@ import { RegisterSchema } from "@/schemas";
 import { getUserByEmail } from "@/data/user";
 
 import { db } from "@/lib/db";
-import { generateUserID } from "@/lib/utils";
+import { formatName, generateUserID } from "@/lib/utils";
 
 export const register = async (values) => {
+  try {
     const validatedFields = RegisterSchema.safeParse(values);
 
-    if (!validatedFields.success) return { error: "Invalid fields!"};
+    if (!validatedFields.success) return { error: "Invalid fields!" };
 
-    const { title, firstName, lastName, email, password } = validatedFields.data;
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const { title, firstName, lastName, email, password } =
+      validatedFields.data;
 
     const existingUser = await getUserByEmail(email);
 
     if (existingUser) {
-        return { error: "Email already in use!"}
+      return { error: "Email already in use!" };
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
     const id = generateUserID();
 
-    await db.user.create({
-        data: {
-            id,
-            title,
-            firstName,
-            lastName,
-            email,
-            password: hashedPassword
-        }
-    })
+    const formattedValues = {
+      firstName: formatName(firstName),
+      lastName: formatName(lastName),
+      email: email.toLowerCase(),
+    };
 
-    return { success: "User has been successfully created!"}    
-}
+    await db.user.create({
+      data: {
+        id,
+        title,
+        ...formattedValues,
+        password: hashedPassword,
+      },
+    });
+
+    return { success: "User has been successfully created!" };
+  } catch (error) {
+    console.error("[REGISTERING_USER_ERROR]", error);
+    return { error: "Something went wrong" };
+  }
+};

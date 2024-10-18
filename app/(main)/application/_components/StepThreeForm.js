@@ -63,7 +63,9 @@ export const StepThreeForm = ({
 }) => {
   const [fileUploads, setFileUploads] = useState([]);
   const [isWorkExperienceClicked, setIsWorkExperienceClicked] = useState(
-    application?.workExperience?.length > 0 && fData?.addWorkExperience !== "No"
+    (application?.workExperience?.length > 0 &&
+      fData?.addWorkExperience !== "No") ||
+      application?.hasWorkExperience
   );
   const [isPending, startTransition] = useTransition();
   const [formErrors, setFormErrors] = useState();
@@ -90,15 +92,7 @@ export const StepThreeForm = ({
       workExperience:
         application?.workExperience?.length > 0
           ? application.workExperience
-          : [
-              {
-                title: "" || undefined,
-                nameOfOrganisation: "" || undefined,
-                natureOfJob: "",
-                jobStartDate: "" || undefined,
-                jobEndDate: "" || undefined,
-              },
-            ],
+          : [],
     },
     resolver: zodResolver(SectionThreeSchema),
   });
@@ -213,7 +207,10 @@ export const StepThreeForm = ({
 
     const currentValues = { ...fData, ...stepThreeData };
 
-    if (stepThreeData.addWorkExperience === "No") {
+    if (
+      stepThreeData.addWorkExperience === "No" ||
+      stepThreeData.addWorkExperience === undefined
+    ) {
       currentValues.workExperience = [];
     }
 
@@ -242,7 +239,7 @@ export const StepThreeForm = ({
             title: data.success,
           });
 
-          router.push("/user-details");
+          router.push("/application-saved");
         }
 
         if (data?.error) {
@@ -318,6 +315,27 @@ export const StepThreeForm = ({
     updateFiles();
   }, [application, updateWorkExperience, hasNoWorkExperienceFiles]);
 
+  // useEffect(() => {
+  //   if (
+  //     isWorkExperienceClicked &&
+  //     workExperienceFields.length === 0 &&
+  //     !fData?.workExperience
+  //   ) {
+  //     appendWorkExperience({
+  //       title: "",
+  //       nameOfOrganisation: "",
+  //       natureOfJob: "",
+  //       jobStartDate: "",
+  //       jobEndDate: "",
+  //     });
+  //   }
+  // }, [
+  //   isWorkExperienceClicked,
+  //   workExperienceFields.length,
+  //   appendWorkExperience,
+  //   fData?.workExperience,
+  // ]);
+
   return (
     <div className="w-full px-5 lg:px-[50px]">
       <FormError message={formErrors || error} />
@@ -351,6 +369,21 @@ export const StepThreeForm = ({
                             onValueChange={(value) => {
                               field.onChange(value);
                               setIsWorkExperienceClicked(value === "Yes");
+
+                              if (value === "No") {
+                                form.setValue("workExperience", []);
+                              } else if (
+                                value === "Yes" &&
+                                workExperienceFields.length === 0
+                              ) {
+                                appendWorkExperience({
+                                  title: "",
+                                  nameOfOrganisation: "",
+                                  natureOfJob: "",
+                                  jobStartDate: "",
+                                  jobEndDate: "",
+                                });
+                              }
                             }}
                             defaultValue={field.value}
                             className="flex flex-col space-y-1"
@@ -378,11 +411,8 @@ export const StepThreeForm = ({
 
               {isWorkExperienceClicked &&
                 workExperienceFields.map((item, index) => (
-                  <>
-                    <div
-                      key={item.id}
-                      className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 lg:flex-nowrap mt-6"
-                    >
+                  <div key={item.id}>
+                    <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 lg:flex-nowrap mt-6">
                       <div className="w-full sm:w-[400px]">
                         <FormField
                           control={form.control}
@@ -634,7 +664,7 @@ export const StepThreeForm = ({
                         )}
                       />
                     </div>
-                  </>
+                  </div>
                 ))}
 
               {isWorkExperienceClicked && workExperienceFields.length < 3 && (

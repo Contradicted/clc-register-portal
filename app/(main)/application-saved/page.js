@@ -33,7 +33,7 @@ const ApplicationSavedPage = async () => {
           </div>
 
           <div className="min-w-[320px] md:min-w-[500px] px-5 mx-auto mt-[60px] lg:min-w-[700px]">
-            <div className="border border-[#F5F5F5] rounded-[10px] p-5">
+            <div className="border border-[#9f9f9f] rounded-[10px] p-5">
               <h3 className="font-semibold mb-5">
                 {savedApplication?.courseTitle}
               </h3>

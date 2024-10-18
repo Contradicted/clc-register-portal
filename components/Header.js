@@ -9,9 +9,10 @@ export const Header = () => {
           <Image
             src="/logo.svg"
             alt="logo"
-            height="200"
-            width="200"
-            className="w-[130px] h-auto md:w-[200px]"
+            width={200}
+            height={200}
+            priority
+            className="w-auto h-auto max-w-[130px] md:max-w-[200px] object-contain"
           />
         </div>
         <LogoutButton>Log out</LogoutButton>

@@ -295,125 +295,200 @@ export const SectionOneSchema = z
     }
   });
 
-export const SectionTwoSchema = z.object({
-  qualifications: z
-    .array(
-      z.object({
-        title: z
-          .string({
-            required_error: "Title is required",
-          })
-          .min(1, {
-            message: "Title is required",
-          }),
-        examiningBody: z
-          .string({
-            required_error: "Examining Body is required",
-          })
-          .min(1, {
-            message: "Examining Body is required",
-          })
-          .refine(
-            (value) => {
-              // Allow letters, numbers, spaces, commas, and periods, but ensure it's not just numbers
-              return /^(?!\d+$)[\p{L}\d\s,.'()-]+$/u.test(value);
-            },
-            {
-              message:
-                "Examining body must contain letters and can include numbers and basic punctuation",
-            }
-          ),
-        dateAwarded: z
-          .date({
-            required_error: "Date awarded is required",
-          })
-          .refine(
-            (date) => {
-              return new Date(date) < new Date(today);
-            },
-            {
-              message: "Date cannot be in the future",
-            }
-          ),
+export const SectionTwoSchema = z
+  .object({
+    qualifications: z
+      .array(
+        z.object({
+          title: z
+            .string({
+              invalid_type_error: "Title is required",
+            })
+            .min(1, {
+              message: "Title is required",
+            }),
+          examiningBody: z
+            .string({
+              invalid_type_error: "Exam body is required",
+            })
+            .min(1, {
+              message: "Examining Body is required",
+            })
+            .refine(
+              (value) => {
+                // Allow letters, numbers, spaces, commas, and periods, but ensure it's not just numbers
+                return /^(?!\d+$)[\p{L}\d\s,.'()-]+$/u.test(value);
+              },
+              {
+                message:
+                  "Examining body must contain letters and can include numbers and basic punctuation",
+              }
+            ),
+          dateAwarded: z
+            .date({
+              required_error: "Date awarded is required",
+              invalid_type_error: "Date awarded is required",
+            })
+            .refine(
+              (date) => {
+                return new Date(date) < new Date(today);
+              },
+              {
+                message: "Date cannot be in the future",
+              }
+            ),
+        })
+      )
+      .min(1, {
+        message: "At least 1 qualification is required",
       })
-    )
-    .min(1, {
-      message: "At least 1 qualification is required",
-    })
-    .max(3, {
-      message: "Only 3 qualifications are allowed",
+      .max(3, {
+        message: "Only 3 qualifications are allowed",
+      }),
+    addPendingQualifications: z.enum(["Yes", "No"], {
+      required_error: "Please tick an option",
     }),
-  addPendingQualifications: z.enum(["Yes", "No"], {
-    required_error: "Please tick an option",
-  }),
-  // pendingQualifications: z
-  //   .array(
-  //     z.object({
-  //       title: z
-  //         .string({
-  //           required_error: "Title is required",
-  //         })
-  //         .min(1, {
-  //           message: "Title is required",
-  //         })
-  //         .regex(nameRegex, {
-  //           message: "Title cannot contain numbers",
-  //         }),
-  //       examiningBody: z
-  //         .string({
-  //           required_error: "Examining Body is required",
-  //         })
-  //         .min(1, {
-  //           message: "Examining Body is required",
-  //         })
-  //         .regex(nameRegex, {
-  //           message: "Examining body cannot contain numbers",
-  //         }),
-  //       dateOfResults: z
-  //         .date({
-  //           required_error: "Date of Results is required",
-  //         })
-  //         .refine(
-  //           (date) => {
-  //             return new Date(date) > new Date(today);
-  //           },
-  //           {
-  //             message: "Date cannot be in the past",
-  //           }
-  //         ),
-  //       subjectsPassed: z
-  //         .string({
-  //           required_error: "Subjects passed is required",
-  //         })
-  //         .min(1, {
-  //           message: "Subjects passed is required",
-  //         }),
-  //     })
-  //   )
-  //   .optional(),
-  isEnglishFirstLanguage: z.string({
-    required_error: "Please tick an option",
-  }),
-});
-// .superRefine((data, ctx) => {
-//   if (data.addPendingQualifications === "Yes") {
-//     if (
-//       !data.pendingQualifications ||
-//       data.pendingQualifications.length === 0
-//     ) {
-//       ctx.addIssue({
-//         path: ["pendingQualifications"],
-//         message: "Please enter details for the pending qualification",
-//       });
-//     }
-//   }
-// });
+    pendingQualifications: z
+      .array(
+        z.object({
+          title: z
+            .string({
+              invalid_type_error: "Title is required",
+            })
+            .min(1, {
+              message: "Title is required",
+            })
+            .regex(nameRegex, {
+              message: "Title cannot contain numbers",
+            }),
+          examiningBody: z
+            .string({
+              invalid_type_error: "Exam Body is required",
+            })
+            .min(1, {
+              message: "Examining Body is required",
+            })
+            .regex(nameRegex, {
+              message: "Examining body cannot contain numbers",
+            }),
+          dateOfResults: z
+            .date({
+              invalid_type_error: "Date of Results is required",
+            })
+            .refine(
+              (date) => {
+                return new Date(date) > new Date(today);
+              },
+              {
+                message: "Date cannot be in the past",
+              }
+            ),
+          subjectsPassed: z
+            .string({
+              invalid_type_error: "Subjects passed is required",
+            })
+            .min(1, {
+              message: "Subjects passed is required",
+            }),
+        })
+      )
+      .optional(),
+    isEnglishFirstLanguage: z.string({
+      required_error: "Please tick an option",
+    }),
+  })
+  .refine(
+    (data) => {
+      if (data.addPendingQualifications === "Yes") {
+        return (
+          data.addPendingQualifications &&
+          data.pendingQualifications.length > 0 &&
+          data.pendingQualifications.every(
+            (qual) =>
+              qual.title &&
+              qual.examiningBody &&
+              qual.dateOfResults &&
+              qual.subjectsPassed
+          )
+        );
+      }
+      return true;
+    },
+    {
+      message: "Enter pending qualification",
+      path: ["pendingQualification"],
+    }
+  );
 
-export const SectionThreeSchema = z.object({
-    addWorkExperience: z.enum(['Yes', 'No'], {
-        required_error: 'Please tick an option',
+export const SectionThreeSchema = z
+  .object({
+    addWorkExperience: z.enum(["Yes", "No"], {
+      required_error: "Please tick an option",
     }),
-})
+    workExperience: z
+      .array(
+        z
+          .object({
+            title: z
+              .string({
+                invalid_type_error: "Job Title is required",
+              })
+              .min(1, { message: "Job title is required" }),
+            nameOfOrganisation: z
+              .string({
+                invalid_type_error: "Name of Organisation is required",
+              })
+              .min(1, { message: "Organisation name is required" }),
+            natureOfJob: z
+              .string({
+                invalid_type_error: "Nature of job is required",
+              })
+              .min(1, { message: "Nature of Job is required" }),
+            jobStartDate: z.date({
+              invalid_type_error: "Job Start Date is required",
+            }),
+            jobEndDate: z.date({
+              invalid_type_error: "Job End Date is required",
+            }),
+          })
+          .refine(
+            (data) => {
+              if (data.jobStartDate && data.jobEndDate) {
+                return new Date(data.jobStartDate) <= new Date(data.jobEndDate);
+              }
+              return true;
+            },
+            {
+              message: "Job start date must before end date",
+              path: ["jobStartDate"], // Changed to jobEndDate for better UX
+            }
+          )
+      )
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.addWorkExperience === "Yes") {
+        return (
+          data.addWorkExperience &&
+          data.workExperience.length > 0 &&
+          data.workExperience.every(
+            (we) =>
+              we.title &&
+              we.nameOfOrganisation &&
+              we.natureOfJob &&
+              we.jobStartDate &&
+              we.jobEndDate
+          )
+        );
+      }
+      return true;
+    },
+    {
+      message: "Enter work experience",
+      path: ["workExperience"],
+    }
+  );
 
 export const SectionFourSchema = z.object({
     reasonsForChoosingProgram: z.string({

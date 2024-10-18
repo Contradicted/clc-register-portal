@@ -46,8 +46,9 @@ export const StepTwoForm = ({
 }) => {
   const [file, setFile] = useState(null);
   const [isPendingExamClicked, setIsPendingExamClicked] = useState(
-    application?.pendingQualifications?.length > 0 &&
-      fData?.addPendingQualifications !== "No"
+    (application?.pendingQualifications?.length > 0 &&
+      fData?.addPendingQualifications !== "No") ||
+      application?.hasPendingResults
   );
   const [isClicked, setIsClicked] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -87,14 +88,7 @@ export const StepTwoForm = ({
       pendingQualifications:
         application?.pendingQualifications?.length > 0
           ? application.pendingQualifications
-          : [
-              {
-                title: "" || undefined,
-                examiningBody: "" || undefined,
-                dateOfResults: "",
-                subjectsPassed: "" || undefined,
-              },
-            ],
+          : [],
       isEnglishFirstLanguage:
         fData?.isEnglishFirstLanguage === "Yes"
           ? "Yes"
@@ -165,22 +159,16 @@ export const StepTwoForm = ({
     const updatedIsRemoved = { ...isRemoved };
 
     if (removed) {
-      if (updatedAccumulatedFiles[`qualification_file_${index}`]) {
-        updatedAccumulatedFiles[`qualification_file_${index}`].file = null;
-      } else {
-        updatedAccumulatedFiles[`qualification_file_${index}`] = {
-          file: null,
-          alreadyExists: false,
-        };
-      }
-      updatedAccumulatedFiles[`qualification_file_${index}_isRemoved`] = true;
+      updatedAccumulatedFiles[`qualification_file_${index}`] = {
+        file: null,
+        alreadyExists: false,
+      };
       updatedIsRemoved[`qualification_file_${index}`] = true;
     } else {
       updatedAccumulatedFiles[`qualification_file_${index}`] = {
         file,
         alreadyExists: false,
       };
-      updatedAccumulatedFiles[`qualification_file_${index}_isRemoved`] = false;
       updatedIsRemoved[`qualification_file_${index}`] = false;
     }
 
@@ -242,7 +230,10 @@ export const StepTwoForm = ({
 
     const currentValues = { ...fData, ...stepTwoData };
 
-    if (stepTwoData.addPendingQualifications === "No") {
+    if (
+      stepTwoData.addPendingQualifications === "No" ||
+      stepTwoData.addPendingQualifications === undefined
+    ) {
       currentValues.pendingQualifications = [];
     }
 
@@ -255,16 +246,17 @@ export const StepTwoForm = ({
           accumulatedFiles[key].alreadyExists
         );
       }
+      formData.append(`${key}_isRemoved`, isRemoved[key] || false);
     }
 
     // Conditional validation logic
-    const isValid = SectionTwoSavedSchema.safeParse(currentValues);
+    // const isValid = SectionTwoSavedSchema.safeParse(currentValues);
 
-    if (!isValid.success) {
-      console.log(isValid);
-      setFormErrors(isValid.error.formErrors.fieldErrors);
-      return;
-    }
+    // if (!isValid.success) {
+    //   console.log(isValid);
+    //   setFormErrors(isValid.error.formErrors.fieldErrors);
+    //   return;
+    // }
 
     startTransition(() => {
       save(
@@ -356,8 +348,6 @@ export const StepTwoForm = ({
     updateFiles();
   }, [application, hasNoQualificationFiles]);
 
-  console.log(accumulatedFiles);
-
   return (
     <div className="w-full px-5 lg:px-[50px]">
       <FormError message={formErrors || error} />
@@ -375,11 +365,8 @@ export const StepTwoForm = ({
           <div className="mt-5 flex justify-center">
             <div className="w-full max-w-[1160px]">
               {qualificationFields.map((item, index) => (
-                <>
-                  <div
-                    key={item.id}
-                    className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap"
-                  >
+                <div key={item.id}>
+                  <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap">
                     <div className="w-full sm:w-[400px]">
                       <FormField
                         control={form.control}
@@ -546,7 +533,7 @@ export const StepTwoForm = ({
                       )}
                     />
                   </div>
-                </>
+                </div>
               ))}
 
               {qualificationFields.length < 3 && (
@@ -559,7 +546,7 @@ export const StepTwoForm = ({
                     appendQualification({
                       title: "",
                       examiningBody: "",
-                      dateAwarded: "",
+                      dateAwarded: undefined,
                     })
                   }
                   className="mb-10 mt-2"
@@ -586,6 +573,20 @@ export const StepTwoForm = ({
                             onValueChange={(value) => {
                               field.onChange(value);
                               setIsPendingExamClicked(value === "Yes");
+
+                              if (value === "No") {
+                                form.setValue("pendingQualifications", []);
+                              } else if (
+                                value === "Yes" &&
+                                pendingQualificationFields.length === 0
+                              ) {
+                                appendPendingQualification({
+                                  title: "",
+                                  examiningBody: "",
+                                  dateAwarded: undefined,
+                                  subjectsPassed: "",
+                                });
+                              }
                             }}
                             defaultValue={field.value}
                             className="flex flex-col space-y-1"
@@ -613,11 +614,8 @@ export const StepTwoForm = ({
 
               {isPendingExamClicked &&
                 pendingQualificationFields.map((item, index) => (
-                  <>
-                    <div
-                      key={item.id}
-                      className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6"
-                    >
+                  <div key={item.id}>
+                    <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6">
                       <div className="w-full sm:w-[400px]">
                         <FormField
                           control={form.control}
@@ -747,7 +745,7 @@ export const StepTwoForm = ({
                         </div>
                       )}
                     </div>
-                  </>
+                  </div>
                 ))}
 
               {isPendingExamClicked &&
@@ -760,7 +758,7 @@ export const StepTwoForm = ({
                       appendPendingQualification({
                         title: "",
                         examiningBody: "",
-                        dateAwarded: "",
+                        dateAwarded: undefined,
                         subjectsPassed: "",
                       })
                     }
