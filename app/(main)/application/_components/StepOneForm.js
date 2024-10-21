@@ -176,6 +176,8 @@ export const StepOneForm = ({
         undefined,
       mobileNo: userDetails?.mobileNo || application?.mobileNo || undefined,
       email: application?.email || undefined,
+      emergency_contact_name: application?.emergency_contact_name || undefined,
+      emergency_contact_no: application?.emergency_contact_no || undefined,
       tuitionFees: application?.tuitionFees || undefined,
     },
     resolver: zodResolver(SectionOneSchema),
@@ -1418,6 +1420,8 @@ export const StepOneForm = ({
                               form.formState.errors.homeTelephoneNo &&
                               "border-red-500"
                             }
+                            international
+                            defaultCountry="GB"
                           />
                         </FormControl>
                         <FormDescription className="text-xs italic text-muted-foreground">
@@ -1430,7 +1434,7 @@ export const StepOneForm = ({
               </div>
 
               {/* Row 10 */}
-              <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6">
+              <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-5">
                 <div className="w-full sm:w-[360px]">
                   <FormField
                     control={form.control}
@@ -1443,6 +1447,8 @@ export const StepOneForm = ({
                             {...field}
                             disabled={isPending}
                             formError={!!form.formState.errors.mobileNo}
+                            international
+                            defaultCountry="GB"
                           />
                         </FormControl>
                         <FormDescription className="text-xs italic text-muted-foreground">
@@ -1474,9 +1480,61 @@ export const StepOneForm = ({
                     )}
                   />
                 </div>
+
+                <div className="w-full sm:w-[400px]">
+                  <FormField
+                    control={form.control}
+                    name="emergency_contact_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Emergency Contact Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="text"
+                            disabled={isPending}
+                            className={
+                              form.formState.errors.emergency_contact_name &&
+                              "border-red-500"
+                            }
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
               {/* Row 11 */}
+              <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-4">
+                <div className="w-full sm:w-[360px]">
+                  <FormField
+                    control={form.control}
+                    name="emergency_contact_no"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Emergency Contact Number</FormLabel>
+                        <FormControl className="w-full">
+                          <PhoneInput
+                            {...field}
+                            disabled={isPending}
+                            formError={
+                              !!form.formState.errors.emergency_contact_no
+                            }
+                            international
+                            defaultCountry="GB"
+                          />
+                        </FormControl>
+                        <FormDescription className="text-xs italic text-muted-foreground">
+                          Select country code from dropdown or enter manually
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Row 12 */}
               <div className="flex flex-wrap flex-col sm:flex-row justify-start items-start gap-6 sm:gap-10 sm:flex-nowrap mt-6">
                 <div className="w-full">
                   <FormField

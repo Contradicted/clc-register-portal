@@ -259,6 +259,16 @@ export const SectionOneSchema = z
       .email({
         message: "Please enter a valid email",
       }),
+    emergency_contact_name: z
+      .string({
+        required_error: "Emergency contact name is required",
+      })
+      .min(1, { message: "Emergency contact name is required" }),
+    emergency_contact_no: z
+      .string({
+        required_error: "Emergency contact number is required",
+      })
+      .min(1, { message: "Emergency contact number is required" }),
     tuitionFees: z.string({
       required_error: "Tuition fee is required",
     }),
