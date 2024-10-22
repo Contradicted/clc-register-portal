@@ -263,7 +263,10 @@ export const SectionOneSchema = z
       .string({
         required_error: "Emergency contact name is required",
       })
-      .min(1, { message: "Emergency contact name is required" }),
+      .min(1, { message: "Emergency contact name is required" })
+      .regex(nameRegex, {
+        message: "Emergency contact name cannot contain numbers",
+      }),
     emergency_contact_no: z
       .string({
         required_error: "Emergency contact number is required",
