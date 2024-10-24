@@ -298,7 +298,10 @@ export const SectionOneSchema = z
       }
     }
 
-    if (data.immigration_status === "pre_settled") {
+    if (
+      data.immigration_status === "pre_settled" ||
+      data.immigration_status === "settled"
+    ) {
       if (!data.share_code) {
         ctx.addIssue({
           path: ["share_code"],

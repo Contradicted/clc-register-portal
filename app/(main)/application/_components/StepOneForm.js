@@ -236,10 +236,6 @@ export const StepOneForm = ({
       currentValues.share_code = null;
     }
 
-    if (currentValues.immigration_status === "settled") {
-      currentValues.share_code = null;
-    }
-
     updateData(
       {
         ...currentValues,
@@ -378,10 +374,7 @@ export const StepOneForm = ({
   }, [watchNationality, setAccumulatedFiles]);
 
   useEffect(() => {
-    setIsShareCodeRequired(
-      watchImmigrationStatus !== "settled" &&
-        watchImmigrationStatus !== undefined
-    );
+    setIsShareCodeRequired(watchImmigrationStatus !== undefined);
   }, [watchImmigrationStatus]);
 
   useEffect(() => {
@@ -447,10 +440,6 @@ export const StepOneForm = ({
 
     if (stepOneData.nationality === "British") {
       stepOneData.immigration_status = null;
-      stepOneData.share_code = null;
-    }
-
-    if (stepOneData.immigration_status === "settled") {
       stepOneData.share_code = null;
     }
 
