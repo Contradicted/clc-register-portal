@@ -129,8 +129,14 @@ function getStatusColor(status) {
       return "text-[#DC143c]";
     case "Waiting for Change":
       return "text-[#f39c12]";
+    case "Approved for Interview":
+      return "text-[#0fa968]";
+    case "Interview successful":
+      return "text-[#0fa968]";
     case "Re-Submitted":
       return "text-[#00CED1]";
+    case "Void":
+      return "text-[#787878]";
     default:
       return "text-[#008080]";
   }
