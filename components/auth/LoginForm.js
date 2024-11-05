@@ -5,65 +5,67 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-import { LoaderCircle } from 'lucide-react'
+import { EyeIcon, EyeOffIcon, LoaderCircle } from "lucide-react";
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
-    Form,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormControl,
-} from '@/components/ui/form'
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+} from "@/components/ui/form";
 
-import { FormError } from '@/components/FormError'
+import { FormError } from "@/components/FormError";
 
-import { LoginSchema } from '@/schemas'
-import { login } from '@/actions/login'
-import { useMedia } from 'react-use'
+import { LoginSchema } from "@/schemas";
+import { login } from "@/actions/login";
+import { useMedia } from "react-use";
+import { cn } from "@/lib/utils";
 
 export function LoginForm() {
-    const [formErrors, setFormErrors] = useState()
-    const [error, setError] = useState()
-    const [success, setSuccess] = useState()
-    const [isPending, startTransition] = useTransition()
+  const [formErrors, setFormErrors] = useState();
+  const [error, setError] = useState();
+  const [success, setSuccess] = useState();
+  const [isVisible, setIsVisible] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-    const searchParams = useSearchParams()
-    const isWide = useMedia('(min-width: 1280px)', false)
-    const callbackURL = searchParams.get('callbackURL')
+  const searchParams = useSearchParams();
+  const isWide = useMedia("(min-width: 1280px)", false);
+  const callbackURL = searchParams.get("callbackURL");
 
-    const form = useForm({
-        defaultValues: {
-            email: '',
-            password: '',
-        },
-    })
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-    const onSubmit = (values) => {
-        setFormErrors()
-        setError('')
-        setSuccess('')
+  const onSubmit = (values) => {
+    setFormErrors();
+    setError("");
+    setSuccess("");
 
-        const isValid = LoginSchema.safeParse(values)
+    const isValid = LoginSchema.safeParse(values);
 
-        if (!isValid.success) {
-            setFormErrors(isValid.error.formErrors.fieldErrors)
-            return
+    if (!isValid.success) {
+      setFormErrors(isValid.error.formErrors.fieldErrors);
+      return;
+    }
+
+    startTransition(() => {
+      login(values, callbackURL).then((data) => {
+        if (data?.error) {
+          setError(data.error);
         }
 
-        startTransition(() => {
-            login(values, callbackURL).then((data) => {
-                if (data?.error) {
-                    setError(data.error)
-                }
-
-                if (data?.success) {
-                    form.reset()
-                }
-            })
-        })
-    }
+        if (data?.success) {
+          form.reset();
+        }
+      });
+    });
+  };
 
   return (
     <div className="w-full h-full lg:grid lg:grid-cols-2 flex items-center justify-center">
@@ -108,20 +110,42 @@ export function LoginForm() {
                       <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="password"
-                            placeholder="*******"
-                            disabled={isPending}
-                          />
+                          <div className="relative">
+                            <Input
+                              {...field}
+                              type={isVisible ? "text" : "password"}
+                              placeholder="*******"
+                              disabled={isPending}
+                            />
+                            <Button
+                              type="button"
+                              variant="icon"
+                              disabled={isPending}
+                              onClick={() => setIsVisible(!isVisible)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                              aria-label={
+                                isVisible ? "Hide password" : "Show password"
+                              }
+                            >
+                              {isVisible ? (
+                                <EyeOffIcon className="h-4 w-4" />
+                              ) : (
+                                <EyeIcon className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
                         </FormControl>
                       </FormItem>
                     )}
                   />
                   <Link
                     href="/auth/reset-password"
-                    className="ml-auto inline-block text-sm underline my-2 hover:text-gray-500"
-                    disabled={isPending}
+                    className={cn(
+                      "ml-auto inline-block text-sm underline my-2 hover:text-gray-500",
+                      isPending && "text-neutral-400 pointer-events-none"
+                    )}
+                    aria-disabled={isPending}
+                    tabIndex={isPending ? -1 : undefined}
                   >
                     Forgot your password?
                   </Link>
@@ -142,7 +166,12 @@ export function LoginForm() {
                 New to City of London College?{" "}
                 <Link
                   href="/auth/register"
-                  className="font-medium text-black hover:text-black/95"
+                  className={cn(
+                    "font-medium text-black hover:text-black/95",
+                    isPending && "text-neutral-400 pointer-events-none"
+                  )}
+                  aria-disabled={isPending}
+                  tabIndex={isPending ? -1 : undefined}
                 >
                   Create an account
                 </Link>

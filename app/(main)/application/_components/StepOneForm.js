@@ -1,6 +1,6 @@
 'use client'
 
-import { format } from 'date-fns'
+import { compareAsc, format } from "date-fns";
 import { CalendarIcon, InfoIcon, Loader2, LoaderCircle } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -139,11 +139,13 @@ export const StepOneForm = ({
   );
   const [courses, setCourses] = useState([]);
   const [studyModes, setStudyModes] = useState([]);
+  const [courseInstances, setCourseInstances] = useState([]);
 
   const form = useForm({
     defaultValues: {
       courseTitle: application?.courseTitle || undefined,
       studyMode: application?.studyMode || undefined,
+      commencement: application?.commencement || undefined,
       campus: application?.campus || undefined,
       title: userDetails?.title || application?.title || undefined,
       firstName: userDetails?.firstName || application?.firstName || undefined,
@@ -175,7 +177,7 @@ export const StepOneForm = ({
         application?.homeTelephoneNo ||
         undefined,
       mobileNo: userDetails?.mobileNo || application?.mobileNo || undefined,
-      email: application?.email || undefined,
+      email: userDetails?.email || application?.email || undefined,
       emergency_contact_name: application?.emergency_contact_name || undefined,
       emergency_contact_no: application?.emergency_contact_no || undefined,
       tuitionFees: application?.tuitionFees || undefined,
@@ -393,6 +395,7 @@ export const StepOneForm = ({
         );
         if (selectedCourse) {
           setStudyModes(selectedCourse.course_study_mode);
+          setCourseInstances(selectedCourse.course_instances);
         }
       } catch (error) {
         console.error("Error fetching courses:", error);
@@ -407,6 +410,7 @@ export const StepOneForm = ({
     );
     if (selectedCourse) {
       setStudyModes(selectedCourse.course_study_mode);
+      setCourseInstances(selectedCourse.course_instances);
 
       // Check if the current study mode is valid for the selected course
       const currentStudyMode = form.getValues("studyMode");
@@ -414,12 +418,24 @@ export const StepOneForm = ({
         (mode) => mode.study_mode === currentStudyMode
       );
 
+      // Check if the current course instance is valid for the selected course
+      const currentCourseInstance = form.getValues("commencement");
+      const isValidCourseInstance = selectedCourse.course_instances.some(
+        (instance) => instance.instance_name === currentCourseInstance
+      );
+
       // Only reset the study mode if it's not valid for the selected course
       if (!isValidStudyMode) {
         form.setValue("studyMode", "");
       }
+
+      // Only reset the commencement if it's not valid for the selected course
+      if (!isValidCourseInstance) {
+        form.setValue("commencement", "");
+      }
     } else {
       setStudyModes([]);
+      setCourseInstances([]);
     }
   }, [watchCourseTitle, courses, form]);
 
@@ -499,7 +515,7 @@ export const StepOneForm = ({
           </div>
 
           <div className="mt-5">
-            <div className="flex flex-col sm:flex-row justify-center items-start gap-6 sm:gap-10 max-w-3xl mx-auto">
+            <div className="flex flex-col sm:flex-row justify-center items-start gap-6 sm:gap-10 max-w-5xl mx-auto">
               <div className="w-full sm:w-1/2">
                 <FormField
                   control={form.control}
@@ -575,6 +591,54 @@ export const StepOneForm = ({
                                   {formatStudyMode(mode.study_mode)}
                                 </SelectItem>
                               ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="w-full sm:w-1/2">
+                <FormField
+                  control={form.control}
+                  name="commencement"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>Commencement</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          value={field.value}
+                          disabled={isPending}
+                        >
+                          <SelectTrigger
+                            className={
+                              form.formState.errors.commencement
+                                ? "border-red-500"
+                                : ""
+                            }
+                          >
+                            <SelectValue placeholder="Select an option" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {courseInstances
+                                .sort((a, b) =>
+                                  compareAsc(
+                                    new Date(a.instance_name),
+                                    new Date(b.instance_name)
+                                  )
+                                )
+                                .map((instance) => (
+                                  <SelectItem
+                                    key={instance.id}
+                                    value={instance.instance_name}
+                                  >
+                                    {instance.instance_name}
+                                  </SelectItem>
+                                ))}
                             </SelectGroup>
                           </SelectContent>
                         </Select>

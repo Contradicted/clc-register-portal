@@ -105,6 +105,7 @@ export const SectionOneSchema = z
     title: z.string({
       required_error: "Title is required",
     }),
+    commencement: z.string().min(1, { message: "Commencement is required " }),
     campus: z.string({
       required_error: "Campus is required",
     }),

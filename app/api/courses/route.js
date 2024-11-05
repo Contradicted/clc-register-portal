@@ -3,15 +3,16 @@ import { db } from '@/lib/db'
 export async function GET() {
     try {
         const courses = await db.course.findMany({
-            where: {
-                status: 'Active',
-            },
-            select: {
-                id: true,
-                name: true,
-                course_study_mode: true,
-            },
-        })
+          where: {
+            status: "Active",
+          },
+          select: {
+            id: true,
+            name: true,
+            course_study_mode: true,
+            course_instances: true,
+          },
+        });
 
         return new Response(JSON.stringify(courses), {
             headers: { 'Content-Type': 'application/json' },
