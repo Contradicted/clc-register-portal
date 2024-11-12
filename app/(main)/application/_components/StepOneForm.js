@@ -1,9 +1,16 @@
-'use client'
+"use client";
 
 import { compareAsc, format } from "date-fns";
-import { CalendarIcon, InfoIcon, Loader2, LoaderCircle } from "lucide-react";
+import {
+  CalendarIcon,
+  InfoIcon,
+  Loader2,
+  LoaderCircle,
+  Plus,
+  Trash,
+} from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -33,7 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn, formatStudyMode } from "@/lib/utils";
+import { cn, formatCurrency, formatStudyMode } from "@/lib/utils";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { FormButtons } from "./FormButtons";
 import { FormError } from "@/components/FormError";
@@ -63,6 +70,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import AmountInput from "@/components/amount-input";
 
 countries.registerLocale(countriesEnglish);
 nationalities.registerLocale(nationalitiesEnglish);
@@ -117,6 +125,7 @@ export const StepOneForm = ({
   const [file, setFile] = useState(null);
   const [idFile, setIdFile] = useState(null);
   const [immigrationFile, setImmigrationFile] = useState(null);
+  const [tuitionFile, setTuitionFile] = useState(null);
   const [isClicked, setIsClicked] = useState(defaultIsClicked);
   const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(true);
@@ -140,6 +149,34 @@ export const StepOneForm = ({
   const [courses, setCourses] = useState([]);
   const [studyModes, setStudyModes] = useState([]);
   const [courseInstances, setCourseInstances] = useState([]);
+  const [slcSelected, setSlcSelected] = useState(
+    fData?.tuitionFees === "Student Loan Company England (SLC)" ||
+      application?.tuitionFees === "Student Loan Company England (SLC)"
+  );
+  const [totalAmount, setTotalAmount] = useState(0);
+  // const [paymentAmounts, setPaymentAmounts] = useState({});
+  const [selectedCourseFee, setSelectedCourseFee] = useState(null);
+  const [feeDifference, setFeeDifference] = useState(null);
+  const [maintenanceDifference, setMaintenanceDifference] = useState(null);
+
+  // New states for enhanced functionality
+  const [paymentStatus, setPaymentStatus] = useState({
+    difference: application?.paymentPlan?.difference || 0,
+    insufficientTuition: false,
+    insufficientMaintenance: false,
+  });
+
+  const [useMaintenanceForTuition, setUseMaintenanceForTuition] = useState(
+    application?.paymentPlan?.usingMaintenanceForTuition
+  );
+
+  const [showMaintenanceOption, setShowMaintenanceOption] = useState(
+    application?.paymentPlan?.slcStatus ===
+      "Approved - Tuition Fees & Maintenance Loan"
+  );
+  const [isCreatingPaymentPlan, setIsCreatingPaymentPlan] = useState(false);
+
+  console.log(application);
 
   const form = useForm({
     defaultValues: {
@@ -181,8 +218,51 @@ export const StepOneForm = ({
       emergency_contact_name: application?.emergency_contact_name || undefined,
       emergency_contact_no: application?.emergency_contact_no || undefined,
       tuitionFees: application?.tuitionFees || undefined,
+      paymentOption: application?.paymentPlan?.paymentOption || undefined,
+      hasSlcAccount:
+        fData?.hasSlcAccount ||
+        (application?.paymentPlan?.hasSlcAccount && "Yes") ||
+        undefined,
+      previouslyReceivedFunds:
+        fData?.previouslyReceivedFunds ||
+        (application?.paymentPlan?.previouslyReceivedFunds === true
+          ? "Yes"
+          : application?.paymentPlan?.previouslyReceivedFunds === false
+          ? "No"
+          : undefined),
+      previousFundingYear:
+        fData?.previousFundingYear ||
+        application?.paymentPlan?.previousFundingYear ||
+        undefined,
+      appliedForCourse:
+        fData?.appliedForCourse ||
+        (application?.paymentPlan?.appliedForCourse && "Yes") ||
+        undefined,
+      crn: fData?.crn || application?.paymentPlan?.crn?.trim() || "",
+      slcStatus:
+        fData?.slcStatus || application?.paymentPlan?.slcStatus || undefined,
+      tuitionFeeAmount:
+        fData?.tuitionFeeAmount ||
+        application?.paymentPlan?.tuitionFeeAmount ||
+        undefined,
+      courseFee: fData?.paymentPlan?.courseFee || undefined,
+      maintenanceLoanAmount:
+        fData?.maintenanceLoanAmount ||
+        application?.paymentPlan?.maintenanceLoanAmount ||
+        undefined,
+      ssn: fData?.ssn || application?.paymentPlan?.ssn || "",
+      usingMaintenanceForTuition:
+        fData?.usingMaintenanceForTuition ||
+        application?.paymentPlan?.usingMaintenanceForTuition ||
+        false,
+      expectedPayments: [],
     },
     resolver: zodResolver(SectionOneSchema),
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "expectedPayments",
   });
 
   const now = new Date();
@@ -193,10 +273,58 @@ export const StepOneForm = ({
   const watchNationality = form.watch("nationality");
   const watchImmigrationStatus = form.watch("immigration_status");
   const watchCourseTitle = form.watch("courseTitle");
+  const watchExpectedPayments = form.watch("expectedPayments");
+  const watchStudyMode = form.watch("studyMode");
+  const watchSlcStatus = form.watch("slcStatus");
+  const watchTuitionFeeAmount = form.watch("tuitionFeeAmount");
+  const watchMaintenanceLoanAmount = form.watch("maintenanceLoanAmount");
+  const watchUsingMaintenanceForTuition = form.watch(
+    "usingMaintenanceForTuition"
+  );
 
   const handlePlaceSelect = ({ placeOfBirth, countryName }) => {
     form.setValue("placeOfBirth", placeOfBirth);
     setDetectedCountry(countryName);
+  };
+
+  const createPaymentPlan = (amount, numberOfPayments = 2) => {
+    const paymentAmount = Number((amount / numberOfPayments).toFixed(2));
+    const remainder = Number(
+      (amount - paymentAmount * (numberOfPayments - 1)).toFixed(2)
+    );
+
+    return Array(numberOfPayments)
+      .fill(null)
+      .map((_, index) => ({
+        date: undefined,
+        amount: index === numberOfPayments - 1 ? remainder : paymentAmount,
+        university: "Plymouth Marjon University",
+        course: form.watch("courseTitle") || "",
+      }));
+  };
+
+  const handleMaintenancePaymentPlan = () => {
+    const maintenanceAmount = form.watch("maintenanceLoanAmount");
+    const currentCourseFee = selectedCourseFee;
+
+    if (maintenanceAmount && currentCourseFee) {
+      setIsCreatingPaymentPlan(true);
+
+      // Clear existing payments
+      while (fields.length > 0) {
+        remove(0);
+      }
+
+      // Create new payment plan
+      const payments = createPaymentPlan(currentCourseFee);
+      payments.forEach((payment) => append(payment));
+
+      toast.success("Payment plan created", {
+        description: "Please review and adjust the dates as needed.",
+      });
+
+      setIsCreatingPaymentPlan(false);
+    }
   };
 
   const onSubmit = (values) => {
@@ -204,6 +332,8 @@ export const StepOneForm = ({
   };
 
   const onNext = () => {
+    let shortfall = null;
+
     setHasError(false);
     if (!file) {
       setIsRemoved(true);
@@ -218,10 +348,10 @@ export const StepOneForm = ({
       return;
     }
 
-    if (currentValues.countryOfBirth !== detectedCountry) {
-      setError("Please select the right country");
-      return;
-    }
+    // if (currentValues.countryOfBirth !== detectedCountry) {
+    //   setError("Please select the right country");
+    //   return;
+    // }
 
     if (isClicked && !otherOptionText) {
       setError("Please specify how you will fund your studies.");
@@ -238,9 +368,56 @@ export const StepOneForm = ({
       currentValues.share_code = null;
     }
 
+    if (
+      currentValues.slcStatus === "Approved - Maintenance Loan" &&
+      currentValues.maintenanceLoanAmount &&
+      selectedCourseFee &&
+      currentValues.maintenanceLoanAmount < selectedCourseFee
+    ) {
+      shortfall = {
+        type: "maintenance",
+        amount: selectedCourseFee - currentValues.maintenanceLoanAmount,
+        courseFee: selectedCourseFee,
+        approvedAmount: currentValues.maintenanceLoanAmount,
+        status: currentValues.slcStatus,
+      };
+    }
+
+    // Check for tuition fee shortfall
+    if (
+      (currentValues.slcStatus === "Approved - Tuition Fees" ||
+        currentValues.slcStatus ===
+          "Approved - Tuition Fees & Maintenance Loan") &&
+      currentValues.tuitionFeeAmount &&
+      selectedCourseFee &&
+      currentValues.tuitionFeeAmount < selectedCourseFee &&
+      !useMaintenanceForTuition
+    ) {
+      shortfall = {
+        type: "tuition",
+        amount: selectedCourseFee - currentValues.tuitionFeeAmount,
+        courseFee: selectedCourseFee,
+        approvedAmount: currentValues.tuitionFeeAmount,
+        status: currentValues.slcStatus,
+      };
+    }
+
+    const submissionData = {
+      ...currentValues,
+      shortfall,
+      paymentStatus:
+        currentValues.tuitionFees !== "Student Loan Company England (SLC)"
+          ? {}
+          : {
+              ...paymentStatus,
+              courseFee: selectedCourseFee,
+              totalAmount,
+            },
+    };
+
     updateData(
       {
-        ...currentValues,
+        ...submissionData,
         tuitionFees: isClicked ? otherOptionText : currentValues.tuitionFees,
       },
       accumulatedFiles
@@ -253,6 +430,25 @@ export const StepOneForm = ({
       accumulatedFiles
     );
   };
+
+  useEffect(() => {
+    const savedPayments =
+      fData?.expectedPayments || application?.paymentPlan?.expectedPayments;
+
+    if (savedPayments?.length > 0 && fields.length === 0) {
+      const formattedPayments = savedPayments.map((payment) => ({
+        ...payment,
+        date: payment.date ? new Date(payment.date) : undefined,
+      }));
+
+      form.setValue("expectedPayments", formattedPayments);
+    }
+  }, [
+    application?.paymentPlan?.expectedPayments,
+    fData?.expectedPayments,
+    form,
+    fields.length,
+  ]);
 
   useEffect(() => {
     if (application && application.photoUrl && !accumulatedFiles.file) {
@@ -338,6 +534,37 @@ export const StepOneForm = ({
   }, [application, accumulatedFiles.immigrationFile, setAccumulatedFiles]);
 
   useEffect(() => {
+    if (
+      application &&
+      application.tuition_doc_url &&
+      !accumulatedFiles.tuitionDoc
+    ) {
+      setIsLoading(true);
+
+      try {
+        fetch(application.tuition_doc_url)
+          .then((response) => response.blob())
+          .then((blob) => {
+            const file = new File([blob], application.tuition_doc_name, {
+              type: blob.type,
+            });
+            setTuitionFile(file);
+            setAccumulatedFiles((prev) => ({
+              ...prev,
+              tuitionDoc: { file, alreadyExists: true },
+            }));
+          });
+        setIsLoading(false);
+      } catch (error) {
+        setIsLoading(false);
+        console.error("Error loading file:", error);
+      }
+    }
+
+    setIsLoading(false);
+  }, [application, accumulatedFiles.tuitionDoc, setAccumulatedFiles]);
+
+  useEffect(() => {
     if (defaultIsClicked) {
       form.setValue("tuitionFees", "Other");
       setOtherOptionText(otherOptionText || "");
@@ -408,42 +635,316 @@ export const StepOneForm = ({
     const selectedCourse = courses.find(
       (course) => course.name === form.getValues("courseTitle")
     );
+
     if (selectedCourse) {
       setStudyModes(selectedCourse.course_study_mode);
       setCourseInstances(selectedCourse.course_instances);
+      setSelectedCourseFee(null);
 
-      // Check if the current study mode is valid for the selected course
       const currentStudyMode = form.getValues("studyMode");
       const isValidStudyMode = selectedCourse.course_study_mode.some(
         (mode) => mode.study_mode === currentStudyMode
       );
 
-      // Check if the current course instance is valid for the selected course
-      const currentCourseInstance = form.getValues("commencement");
-      const isValidCourseInstance = selectedCourse.course_instances.some(
-        (instance) => instance.instance_name === currentCourseInstance
-      );
-
-      // Only reset the study mode if it's not valid for the selected course
       if (!isValidStudyMode) {
         form.setValue("studyMode", "");
       }
 
-      // Only reset the commencement if it's not valid for the selected course
-      if (!isValidCourseInstance) {
+      const currentInstance = form.getValues("commencement");
+      const isValidInstance = selectedCourse.course_instances.some(
+        (instance) => instance.instance_name === currentInstance
+      );
+
+      if (!isValidInstance) {
         form.setValue("commencement", "");
       }
     } else {
       setStudyModes([]);
       setCourseInstances([]);
+      setSelectedCourseFee(null);
     }
   }, [watchCourseTitle, courses, form]);
+
+  // 2. Effect for updating course fee based on study mode
+  useEffect(() => {
+    const selectedCourse = courses.find(
+      (course) => course.name === form.getValues("courseTitle")
+    );
+    const currentStudyMode = form.getValues("studyMode");
+
+    if (selectedCourse && currentStudyMode) {
+      const studyModeData = selectedCourse.course_study_mode.find(
+        (mode) => mode.study_mode === currentStudyMode
+      );
+
+      if (studyModeData) {
+        setSelectedCourseFee(studyModeData.tuition_fees);
+      }
+    }
+  }, [watchCourseTitle, watchStudyMode, courses, form]);
+
+  useEffect(() => {
+    if (selectedCourseFee) {
+      form.setValue("courseFee", selectedCourseFee);
+      console.log("done", selectedCourseFee);
+    }
+  }, [selectedCourseFee, form]);
+
+  console.log("coursefee", form.getValues("courseFee"));
+
+  // Main effect for handling all payment scenarios
+  useEffect(() => {
+    if (
+      !selectedCourseFee ||
+      !form.watch("slcStatus")?.includes("Tuition Fees")
+    )
+      return;
+
+    const status = form.watch("slcStatus");
+    const tuitionFee = form.watch("tuitionFeeAmount");
+    const maintenanceLoan = form.watch("maintenanceLoanAmount");
+
+    const newStatus = {};
+
+    switch (status) {
+      case "Approved - Maintenance Loan":
+        // Only check if maintenanceLoan has actually been entered
+        if (maintenanceLoan !== undefined && maintenanceLoan !== "") {
+          if (maintenanceLoan < selectedCourseFee) {
+            newStatus.insufficientMaintenance = true;
+            newStatus.difference = Number(
+              (selectedCourseFee - maintenanceLoan).toFixed(2)
+            );
+            setMaintenanceDifference(null);
+          } else {
+            setMaintenanceDifference(
+              Number((maintenanceLoan - selectedCourseFee).toFixed(2))
+            );
+            if (fields.length === 0 || !fields[0].amount) {
+              handleMaintenancePaymentPlan();
+            }
+          }
+        }
+        break;
+
+      case "Approved - Tuition Fees":
+        // Only check if tuitionFee has actually been entered
+        if (tuitionFee !== undefined && tuitionFee !== "") {
+          if (tuitionFee < selectedCourseFee) {
+            newStatus.insufficientTuition = true;
+            newStatus.difference = Number(
+              (selectedCourseFee - tuitionFee).toFixed(2)
+            );
+            setFeeDifference(
+              Number((selectedCourseFee - tuitionFee).toFixed(2))
+            );
+          } else {
+            setFeeDifference(null);
+          }
+        }
+        break;
+
+      case "Approved - Tuition Fees & Maintenance Loan":
+        // Only check if tuitionFee has actually been entered
+        if (tuitionFee !== undefined && tuitionFee !== "") {
+          const tuitionDifference = selectedCourseFee - tuitionFee;
+          if (tuitionDifference > 0) {
+            setFeeDifference(Number(tuitionDifference.toFixed(2)));
+
+            // Only show maintenance option if:
+            // 1. Tuition fee is less than course fee
+            // 2. Maintenance loan amount has been entered
+            // 3. Maintenance loan is sufficient to cover the difference
+            // 4. User hasn't already chosen to use maintenance
+            if (
+              maintenanceLoan !== undefined &&
+              maintenanceLoan !== "" &&
+              tuitionFee !== undefined &&
+              tuitionFee !== "" &&
+              maintenanceLoan >= tuitionDifference &&
+              !useMaintenanceForTuition
+            ) {
+              console.log("yep, doing this");
+              setShowMaintenanceOption(true);
+              newStatus.difference = tuitionDifference;
+            } else {
+              setShowMaintenanceOption(false);
+              newStatus.insufficientTuition = true;
+              newStatus.difference = tuitionDifference;
+            }
+          } else {
+            setFeeDifference(null);
+            setShowMaintenanceOption(false);
+          }
+        } else {
+          setShowMaintenanceOption(false);
+        }
+        break;
+    }
+
+    setPaymentStatus(newStatus);
+  }, [
+    selectedCourseFee,
+    watchSlcStatus,
+    watchTuitionFeeAmount,
+    watchMaintenanceLoanAmount,
+    useMaintenanceForTuition,
+  ]);
+
+  useEffect(() => {
+    const values = form.watch("expectedPayments");
+    const newTotal =
+      values?.reduce((sum, payment) => {
+        const amount = payment?.amount ? parseFloat(payment.amount) : 0;
+        return sum + amount;
+      }, 0) || 0;
+
+    setTotalAmount(Number(newTotal.toFixed(2)));
+  }, [watchExpectedPayments]);
+
+  useEffect(() => {
+    if (
+      !selectedCourseFee ||
+      !form.watch("slcStatus")?.includes("Tuition Fees")
+    )
+      return;
+
+    const tuitionAmount = Number(form.watch("tuitionFeeAmount")) || 0;
+    const isUsingMaintenance = form.watch("usingMaintenanceForTuition");
+    const maintenanceAmount = Number(form.watch("maintenanceLoanAmount")) || 0;
+
+    console.log("using", isUsingMaintenance);
+
+    // Calculate the target amount based on the scenario
+    let targetAmount = 0;
+
+    if (isUsingMaintenance) {
+      console.log("are we doing this?");
+      // When using maintenance, we need to validate against the remaining tuition fee
+      const remainingTuition = selectedCourseFee - tuitionAmount;
+      targetAmount = Math.min(remainingTuition, maintenanceAmount);
+    } else {
+      // When not using maintenance, validate against the full tuition amount
+      targetAmount = tuitionAmount;
+    }
+
+    // Only set error if difference is significant (using 0.01 tolerance)
+    if (Math.abs(totalAmount - targetAmount) > 0.01) {
+      form.setError("expectedPayments", {
+        type: "custom",
+        message: `Total expected payments must equal ${formatCurrency(
+          targetAmount
+        )}`,
+      });
+    } else {
+      form.clearErrors("expectedPayments");
+    }
+  }, [
+    totalAmount,
+    selectedCourseFee,
+    watchSlcStatus,
+    watchTuitionFeeAmount,
+    watchMaintenanceLoanAmount,
+    watchUsingMaintenanceForTuition,
+  ]);
+  useEffect(() => {
+    const currentStatus = form.watch("slcStatus");
+
+    // Only reset if status is changing to a new value and there's no saved data
+    if (currentStatus && !fData?.slcStatus) {
+      // Clear existing payments only if they're not from saved data
+      if (!fData?.expectedPayments?.length) {
+        while (fields.length > 0) {
+          remove(0);
+        }
+      }
+
+      setTotalAmount(fData?.paymentStatus?.totalAmount || 0);
+      // setPaymentAmounts(fData?.paymentAmounts || {});
+      setUseMaintenanceForTuition(fData?.usingMaintenanceForTuition || false);
+      setShowMaintenanceOption(
+        currentStatus === "Approved - Tuition Fees & Maintenance Loan"
+      );
+      setFeeDifference(null);
+      setMaintenanceDifference(null);
+      setPaymentStatus({
+        difference: fData?.paymentStatus?.difference || 0,
+        insufficientTuition: false,
+        insufficientMaintenance: false,
+      });
+
+      form.clearErrors("expectedPayments");
+    }
+  }, [watchSlcStatus]);
+
+  // Add this near your other useEffects
+  // useEffect(() => {
+  //   // Initialize from either fData or application.paymentPlan
+  //   const paymentPlanData = fData || application?.paymentPlan;
+
+  //   if (paymentPlanData) {
+  //     // Initialize SLC-related states
+  //     if (paymentPlanData.slcStatus) {
+  //       setShowMaintenanceOption(
+  //         paymentPlanData.slcStatus ===
+  //           "Approved - Tuition Fees & Maintenance Loan"
+  //       );
+
+  //       // Initialize payment amounts and expected payments
+  //       if (paymentPlanData.expectedPayments?.length > 0) {
+  //         const amounts = {};
+  //         let total = 0;
+
+  //         // Ensure dates are properly converted to Date objects
+  //         const formattedPayments = paymentPlanData.expectedPayments.map(
+  //           (payment) => ({
+  //             ...payment,
+  //             date: payment.date ? new Date(payment.date) : undefined,
+  //             amount: Number(payment.amount) || 0,
+  //             university: payment.university || "Plymouth Marjon University",
+  //             course: payment.course || form.watch("courseTitle") || "",
+  //           })
+  //         );
+
+  //         // Set the formatted payments in the form
+  //         form.setValue("expectedPayments", formattedPayments);
+
+  //         // Calculate totals
+  //         formattedPayments.forEach((payment, index) => {
+  //           amounts[index] = payment.amount;
+  //           total += payment.amount;
+  //         });
+
+  //         setPaymentAmounts(amounts);
+  //         setTotalAmount(total);
+  //       }
+
+  //       // Set course fee
+  //       if (paymentPlanData.courseFee) {
+  //         setSelectedCourseFee(Number(paymentPlanData.courseFee));
+  //       }
+
+  //       // Set payment status
+  //       if (paymentPlanData.paymentStatus) {
+  //         setPaymentStatus(paymentPlanData.paymentStatus);
+  //       }
+
+  //       // Set maintenance option
+  //       setUseMaintenanceForTuition(
+  //         paymentPlanData.usingMaintenanceForTuition || false
+  //       );
+  //     }
+  //   }
+  // }, [application?.paymentPlan, fData, form]); // Run when either source changes
+
+  console.log(totalAmount);
 
   const saveForm = () => {
     setHasError(false);
 
     setError("");
     const stepOneData = form.getValues();
+    let shortfall = null;
 
     if (isClicked && !otherOptionText) {
       setError("Please specify where you heard about us.");
@@ -459,10 +960,55 @@ export const StepOneForm = ({
       stepOneData.share_code = null;
     }
 
+    if (stepOneData.tuitionFees === "Student Loan Company England (SLC)") {
+      if (
+        stepOneData.slcStatus === "Approved - Maintenance Loan" &&
+        stepOneData.maintenanceLoanAmount &&
+        selectedCourseFee &&
+        stepOneData.maintenanceLoanAmount < selectedCourseFee
+      ) {
+        shortfall = {
+          type: "maintenance",
+          amount: selectedCourseFee - stepOneData.maintenanceLoanAmount,
+          courseFee: selectedCourseFee,
+          approvedAmount: stepOneData.maintenanceLoanAmount,
+          status: stepOneData.slcStatus,
+        };
+      }
+
+      if (
+        (stepOneData.slcStatus === "Approved - Tuition Fees" ||
+          stepOneData.slcStatus ===
+            "Approved - Tuition Fees & Maintenance Loan") &&
+        stepOneData.tuitionFeeAmount &&
+        selectedCourseFee &&
+        stepOneData.tuitionFeeAmount < selectedCourseFee &&
+        !useMaintenanceForTuition
+      ) {
+        shortfall = {
+          type: "tuition",
+          amount: selectedCourseFee - stepOneData.tuitionFeeAmount,
+          courseFee: selectedCourseFee,
+          approvedAmount: stepOneData.tuitionFeeAmount,
+          status: stepOneData.slcStatus,
+        };
+      }
+    }
+
     const currentValues = {
       ...fData,
       ...stepOneData,
       tuitionFees: isClicked ? otherOptionText : stepOneData.tuitionFees,
+      shortfall,
+      paymentStatus:
+        stepOneData.tuitionFees !== "Student Loan Company England (SLC)"
+          ? {}
+          : {
+              ...paymentStatus,
+              courseFee: selectedCourseFee,
+              totalAmount,
+            },
+      courseFee: selectedCourseFee,
     };
 
     const formData = new FormData();
@@ -499,6 +1045,8 @@ export const StepOneForm = ({
       });
     });
   };
+
+  console.log("foobar", form.getValues("maintenanceLoanAmount"));
 
   return (
     <div className="w-full px-5 lg:px-[50px]">
@@ -1606,11 +2154,34 @@ export const StepOneForm = ({
                           <RadioGroup
                             onValueChange={(value) => {
                               field.onChange(value);
+                              setSlcSelected(
+                                value === "Student Loan Company England (SLC)"
+                              );
                               if (value === "Other") {
                                 setIsClicked(true);
                               } else {
                                 setIsClicked(false);
                                 setOtherOptionText("");
+                              }
+
+                              if (
+                                value !== "Student Loan Company England (SLC)"
+                              ) {
+                                setPaymentStatus({});
+                                form.reset({
+                                  ...form.getValues(),
+                                  appliedForCourse: undefined,
+                                  slcStatus: undefined,
+                                  crn: "",
+                                  courseFee: undefined,
+                                  previousFundingYear: undefined,
+                                  previouslyReceivedFunds: undefined,
+                                  tuitionFeeAmount: undefined,
+                                  maintenanceLoanAmount: undefined,
+                                  hasSlcAccount: undefined,
+                                  ssn: "",
+                                  expectedPayments: [],
+                                });
                               }
                             }}
                             value={isClicked ? "Other" : field.value}
@@ -1651,14 +2222,6 @@ export const StepOneForm = ({
                             </FormItem>
                             <FormItem className="flex items-center space-x-3 space-y-0">
                               <FormControl>
-                                <RadioGroupItem value="Student Loan Company England (SLC)" />
-                              </FormControl>
-                              <FormLabel className="font-medium">
-                                Student Loan Company England (SLC)
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-3 space-y-0">
-                              <FormControl>
                                 <RadioGroupItem
                                   value="Other"
                                   checked={isClicked}
@@ -1683,6 +2246,919 @@ export const StepOneForm = ({
                                   )}
                                 />
                               </FormControl>
+                            )}
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="Student Loan Company England (SLC)" />
+                              </FormControl>
+                              <FormLabel className="font-medium">
+                                Student Loan Company England (SLC)
+                              </FormLabel>
+                            </FormItem>
+
+                            {slcSelected && (
+                              <div className="space-y-6 pb-4">
+                                <FormField
+                                  control={form.control}
+                                  name="hasSlcAccount"
+                                  render={({ field }) => (
+                                    <FormItem className="space-y-3">
+                                      <FormLabel>
+                                        Do you have an account with the Student
+                                        Loan Company (SLC)?
+                                      </FormLabel>
+                                      <FormControl>
+                                        <RadioGroup
+                                          onValueChange={(value) => {
+                                            field.onChange(value);
+                                            if (value === "No") {
+                                              // Reset related fields
+                                              form.reset({
+                                                ...form.getValues(),
+                                                previouslyReceivedFunds:
+                                                  undefined,
+                                                previousFundingYear: undefined,
+                                                appliedForCourse: undefined,
+                                                crn: "",
+                                                slcStatus: undefined,
+                                                courseFee: undefined,
+                                                tuitionFeeAmount: undefined,
+                                                maintenanceLoanAmount:
+                                                  undefined,
+                                                ssn: "",
+                                                expectedPayments: [],
+                                              });
+                                            }
+                                          }}
+                                          value={field.value}
+                                          className="flex flex-col space-y-1 sm:flex-row sm:space-x-4 sm:space-y-0"
+                                        >
+                                          <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl>
+                                              <RadioGroupItem value="Yes" />
+                                            </FormControl>
+                                            <FormLabel className="font-normal">
+                                              Yes
+                                            </FormLabel>
+                                          </FormItem>
+                                          <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl>
+                                              <RadioGroupItem value="No" />
+                                            </FormControl>
+                                            <FormLabel className="font-normal">
+                                              No
+                                            </FormLabel>
+                                          </FormItem>
+                                        </RadioGroup>
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                {form.watch("hasSlcAccount") === "Yes" && (
+                                  <>
+                                    <FormField
+                                      control={form.control}
+                                      name="previouslyReceivedFunds"
+                                      render={({ field }) => (
+                                        <FormItem className="space-y-3">
+                                          <FormLabel>
+                                            Have you previously received funds
+                                            from SLC?
+                                          </FormLabel>
+                                          <FormControl>
+                                            <RadioGroup
+                                              onValueChange={(value) => {
+                                                field.onChange(value);
+                                                if (value === "No") {
+                                                  form.setValue(
+                                                    "previousFundingYear",
+                                                    undefined
+                                                  );
+                                                }
+                                              }}
+                                              value={field.value}
+                                              className="flex flex-col space-y-1 sm:flex-row sm:space-x-4 sm:space-y-0"
+                                            >
+                                              <FormItem className="flex items-center space-x-3 space-y-0">
+                                                <FormControl>
+                                                  <RadioGroupItem value="Yes" />
+                                                </FormControl>
+                                                <FormLabel className="font-normal">
+                                                  Yes
+                                                </FormLabel>
+                                              </FormItem>
+                                              <FormItem className="flex items-center space-x-3 space-y-0">
+                                                <FormControl>
+                                                  <RadioGroupItem value="No" />
+                                                </FormControl>
+                                                <FormLabel className="font-normal">
+                                                  No
+                                                </FormLabel>
+                                              </FormItem>
+                                            </RadioGroup>
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+
+                                    {form.watch("previouslyReceivedFunds") ===
+                                      "Yes" && (
+                                      <FormField
+                                        control={form.control}
+                                        name="previousFundingYear"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>
+                                              During which academic year did you
+                                              receive funding?
+                                            </FormLabel>
+                                            <FormControl>
+                                              <Select
+                                                onValueChange={field.onChange}
+                                                value={field.value}
+                                              >
+                                                <FormControl>
+                                                  <SelectTrigger>
+                                                    <SelectValue placeholder="Select academic year" />
+                                                  </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                  {/* Add last 5 academic years */}
+                                                  {Array.from(
+                                                    {
+                                                      length: 20,
+                                                    },
+                                                    (_, i) => {
+                                                      const year =
+                                                        new Date().getFullYear() -
+                                                        i;
+                                                      return (
+                                                        <SelectItem
+                                                          key={year}
+                                                          value={`${
+                                                            year - 1
+                                                          }/${year}`}
+                                                        >
+                                                          {year - 1}/{year}
+                                                        </SelectItem>
+                                                      );
+                                                    }
+                                                  )}
+                                                </SelectContent>
+                                              </Select>
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                    )}
+
+                                    <FormField
+                                      control={form.control}
+                                      name="appliedForCourse"
+                                      render={({ field }) => (
+                                        <FormItem className="space-y-3">
+                                          <FormLabel>
+                                            Have you applied for SLC funding for
+                                            this course?
+                                          </FormLabel>
+                                          <FormControl>
+                                            <RadioGroup
+                                              onValueChange={(value) => {
+                                                field.onChange(value);
+                                                if (value === "No") {
+                                                  form.reset({
+                                                    ...form.getValues(),
+                                                    crn: "",
+                                                    slcStatus: undefined,
+                                                    tuitionFeeAmount: undefined,
+                                                    maintenanceLoanAmount:
+                                                      undefined,
+                                                    ssn: "",
+                                                    expectedPayments: [],
+                                                  });
+                                                }
+                                              }}
+                                              value={field.value}
+                                              className="flex flex-col space-y-1 sm:flex-row sm:space-x-4 sm:space-y-0"
+                                            >
+                                              <FormItem className="flex items-center space-x-3 space-y-0">
+                                                <FormControl>
+                                                  <RadioGroupItem value="Yes" />
+                                                </FormControl>
+                                                <FormLabel className="font-normal">
+                                                  Yes
+                                                </FormLabel>
+                                              </FormItem>
+                                              <FormItem className="flex items-center space-x-3 space-y-0">
+                                                <FormControl>
+                                                  <RadioGroupItem value="No" />
+                                                </FormControl>
+                                                <FormLabel className="font-normal">
+                                                  No
+                                                </FormLabel>
+                                              </FormItem>
+                                            </RadioGroup>
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </>
+                                )}
+
+                                {form.watch("appliedForCourse") === "Yes" && (
+                                  <div className="space-y-6">
+                                    <FormField
+                                      control={form.control}
+                                      name="crn"
+                                      render={({ field }) => (
+                                        <FormItem className="w-fit">
+                                          <FormLabel>
+                                            Customer Reference Number (CRN)
+                                          </FormLabel>
+                                          <FormControl>
+                                            <Input
+                                              {...field}
+                                              placeholder="Enter your CRN"
+                                              value={field.value?.trim() || ""}
+                                            />
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+
+                                    <FormField
+                                      control={form.control}
+                                      name="slcStatus"
+                                      render={({ field }) => (
+                                        <FormItem className="w-fit">
+                                          <FormLabel>
+                                            Application Status
+                                          </FormLabel>
+                                          <Select
+                                            onValueChange={(value) => {
+                                              field.onChange(value);
+                                              // Reset only SLC-related fields when changing status
+                                              const currentValues =
+                                                form.getValues();
+                                              form.reset({
+                                                ...currentValues,
+                                                tuitionFeeAmount: undefined,
+                                                maintenanceLoanAmount:
+                                                  undefined,
+                                                ssn: "",
+                                                expectedPayments: [],
+                                                usingMaintenanceForTuition: false,
+                                              });
+                                              setPaymentStatus({});
+                                              setShowMaintenanceOption(false);
+                                              setTotalAmount(0);
+                                              // setPaymentAmounts({});
+                                            }}
+                                            value={field.value}
+                                          >
+                                            <FormControl>
+                                              <SelectTrigger>
+                                                <SelectValue placeholder="Select status" />
+                                              </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                              <SelectItem value="Approved - Tuition Fees & Maintenance Loan">
+                                                Approved - Tuition Fees &
+                                                Maintenance Loan
+                                              </SelectItem>
+                                              <SelectItem value="Approved - Tuition Fees">
+                                                Approved - Tuition Fees
+                                              </SelectItem>
+                                              <SelectItem value="Approved - Maintenance Loan">
+                                                Approved - Maintenance Loan
+                                              </SelectItem>
+                                              <SelectItem value="Rejected">
+                                                Rejected
+                                              </SelectItem>
+                                              <SelectItem value="In-process">
+                                                In-process
+                                              </SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+
+                                    {form
+                                      .watch("slcStatus")
+                                      ?.startsWith("Approved") && (
+                                      <div className="space-y-6">
+                                        {(form.watch("slcStatus") ===
+                                          "Approved - Tuition Fees & Maintenance Loan" ||
+                                          form.watch("slcStatus") ===
+                                            "Approved - Tuition Fees") && (
+                                          <FormField
+                                            control={form.control}
+                                            name="tuitionFeeAmount"
+                                            render={({ field }) => (
+                                              <FormItem className="w-fit">
+                                                <FormLabel>
+                                                  Tuition Fee Amount
+                                                </FormLabel>
+                                                <FormControl>
+                                                  <AmountInput
+                                                    {...field}
+                                                    value={field.value ?? ""}
+                                                    onChange={(value) => {
+                                                      field.onChange(
+                                                        value === ""
+                                                          ? ""
+                                                          : value
+                                                      );
+                                                    }}
+                                                  />
+                                                </FormControl>
+                                                <FormMessage />
+                                                {selectedCourseFee && (
+                                                  <p className="text-sm text-muted-foreground mt-2">
+                                                    Course fee:{" "}
+                                                    {formatCurrency(
+                                                      selectedCourseFee
+                                                    )}
+                                                  </p>
+                                                )}
+                                                {paymentStatus.insufficientTuition && (
+                                                  <div className="mt-2 p-4 bg-red-50 rounded-md space-y-2">
+                                                    <p className="text-sm font-medium text-destructive">
+                                                      Your tuition fee is{" "}
+                                                      {formatCurrency(
+                                                        paymentStatus.difference ||
+                                                          0
+                                                      )}{" "}
+                                                      less than the course fee.
+                                                    </p>
+                                                    <p className="text-sm text-destructive">
+                                                      This shortfall will be
+                                                      flagged for administrative
+                                                      review.
+                                                    </p>
+                                                  </div>
+                                                )}
+                                              </FormItem>
+                                            )}
+                                          />
+                                        )}
+
+                                        {(form.watch("slcStatus") ===
+                                          "Approved - Tuition Fees & Maintenance Loan" ||
+                                          form.watch("slcStatus") ===
+                                            "Approved - Maintenance Loan") && (
+                                          <FormField
+                                            control={form.control}
+                                            name="maintenanceLoanAmount"
+                                            render={({ field }) => (
+                                              <FormItem className="w-fit">
+                                                <FormLabel>
+                                                  Maintenance Loan Amount
+                                                </FormLabel>
+                                                <FormControl>
+                                                  <AmountInput
+                                                    {...field}
+                                                    value={field.value ?? ""}
+                                                    onChange={(value) => {
+                                                      field.onChange(
+                                                        value === ""
+                                                          ? ""
+                                                          : value
+                                                      );
+                                                    }}
+                                                  />
+                                                </FormControl>
+                                                <FormMessage />
+                                                {selectedCourseFee && (
+                                                  <p className="text-sm text-muted-foreground mt-2">
+                                                    Course fee:{" "}
+                                                    {formatCurrency(
+                                                      selectedCourseFee
+                                                    )}
+                                                  </p>
+                                                )}
+                                                {paymentStatus.insufficientMaintenance && (
+                                                  <div className="mt-2 p-4 bg-destructive/10 rounded-md space-y-2">
+                                                    <p className="text-sm font-medium text-destructive">
+                                                      Your maintenance loan is{" "}
+                                                      {formatCurrency(
+                                                        paymentStatus.difference ||
+                                                          0
+                                                      )}{" "}
+                                                      less than the course fee.
+                                                    </p>
+                                                    <p className="text-sm text-destructive">
+                                                      This shortfall will be
+                                                      flagged for administrative
+                                                      review.
+                                                    </p>
+                                                  </div>
+                                                )}
+                                              </FormItem>
+                                            )}
+                                          />
+                                        )}
+
+                                        {/* Maintenance Option for Tuition Fee Shortfall */}
+                                        {showMaintenanceOption && (
+                                          <div className="mt-4 p-4 bg-neutral-100 rounded-md space-y-4">
+                                            <div className="space-y-2">
+                                              <p className="text-sm font-medium">
+                                                Would you like to use your
+                                                maintenance loan to cover the
+                                                remaining tuition fee of{" "}
+                                                {formatCurrency(
+                                                  paymentStatus.difference || 0
+                                                )}
+                                                ?
+                                              </p>
+                                              <div className="flex space-x-4">
+                                                <Button
+                                                  type="button"
+                                                  variant="outline"
+                                                  size="sm"
+                                                  // Replace the existing onClick handler in the maintenance option button
+                                                  onClick={() => {
+                                                    if (
+                                                      !paymentStatus.difference
+                                                    )
+                                                      return;
+
+                                                    console.log(
+                                                      "Current payment status:",
+                                                      paymentStatus
+                                                    );
+                                                    console.log(
+                                                      "Difference amount:",
+                                                      paymentStatus.difference
+                                                    );
+
+                                                    // Create the payment plan first
+                                                    const payments =
+                                                      createPaymentPlan(
+                                                        paymentStatus.difference
+                                                      );
+
+                                                    // Reset the form's expected payments with the new plan
+                                                    form.setValue(
+                                                      "expectedPayments",
+                                                      payments.map(
+                                                        (payment) => ({
+                                                          ...payment,
+                                                          date: new Date(), // Ensure date is set
+                                                          university:
+                                                            "Plymouth Marjon University",
+                                                          course:
+                                                            form.watch(
+                                                              "expectedPayments.0.course"
+                                                            ) || "",
+                                                        })
+                                                      ),
+                                                      {
+                                                        shouldValidate: true,
+                                                      }
+                                                    );
+
+                                                    // Update states
+                                                    setUseMaintenanceForTuition(
+                                                      true
+                                                    );
+                                                    setShowMaintenanceOption(
+                                                      false
+                                                    );
+
+                                                    // Also update the form to indicate we're using maintenance for tuition
+                                                    form.setValue(
+                                                      "usingMaintenanceForTuition",
+                                                      true,
+                                                      {
+                                                        shouldValidate: true,
+                                                        shouldDirty: true,
+                                                      }
+                                                    );
+
+                                                    console.log(
+                                                      "foobar",
+                                                      form.getValues(
+                                                        "courseFee"
+                                                      )
+                                                    );
+                                                  }}
+                                                >
+                                                  Yes, use maintenance loan
+                                                </Button>
+                                                <Button
+                                                  type="button"
+                                                  variant="outline"
+                                                  size="sm"
+                                                  onClick={() =>
+                                                    setShowMaintenanceOption(
+                                                      false
+                                                    )
+                                                  }
+                                                >
+                                                  No, I&apos;ll pay another way
+                                                </Button>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        <FormField
+                                          control={form.control}
+                                          name="ssn"
+                                          render={({ field }) => (
+                                            <FormItem className="w-fit">
+                                              <FormLabel>
+                                                Student Support Number (SSN)
+                                              </FormLabel>
+                                              <FormControl>
+                                                <Input
+                                                  {...field}
+                                                  onChange={(e) => {
+                                                    field.onChange(
+                                                      e.target.value.toUpperCase()
+                                                    );
+                                                  }}
+                                                  placeholder="Enter your SSN"
+                                                />
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+
+                                        <div className="flex flex-col">
+                                          <div className="flex flex-col space-y-2 mb-4">
+                                            <FormLabel>
+                                              Expected Payments
+                                              {useMaintenanceForTuition && (
+                                                <span className="text-sm font-normal text-muted-foreground ml-2">
+                                                  (Including maintenance loan
+                                                  payment)
+                                                </span>
+                                              )}
+                                            </FormLabel>
+                                            {isCreatingPaymentPlan && (
+                                              <p className="text-sm text-muted-foreground">
+                                                Creating payment plan...
+                                              </p>
+                                            )}
+
+                                            {fields.map((field, index) => (
+                                              <div
+                                                key={field.id}
+                                                className="pt-4 space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4"
+                                              >
+                                                <FormField
+                                                  control={form.control}
+                                                  name={`expectedPayments.${index}.date`}
+                                                  render={({ field }) => (
+                                                    <FormItem className="flex flex-col space-y-2">
+                                                      {" "}
+                                                      {/* Added space-y-2 */}
+                                                      <div className="md:block hidden">
+                                                        {" "}
+                                                        {/* Wrapper for non-sr label */}
+                                                        <FormLabel>
+                                                          Date
+                                                        </FormLabel>
+                                                      </div>
+                                                      <Popover>
+                                                        <PopoverTrigger asChild>
+                                                          <FormControl>
+                                                            <Button
+                                                              variant={
+                                                                "outline"
+                                                              }
+                                                              className={cn(
+                                                                "w-full pl-3 text-left font-normal",
+                                                                !field.value &&
+                                                                  "text-muted-foreground"
+                                                              )}
+                                                            >
+                                                              {field.value ? (
+                                                                format(
+                                                                  field.value,
+                                                                  "PPP"
+                                                                )
+                                                              ) : (
+                                                                <span>
+                                                                  Pick a date
+                                                                </span>
+                                                              )}
+                                                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                            </Button>
+                                                          </FormControl>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent
+                                                          className="w-auto p-0"
+                                                          align="start"
+                                                        >
+                                                          <Calendar
+                                                            mode="single"
+                                                            selected={
+                                                              field.value
+                                                            }
+                                                            onSelect={
+                                                              field.onChange
+                                                            }
+                                                            disabled={(date) =>
+                                                              date <
+                                                                new Date() ||
+                                                              date >
+                                                                new Date(
+                                                                  "2100-01-01"
+                                                                )
+                                                            }
+                                                            initialFocus
+                                                            weekStartsOn={1}
+                                                          />
+                                                        </PopoverContent>
+                                                      </Popover>
+                                                      <FormMessage />
+                                                    </FormItem>
+                                                  )}
+                                                />
+
+                                                <FormField
+                                                  control={form.control}
+                                                  name={`expectedPayments.${index}.amount`}
+                                                  render={({ field }) => (
+                                                    <FormItem>
+                                                      <FormLabel className="sr-only md:not-sr-only">
+                                                        Amount
+                                                      </FormLabel>
+                                                      <FormControl>
+                                                        <AmountInput
+                                                          {...field}
+                                                          value={
+                                                            field.value ?? ""
+                                                          }
+                                                          onChange={(value) => {
+                                                            field.onChange(
+                                                              value === ""
+                                                                ? ""
+                                                                : value
+                                                            );
+
+                                                            // Get the latest values from the form
+                                                            const values =
+                                                              form.getValues(
+                                                                "expectedPayments"
+                                                              );
+                                                            // Update the current field's value
+                                                            values[
+                                                              index
+                                                            ].amount =
+                                                              value === ""
+                                                                ? 0
+                                                                : parseFloat(
+                                                                    value
+                                                                  );
+
+                                                            const total =
+                                                              values.reduce(
+                                                                (
+                                                                  sum,
+                                                                  payment
+                                                                ) => {
+                                                                  return (
+                                                                    sum +
+                                                                    (payment.amount
+                                                                      ? parseFloat(
+                                                                          payment.amount
+                                                                        )
+                                                                      : 0)
+                                                                  );
+                                                                },
+                                                                0
+                                                              );
+
+                                                            setTotalAmount(
+                                                              total
+                                                            );
+                                                          }}
+                                                        />
+                                                      </FormControl>
+                                                      <FormMessage />
+                                                    </FormItem>
+                                                  )}
+                                                />
+
+                                                <FormField
+                                                  control={form.control}
+                                                  name={`expectedPayments.${index}.university`}
+                                                  render={({ field }) => (
+                                                    <FormItem>
+                                                      <FormLabel className="sr-only md:not-sr-only">
+                                                        University or College
+                                                      </FormLabel>
+                                                      <Select
+                                                        onValueChange={
+                                                          field.onChange
+                                                        }
+                                                        value={field.value}
+                                                      >
+                                                        <FormControl>
+                                                          <SelectTrigger>
+                                                            <SelectValue placeholder="Select university or college" />
+                                                          </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                          <SelectItem value="Plymouth Marjon University">
+                                                            Plymouth Marjon
+                                                            University
+                                                          </SelectItem>
+                                                          <SelectItem value="Gloucestershire College">
+                                                            Gloucestershire
+                                                            College
+                                                          </SelectItem>
+                                                        </SelectContent>
+                                                      </Select>
+                                                      <FormMessage />
+                                                    </FormItem>
+                                                  )}
+                                                />
+
+                                                <FormField
+                                                  control={form.control}
+                                                  name={`expectedPayments.${index}.course`}
+                                                  render={({ field }) => (
+                                                    <FormItem>
+                                                      <FormLabel className="sr-only md:not-sr-only">
+                                                        Course
+                                                      </FormLabel>
+                                                      <Select
+                                                        onValueChange={(
+                                                          value
+                                                        ) => {
+                                                          field.onChange(value);
+                                                          // handleCourseSelection(value);
+                                                        }}
+                                                        value={field.value}
+                                                      >
+                                                        <FormControl>
+                                                          <SelectTrigger>
+                                                            <SelectValue placeholder="Select your course" />
+                                                          </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                          {courses.map(
+                                                            (course) => (
+                                                              <SelectItem
+                                                                className="w-full"
+                                                                key={course.id}
+                                                                value={
+                                                                  course.name
+                                                                }
+                                                              >
+                                                                {course.name}
+                                                              </SelectItem>
+                                                            )
+                                                          )}
+                                                        </SelectContent>
+                                                      </Select>
+                                                      <FormMessage />
+                                                    </FormItem>
+                                                  )}
+                                                />
+
+                                                <Button
+                                                  type="button"
+                                                  variant="destructive"
+                                                  size="sm"
+                                                  onClick={() => remove(index)}
+                                                  className="w-full md:col-span-2 lg:col-span-3"
+                                                >
+                                                  <Trash className="h-4 w-4 mr-2" />
+                                                  Remove Payment
+                                                </Button>
+                                              </div>
+                                            ))}
+
+                                            <Button
+                                              type="button"
+                                              variant="outline"
+                                              size="sm"
+                                              className="mt-4 w-fit"
+                                              onClick={() =>
+                                                append({
+                                                  date: undefined,
+                                                  amount: undefined,
+                                                  university: "",
+                                                  course:
+                                                    form.watch(
+                                                      "expectedPayments.0.course"
+                                                    ) || "",
+                                                })
+                                              }
+                                            >
+                                              <Plus className="mr-2 h-4 w-4" />
+                                              Add Payment
+                                            </Button>
+
+                                            {form.formState.errors
+                                              .expectedPayments && (
+                                              <p className="mt-2 text-[0.8rem] font-medium text-destructive">
+                                                {
+                                                  form.formState.errors
+                                                    .expectedPayments.message
+                                                }
+                                              </p>
+                                            )}
+
+                                            {form.formState.errors
+                                              .expectedPayments?.root
+                                              ?.message && (
+                                              <p className="mt-2 text-[0.8rem] font-medium text-destructive">
+                                                {
+                                                  form.formState.errors
+                                                    .expectedPayments.root
+                                                    .message
+                                                }
+                                              </p>
+                                            )}
+                                          </div>
+
+                                          <FormField
+                                            control={form.control}
+                                            name="file"
+                                            render={({ field }) => (
+                                              <FormItem>
+                                                <FormLabel>
+                                                  Upload File
+                                                </FormLabel>
+                                                <FormControl>
+                                                  <MultiUploader
+                                                    onChange={(
+                                                      file,
+                                                      removed
+                                                    ) => {
+                                                      setTuitionFile(file);
+                                                      setIsRemoved(removed);
+
+                                                      const newAccumulatedFiles =
+                                                        {
+                                                          ...accumulatedFiles,
+                                                        };
+                                                      newAccumulatedFiles.tuitionDoc =
+                                                        {
+                                                          file,
+                                                          alreadyExists: false,
+                                                        };
+                                                      setAccumulatedFiles(
+                                                        newAccumulatedFiles
+                                                      );
+                                                    }}
+                                                    defaultFile={
+                                                      accumulatedFiles
+                                                        .tuitionDoc?.file ||
+                                                      tuitionFile
+                                                    }
+                                                    defaultPreviewUrl={
+                                                      accumulatedFiles
+                                                        .tuitionDoc
+                                                        ?.alreadyExists
+                                                        ? application?.tuition_doc_url
+                                                        : accumulatedFiles
+                                                            .tuitionDoc?.file
+                                                        ? URL.createObjectURL(
+                                                            accumulatedFiles
+                                                              .tuitionDoc.file
+                                                          )
+                                                        : null
+                                                    }
+                                                    isPending={isPending}
+                                                    fileType="file"
+                                                  />
+                                                </FormControl>
+                                                <FormMessage />
+                                              </FormItem>
+                                            )}
+                                          />
+
+                                          {/* Total Amount Display */}
+                                          <div className="mt-6">
+                                            <h3 className="text-lg font-semibold">
+                                              Total Expected Payments:{" "}
+                                              {formatCurrency(totalAmount)}
+                                            </h3>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
                             )}
                           </RadioGroup>
                         </FormControl>

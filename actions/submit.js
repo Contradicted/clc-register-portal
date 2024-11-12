@@ -12,6 +12,119 @@ import { sendRecievedApplicationEmail, sendReSubmittedEmail } from '@/lib/mail'
 import { generateApplicationID } from '@/lib/utils'
 import { UTApi, UTFile } from "uploadthing/server";
 
+const handleSubmitPaymentPlan = async (applicationID, values) => {
+  if (values.tuitionFees === "Student Loan Company England (SLC)") {
+    // First check for existing saved payment plan
+    const existingSavedPaymentPlan = await db.savedPaymentPlan.findUnique({
+      where: { applicationID },
+    });
+
+    if (existingSavedPaymentPlan) {
+      // Convert saved payment plan to submitted payment plan
+      await db.paymentPlan.create({
+        data: {
+          applicationID,
+          paymentOption: existingSavedPlan.paymentOption,
+          hasSlcAccount: existingSavedPlan.hasSlcAccount,
+          previouslyReceivedFunds: existingSavedPlan.previouslyReceivedFunds,
+          previousFundingYear: existingSavedPlan.previousFundingYear,
+          appliedForCourse: existingSavedPlan.appliedForCourse,
+          crn: existingSavedPlan.crn,
+          slcStatus: existingSavedPlan.slcStatus,
+          tuitionFeeAmount: existingSavedPlan.tuitionFeeAmount,
+          maintenanceLoanAmount: existingSavedPlan.maintenanceLoanAmount,
+          ssn: existingSavedPlan.ssn,
+          usingMaintenanceForTuition:
+            existingSavedPlan.usingMaintenanceForTuition,
+          courseFee: existingSavedPlan.courseFee,
+          paymentStatus: existingSavedPlan.paymentStatus,
+          shortfall: existingSavedPlan.shortfall,
+          expectedPayments: existingSavedPlan.expectedPayments,
+        },
+      });
+
+      await db.savedPaymentPlan.delete({
+        where: { applicationID },
+      });
+    } else {
+      // If no saved payment plan, create one
+      await db.paymentPlan.create({
+        data: {
+          applicationID,
+          paymentOption: "SLC",
+          hasSlcAccount: values.hasSlcAccount === "Yes",
+          previouslyReceivedFunds: values.previouslyReceivedFunds === "Yes",
+          previousFundingYear: values.previousFundingYear || null,
+          appliedForCourse: values.appliedForCourse === "Yes",
+          crn: values.crn || null,
+          slcStatus: values.slcStatus || null,
+          tuitionFeeAmount: values.tuitionFeeAmount
+            ? Number(values.tuitionFeeAmount)
+            : null,
+          maintenanceLoanAmount: values.maintenanceLoanAmount
+            ? Number(values.maintenanceLoanAmount)
+            : null,
+          ssn: values.ssn || null,
+          usingMaintenanceForTuition: values.usingMaintenanceForTuition || null,
+          courseFee: values.courseFee ? Number(values.courseFee) : null,
+          paymentStatus: values.paymentStatus || null,
+          shortfall: values.shortfall || null,
+          expectedPayments: values.expectedPayments || [],
+        },
+      });
+    }
+  } else {
+    // If not SLC, then check if payment plans have been created before
+    const [application, savedApplication] = await Promise.all([
+      db.application.findUnique({
+        where: { id: applicationID },
+        select: { tuition_doc_url: true },
+      }),
+      db.savedApplication.findUnique({
+        where: { id: applicationID },
+        select: { tuition_doc_url: true },
+      }),
+    ]);
+
+    // Delete tuition doc files if they exist
+    const deletePromises = [];
+    const utapi = new UTApi();
+
+    if (application?.tuition_doc_url) {
+      const fileKey = application.tuition_doc_url.split("f/")[1];
+      deletePromises.push(utapi.deleteFiles([fileKey]));
+    }
+    if (savedApplication?.tuition_doc_url) {
+      const fileKey = savedApplication.tuition_doc_url.split("f/")[1];
+      deletePromises.push(utapi.deleteFiles([fileKey]));
+    }
+
+    await Promise.all([
+      ...deletePromises,
+      db.savedPaymentPlan.deleteMany({
+        where: { applicationID },
+      }),
+      db.paymentPlan.deleteMany({
+        where: { applicationID },
+      }),
+      db.application.update({
+        where: { id: applicationID },
+        data: {
+          tuition_doc_url: null,
+          tuition_doc_name: null,
+        },
+      }),
+      db.savedApplication.update({
+        where: { id: applicationID },
+        data: {
+          tuition_doc_url: null,
+          tuition_doc_name: null,
+        },
+      }),
+    ]);
+  }
+};
+
 export const submit = async (
   values,
   deletedQualifications,
@@ -60,6 +173,21 @@ export const submit = async (
     isEnglishFirstLanguage,
     addWorkExperience: hasWorkExperience,
     addPendingQualifications: hasPendingResults,
+    hasSlcAccount,
+    previousFundingYear,
+    previouslyReceivedFunds,
+    appliedForCourse,
+    crn,
+    slcStatus,
+    paymentOption,
+    tuitionFeeAmount,
+    maintenanceLoanAmount,
+    ssn,
+    usingMaintenanceForTuition,
+    expectedPayments,
+    shortfall,
+    paymentStatus,
+    courseFee,
     ...applicationValues
   } = parsedValues;
 
@@ -78,6 +206,8 @@ export const submit = async (
     let uploadedIDFile;
     let uploadedImmigrationFileName;
     let uploadedImmigrationFileUrl;
+    let tuitionDocUrl = null;
+    let tuitionDocName = null;
 
     if (userDetails) {
       await db.user.update({
@@ -190,6 +320,26 @@ export const submit = async (
       }
     }
 
+    // Handle tuition document upload
+    const tuitionDoc = photo.get("tuitionDoc");
+    const tuitionDocExists = photo.get("tuitionDoc_alreadyExists") === "true";
+    const isTuitionDocRemoved = photo.get("tuitionDoc_isRemoved") === "true";
+
+    if (tuitionDoc && tuitionDoc !== "null" && !tuitionDocExists) {
+      if (existingApplication[0]?.tuition_doc_url) {
+        const fileKey = existingApplication[0].tuition_doc_url.split("f/");
+        await utapi.deleteFiles(fileKey);
+      }
+      const uploadedFile = await utapi.uploadFiles(tuitionDoc);
+      tuitionDocUrl = uploadedFile.data.url;
+      tuitionDocName = tuitionDoc.name;
+    } else if (tuitionDoc === "null" || !tuitionDoc || isTuitionDocRemoved) {
+      if (existingApplication[0]?.tuition_doc_url) {
+        const fileKey = existingApplication[0].tuition_doc_url.split("f/");
+        await utapi.deleteFiles(fileKey);
+      }
+    }
+
     await db.application.update({
       where: {
         id: existingApplication[0].id,
@@ -201,9 +351,13 @@ export const submit = async (
         immigration_name: uploadedImmigrationFileName || null,
         immigration_url: uploadedImmigrationFileUrl || null,
         identificationNoUrl: uploadedIDFile || null,
+        tuition_doc_url: tuitionDocUrl,
+        tuition_doc_name: tuitionDocName,
         ...applicationValues,
       },
     });
+
+    await handleSubmitPaymentPlan(existingApplication[0].id, parsedValues);
 
     // Handle deleting qualifications
     if (deletedQualifications.length > 0) {
@@ -530,6 +684,8 @@ export const submit = async (
 
   // Submitting for the first time
   if (!existingSavedApplication && !existingApplication.length > 0) {
+    const tuitionDoc = photo.get("tuitionDoc");
+
     if (userDetails) {
       await db.user.update({
         where: {
@@ -549,6 +705,10 @@ export const submit = async (
       immigrationFile && immigrationFile !== "null"
         ? await utapi.uploadFiles(immigrationFile)
         : null;
+    const uploadedTuitionFile =
+      tuitionDoc && tuitionDoc !== "null"
+        ? await utapi.uploadFiles(tuitionDoc)
+        : null;
 
     const applicationID = generateApplicationID();
 
@@ -563,6 +723,10 @@ export const submit = async (
         immigration_url: uploadedImmigrationFile
           ? uploadedImmigrationFile.data.url
           : null,
+        tuition_doc_url: uploadedTuitionFile
+          ? uploadedTuitionFile.data.url
+          : null,
+        tuition_doc_name: uploadedTuitionFile ? tuitionDoc.name : null,
         user: {
           connect: {
             id: user.id,
@@ -575,6 +739,8 @@ export const submit = async (
         },
       },
     });
+
+    await handleSubmitPaymentPlan(applicationID, parsedValues);
 
     if (qualifications) {
       for (let i = 0; i < qualifications.length; i++) {
@@ -700,6 +866,8 @@ export const submit = async (
     let uploadedIDFile;
     let uploadedImmigrationFileName;
     let uploadedImmigrationFileUrl;
+    let tuitionDocUrl = null;
+    let tuitionDocName = null;
 
     if (userDetails) {
       await db.user.update({
@@ -815,6 +983,35 @@ export const submit = async (
       }
     }
 
+    // Handle tuition document upload
+    const tuitionDoc = photo.get("tuitionDoc");
+    const tuitionDocExists = photo.get("tuitionDoc_alreadyExists") === "true";
+    const isTuitionDocRemoved = photo.get("tuitionDoc_isRemoved") === "true";
+
+    if (tuitionDoc && tuitionDoc !== "null" && !tuitionDocExists) {
+      if (existingSavedApplication?.tuition_doc_url) {
+        const fileKey = existingSavedApplication.tuition_doc_url.split("f/");
+        await utapi.deleteFiles(fileKey);
+      }
+      const uploadedFile = await utapi.uploadFiles(tuitionDoc);
+      tuitionDocUrl = uploadedFile.data.url;
+      tuitionDocName = tuitionDoc.name;
+    } else if (tuitionDoc === "null" || !tuitionDoc || isTuitionDocRemoved) {
+      if (existingSavedApplication.tuition_doc_url) {
+        const fileKey = existingSavedApplication.tuition_doc_url.split("f/");
+        await utapi.deleteFiles(fileKey);
+      }
+      tuitionDocName = null;
+      tuitionDocUrl = null;
+    } else {
+      if (tuitionDocExists) {
+        if (existingSavedApplication.tuition_doc_url) {
+          tuitionDocName = existingSavedApplication?.tuition_doc_name;
+          tuitionDocUrl = existingSavedApplication?.tuition_doc_url;
+        }
+      }
+    }
+
     // Create application
     await db.application.create({
       data: {
@@ -824,6 +1021,8 @@ export const submit = async (
         identificationNoUrl: uploadedIDFile || null,
         immigration_name: uploadedImmigrationFileName || null,
         immigration_url: uploadedImmigrationFileUrl || null,
+        tuition_doc_url: tuitionDocUrl,
+        tuition_doc_name: tuitionDocName,
         ...applicationValues,
         user: {
           connect: {
@@ -837,6 +1036,8 @@ export const submit = async (
         },
       },
     });
+
+    await handleSubmitPaymentPlan(applicationID, parsedValues);
 
     // Handle deleting qualifications
     if (deletedQualifications.length > 0) {

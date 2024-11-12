@@ -8,6 +8,86 @@ import { db } from '@/lib/db'
 import { generateApplicationID } from '@/lib/utils'
 import { UTApi, UTFile } from "uploadthing/server";
 
+const handleSavePaymentPlan = async (applicationID, values) => {
+  console.log(values);
+
+  if (values.tuitionFees === "Student Loan Company England (SLC)") {
+    const paymentPlanData = {
+      paymentOption: "SLC",
+      hasSlcAccount: values.hasSlcAccount === "Yes",
+      previouslyReceivedFunds: values.previouslyReceivedFunds === "Yes",
+      previousFundingYear: values.previousFundingYear || null,
+      appliedForCourse: values.appliedForCourse === "Yes",
+      crn: values.crn || null,
+      slcStatus: values.slcStatus || null,
+      tuitionFeeAmount: values.tuitionFeeAmount
+        ? Number(values.tuitionFeeAmount)
+        : null,
+      maintenanceLoanAmount: values.maintenanceLoanAmount
+        ? Number(values.maintenanceLoanAmount)
+        : null,
+      ssn: values.ssn || null,
+      usingMaintenanceForTuition: values.usingMaintenanceForTuition || null,
+      courseFee: values.courseFee ? Number(values.courseFee) : null,
+      paymentStatus: values.paymentStatus || null,
+      shortfall: values.shortfall || null,
+      expectedPayments: values.expectedPayments || [],
+    };
+
+    const existingPlan = await db.savedPaymentPlan.findUnique({
+      where: { applicationID },
+    });
+
+    if (existingPlan) {
+      // Update existing plan and its payments
+      await db.savedPaymentPlan.update({
+        where: { applicationID },
+        data: {
+          ...paymentPlanData,
+        },
+      });
+    } else {
+      // Create new plan with payments
+      await db.savedPaymentPlan.create({
+        data: {
+          ...paymentPlanData,
+          applicationID,
+        },
+      });
+    }
+  } else {
+    // If not SLC, delete any existing payment plan
+    const existingPlan = await db.savedPaymentPlan.findUnique({
+      where: { applicationID },
+    });
+
+    if (existingPlan) {
+      await db.savedPaymentPlan.delete({
+        where: { applicationID },
+      });
+
+      const application = await db.savedApplication.findUnique({
+        where: { id: applicationID },
+      });
+
+      if (application?.tuition_doc_url) {
+        const utapi = new UTApi();
+        const fileKey = application.tuition_doc_url.split("f/");
+        await utapi.deleteFiles(fileKey);
+
+        // Update application to remove document references
+        await db.savedApplication.update({
+          where: { id: applicationID },
+          data: {
+            tuition_doc_url: null,
+            tuition_doc_name: null,
+          },
+        });
+      }
+    }
+  }
+};
+
 export const save = async (
   values,
   deletedQualifications,
@@ -54,6 +134,21 @@ export const save = async (
     workExperience,
     signature,
     addWorkExperience: hasWorkExperience,
+    hasSlcAccount,
+    previousFundingYear,
+    previouslyReceivedFunds,
+    appliedForCourse,
+    crn,
+    slcStatus,
+    paymentOption,
+    tuitionFeeAmount,
+    maintenanceLoanAmount,
+    ssn,
+    usingMaintenanceForTuition,
+    expectedPayments,
+    shortfall,
+    paymentStatus,
+    courseFee,
     ...applicationValues
   } = parsedValues;
 
@@ -255,8 +350,53 @@ export const save = async (
       });
     }
 
-    // Handle deleting qualifications
+    // Handle tuition document upload
+    const tuitionDoc = photo.get("tuitionDoc");
+    const tuitionDocExists = photo.get("tuitionDoc_alreadyExists") === "true";
+    const isTuitionDocRemoved = photo.get("tuitionDoc_isRemoved") === "true";
+
+    let tuitionDocUrl = null;
+    let tuitionDocName = null;
+
+    if (tuitionDoc && tuitionDoc !== "null" && !tuitionDocExists) {
+      if (existingSavedApplication?.tuition_doc_url) {
+        const fileKey = existingSavedApplication.tuition_doc_url.split("f/");
+        await utapi.deleteFiles(fileKey);
+      }
+      const uploadedFile = await utapi.uploadFiles(tuitionDoc);
+      tuitionDocUrl = uploadedFile.data.url;
+      tuitionDocName = tuitionDoc.name;
+
+      await db.savedApplication.update({
+        where: {
+          id: existingSavedApplication.id,
+        },
+        data: {
+          tuition_doc_url: tuitionDocUrl,
+          tuition_doc_name: tuitionDocName,
+        },
+      });
+    } else if (tuitionDoc === "null" || !tuitionDoc || isTuitionDocRemoved) {
+      if (existingSavedApplication?.tuition_doc_url) {
+        const fileKey = existingSavedApplication.tuition_doc_url.split("f/");
+        await utapi.deleteFiles(fileKey);
+      }
+
+      await db.savedApplication.update({
+        where: {
+          id: existingSavedApplication.id,
+        },
+        data: {
+          tuition_doc_url: null,
+          tuition_doc_name: null,
+        },
+      });
+    }
+
+    await handleSavePaymentPlan(existingSavedApplication.id, parsedValues);
+
     if (deletedQualifications.length > 0) {
+      // Handle deleting qualifications
       const qualificationsToDelete = await db.savedQualification.findMany({
         where: {
           id: { in: deletedQualifications },
@@ -644,6 +784,29 @@ export const save = async (
       ? await utapi.uploadFiles(immigrationFile)
       : null;
 
+  // Handle tuition document upload
+  const tuitionDoc = photo.get("tuitionDoc");
+  const tuitionDocExists = photo.get("tuitionDoc_alreadyExists") === "true";
+  const isTuitionDocRemoved = photo.get("tuitionDoc_isRemoved") === "true";
+
+  let tuitionDocUrl = null;
+  let tuitionDocName = null;
+
+  if (tuitionDoc && tuitionDoc !== "null" && !tuitionDocExists) {
+    if (existingSavedApplication?.tuition_doc_url) {
+      const fileKey = existingSavedApplication.tuition_doc_url.split("f/");
+      await utapi.deleteFiles(fileKey);
+    }
+    const uploadedFile = await utapi.uploadFiles(tuitionDoc);
+    tuitionDocUrl = uploadedFile.data.url;
+    tuitionDocName = tuitionDoc.name;
+  } else if (tuitionDoc === "null" || !tuitionDoc || isTuitionDocRemoved) {
+    if (existingSavedApplication?.tuition_doc_url) {
+      const fileKey = existingSavedApplication.tuition_doc_url.split("f/");
+      await utapi.deleteFiles(fileKey);
+    }
+  }
+
   await db.savedApplication.create({
     data: {
       id: applicationID,
@@ -658,63 +821,13 @@ export const save = async (
       immigration_name: uploadedImmigrationFile
         ? uploadedImmigrationFile.data.name
         : null,
+      tuition_doc_url: tuitionDocUrl,
+      tuition_doc_name: tuitionDocName,
       recruitment_agent: applicationValues.recruitment_agent,
     },
   });
 
-  // TODO: Test if this works as intended
-  // if (file && file !== "null") {
-  //   if (idFile && idFile !== "null") {
-  //     const photoFile = await utapi.uploadFiles(file);
-  //     const identificationFile = await utapi.uploadFiles(idFile);
-
-  //     await db.savedApplication.create({
-  //       data: {
-  //         id: applicationID,
-  //         userID: user.id,
-  //         photoName: file.name,
-  //         photoUrl: photoFile.data.url,
-  //         identificationNoUrl: identificationFile.data.url,
-  //         ...applicationValues,
-  //       },
-  //     });
-
-  //     return;
-  //   }
-
-  //   await utapi.uploadFiles(file).then(async (res) => {
-  //     await db.savedApplication.create({
-  //       data: {
-  //         id: applicationID,
-  //         userID: user.id,
-  //         photoName: file.name,
-  //         photoUrl: res.data.url,
-  //         ...applicationValues,
-  //       },
-  //     });
-  //   });
-  // } else if (idFile && idFile !== "null") {
-  //   await utapi.uploadFiles(idFile).then(async (res) => {
-  //     await db.savedApplication.create({
-  //       data: {
-  //         id: applicationID,
-  //         userID: user.id,
-  //         identificationNoUrl: res.data.url,
-  //         ...applicationValues,
-  //       },
-  //     });
-  //   });
-  // }
-
-  // if (!file || file === "null" || !idFile || idFile === "null") {
-  //   await db.savedApplication.create({
-  //     data: {
-  //       id: applicationID,
-  //       userID: user.id,
-  //       ...applicationValues,
-  //     },
-  //   });
-  // }
+  await handleSavePaymentPlan(applicationID, parsedValues);
 
   if (qualifications) {
     for (let i = 0; i < qualifications.length; i++) {

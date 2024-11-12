@@ -24,15 +24,16 @@ export const getApplicationByUserID = async (userID) => {
 export const getSavedApplicationByUserID = async (userID) => {
     try {
         const savedApplication = await db.savedApplication.findFirst({
-            where: {
-                userID,
-            },
-            include: {
-                qualifications: true,
-                pendingQualifications: true,
-                workExperience: true,
-            },
-        })
+          where: {
+            userID,
+          },
+          include: {
+            qualifications: true,
+            pendingQualifications: true,
+            workExperience: true,
+            paymentPlan: true,
+          },
+        });
 
         return savedApplication
     } catch {

@@ -18,6 +18,7 @@ export const MultiUploader = ({
   isPending,
   isLoading,
   fileType,
+  multiple = false,
 }) => {
   const [file, setFile] = useState(defaultFile);
   const [previewUrl, setPreviewUrl] = useState(defaultPreviewUrl);
