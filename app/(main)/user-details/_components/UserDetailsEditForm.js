@@ -219,6 +219,7 @@ export const UserDetailsEditForm = ({ userDetails }) => {
                                 date < new Date("1900-01-01")
                               }
                               initialFocus
+                              weekStartsOn={1}
                             />
                           </PopoverContent>
                         </Popover>

@@ -1512,6 +1512,7 @@ export const StepOneForm = ({
                                   date < new Date("1900-01-01")
                                 }
                                 initialFocus
+                                weekStartsOn={1}
                               />
                             </PopoverContent>
                           </Popover>
@@ -1716,6 +1717,7 @@ export const StepOneForm = ({
                                     date < new Date("1900-01-01")
                                   }
                                   initialFocus
+                                  weekStartsOn={1}
                                 />
                               </PopoverContent>
                             </Popover>
@@ -2290,6 +2292,7 @@ export const StepOneForm = ({
                                               });
                                             }
                                           }}
+                                          disabled={isPending}
                                           value={field.value}
                                           className="flex flex-col space-y-1 sm:flex-row sm:space-x-4 sm:space-y-0"
                                         >
@@ -2338,6 +2341,7 @@ export const StepOneForm = ({
                                                   );
                                                 }
                                               }}
+                                              disabled={isPending}
                                               value={field.value}
                                               className="flex flex-col space-y-1 sm:flex-row sm:space-x-4 sm:space-y-0"
                                             >
@@ -2379,6 +2383,7 @@ export const StepOneForm = ({
                                               <Select
                                                 onValueChange={field.onChange}
                                                 value={field.value}
+                                                disabled={isPending}
                                               >
                                                 <FormControl>
                                                   <SelectTrigger>
@@ -2442,6 +2447,7 @@ export const StepOneForm = ({
                                                   });
                                                 }
                                               }}
+                                              disabled={isPending}
                                               value={field.value}
                                               className="flex flex-col space-y-1 sm:flex-row sm:space-x-4 sm:space-y-0"
                                             >
@@ -2476,13 +2482,14 @@ export const StepOneForm = ({
                                       control={form.control}
                                       name="crn"
                                       render={({ field }) => (
-                                        <FormItem className="w-fit">
+                                        <FormItem className="w-full md:w-fit">
                                           <FormLabel>
                                             Customer Reference Number (CRN)
                                           </FormLabel>
                                           <FormControl>
                                             <Input
                                               {...field}
+                                              disabled={isPending}
                                               placeholder="Enter your CRN"
                                               value={field.value?.trim() || ""}
                                             />
@@ -2496,7 +2503,7 @@ export const StepOneForm = ({
                                       control={form.control}
                                       name="slcStatus"
                                       render={({ field }) => (
-                                        <FormItem className="w-fit">
+                                        <FormItem className="w-full md:w-fit">
                                           <FormLabel>
                                             Application Status
                                           </FormLabel>
@@ -2521,6 +2528,7 @@ export const StepOneForm = ({
                                               // setPaymentAmounts({});
                                             }}
                                             value={field.value}
+                                            disabled={isPending}
                                           >
                                             <FormControl>
                                               <SelectTrigger>
@@ -2563,7 +2571,7 @@ export const StepOneForm = ({
                                             control={form.control}
                                             name="tuitionFeeAmount"
                                             render={({ field }) => (
-                                              <FormItem className="w-fit">
+                                              <FormItem className="w-full md:w-fit">
                                                 <FormLabel>
                                                   Tuition Fee Amount
                                                 </FormLabel>
@@ -2578,6 +2586,7 @@ export const StepOneForm = ({
                                                           : value
                                                       );
                                                     }}
+                                                    disabled={isPending}
                                                   />
                                                 </FormControl>
                                                 <FormMessage />
@@ -2619,7 +2628,7 @@ export const StepOneForm = ({
                                             control={form.control}
                                             name="maintenanceLoanAmount"
                                             render={({ field }) => (
-                                              <FormItem className="w-fit">
+                                              <FormItem className="w-full md:w-fit">
                                                 <FormLabel>
                                                   Maintenance Loan Amount
                                                 </FormLabel>
@@ -2634,6 +2643,7 @@ export const StepOneForm = ({
                                                           : value
                                                       );
                                                     }}
+                                                    disabled={isPending}
                                                   />
                                                 </FormControl>
                                                 <FormMessage />
@@ -2670,7 +2680,9 @@ export const StepOneForm = ({
                                         {/* Maintenance Option for Tuition Fee Shortfall */}
                                         {showMaintenanceOption && (
                                           <div className="mt-4 p-4 bg-neutral-100 rounded-md space-y-4">
-                                            <div className="space-y-2">
+                                            <div className="space-y-4">
+                                              {" "}
+                                              {/* Increased space-y for better mobile spacing */}
                                               <p className="text-sm font-medium">
                                                 Would you like to use your
                                                 maintenance loan to cover the
@@ -2680,12 +2692,15 @@ export const StepOneForm = ({
                                                 )}
                                                 ?
                                               </p>
-                                              <div className="flex space-x-4">
+                                              <div className="flex flex-wrap gap-2 items-center md:flex-row md:space-y-0 md:space-x-2">
+                                                {" "}
+                                                {/* Modified this div */}
                                                 <Button
                                                   type="button"
                                                   variant="outline"
                                                   size="sm"
-                                                  // Replace the existing onClick handler in the maintenance option button
+                                                  className="w-full sm:w-auto"
+                                                  disabled={isPending}
                                                   onClick={() => {
                                                     if (
                                                       !paymentStatus.difference
@@ -2701,19 +2716,17 @@ export const StepOneForm = ({
                                                       paymentStatus.difference
                                                     );
 
-                                                    // Create the payment plan first
                                                     const payments =
                                                       createPaymentPlan(
                                                         paymentStatus.difference
                                                       );
 
-                                                    // Reset the form's expected payments with the new plan
                                                     form.setValue(
                                                       "expectedPayments",
                                                       payments.map(
                                                         (payment) => ({
                                                           ...payment,
-                                                          date: new Date(), // Ensure date is set
+                                                          date: new Date(),
                                                           university:
                                                             "Plymouth Marjon University",
                                                           course:
@@ -2722,12 +2735,9 @@ export const StepOneForm = ({
                                                             ) || "",
                                                         })
                                                       ),
-                                                      {
-                                                        shouldValidate: true,
-                                                      }
+                                                      { shouldValidate: true }
                                                     );
 
-                                                    // Update states
                                                     setUseMaintenanceForTuition(
                                                       true
                                                     );
@@ -2735,7 +2745,6 @@ export const StepOneForm = ({
                                                       false
                                                     );
 
-                                                    // Also update the form to indicate we're using maintenance for tuition
                                                     form.setValue(
                                                       "usingMaintenanceForTuition",
                                                       true,
@@ -2759,13 +2768,15 @@ export const StepOneForm = ({
                                                   type="button"
                                                   variant="outline"
                                                   size="sm"
+                                                  className="w-full sm:w-auto"
+                                                  disabled={isPending}
                                                   onClick={() =>
                                                     setShowMaintenanceOption(
                                                       false
                                                     )
                                                   }
                                                 >
-                                                  No, I&apos;ll pay another way
+                                                  No, I'll pay another way
                                                 </Button>
                                               </div>
                                             </div>
@@ -2776,13 +2787,14 @@ export const StepOneForm = ({
                                           control={form.control}
                                           name="ssn"
                                           render={({ field }) => (
-                                            <FormItem className="w-fit">
+                                            <FormItem className="w-full md:w-fit">
                                               <FormLabel>
                                                 Student Support Number (SSN)
                                               </FormLabel>
                                               <FormControl>
                                                 <Input
                                                   {...field}
+                                                  disabled={isPending}
                                                   onChange={(e) => {
                                                     field.onChange(
                                                       e.target.value.toUpperCase()
@@ -2836,6 +2848,9 @@ export const StepOneForm = ({
                                                         <PopoverTrigger asChild>
                                                           <FormControl>
                                                             <Button
+                                                              disabled={
+                                                                isPending
+                                                              }
                                                               variant={
                                                                 "outline"
                                                               }
@@ -2900,6 +2915,7 @@ export const StepOneForm = ({
                                                       <FormControl>
                                                         <AmountInput
                                                           {...field}
+                                                          disabled={isPending}
                                                           value={
                                                             field.value ?? ""
                                                           }
@@ -2967,6 +2983,7 @@ export const StepOneForm = ({
                                                           field.onChange
                                                         }
                                                         value={field.value}
+                                                        disabled={isPending}
                                                       >
                                                         <FormControl>
                                                           <SelectTrigger>
@@ -3005,6 +3022,7 @@ export const StepOneForm = ({
                                                           // handleCourseSelection(value);
                                                         }}
                                                         value={field.value}
+                                                        disabled={isPending}
                                                       >
                                                         <FormControl>
                                                           <SelectTrigger>
@@ -3037,6 +3055,7 @@ export const StepOneForm = ({
                                                   variant="destructive"
                                                   size="sm"
                                                   onClick={() => remove(index)}
+                                                  disabled={isPending}
                                                   className="w-full md:col-span-2 lg:col-span-3"
                                                 >
                                                   <Trash className="h-4 w-4 mr-2" />
@@ -3049,7 +3068,8 @@ export const StepOneForm = ({
                                               type="button"
                                               variant="outline"
                                               size="sm"
-                                              className="mt-4 w-fit"
+                                              className="mt-8 w-full md:w-fit"
+                                              disabled={isPending}
                                               onClick={() =>
                                                 append({
                                                   date: undefined,

@@ -532,6 +532,7 @@ export const StepThreeForm = ({
                                         date < new Date("1900-01-01")
                                       }
                                       initialFocus
+                                      weekStartsOn={1}
                                     />
                                   </PopoverContent>
                                 </Popover>
@@ -590,6 +591,7 @@ export const StepThreeForm = ({
                                         );
                                       }}
                                       initialFocus
+                                      weekStartsOn={1}
                                     />
                                   </PopoverContent>
                                 </Popover>
