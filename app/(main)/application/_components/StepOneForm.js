@@ -2776,7 +2776,7 @@ export const StepOneForm = ({
                                                     )
                                                   }
                                                 >
-                                                  No, I'll pay another way
+                                                  No, I&apos;ll pay another way
                                                 </Button>
                                               </div>
                                             </div>
