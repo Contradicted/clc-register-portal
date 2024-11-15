@@ -2407,7 +2407,7 @@ export const StepOneForm = ({
                                                             year - 1
                                                           }/${year}`}
                                                         >
-                                                          {year - 1}/{year}
+                                                          `{year - 1}/{year}`
                                                         </SelectItem>
                                                       );
                                                     }

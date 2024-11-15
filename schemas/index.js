@@ -176,13 +176,13 @@ export const SectionOneSchema = z
           message: "The date must be before today",
         }
       ),
-    // placeOfBirth: z
-    //   .string({
-    //     required_error: "Place of Birth is required",
-    //   })
-    //   .regex(nameRegex, {
-    //     message: "Place of Birth cannot contain numbers",
-    //   }),
+    placeOfBirth: z
+      .string({
+        required_error: "Place of Birth is required",
+      })
+      .regex(nameRegex, {
+        message: "Place of Birth cannot contain numbers",
+      }),
     countryOfBirth: z.string({
       required_error: "Country of Birth is required",
     }),
