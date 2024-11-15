@@ -348,10 +348,10 @@ export const StepOneForm = ({
       return;
     }
 
-    // if (currentValues.countryOfBirth !== detectedCountry) {
-    //   setError("Please select the right country");
-    //   return;
-    // }
+    if (currentValues.countryOfBirth !== detectedCountry) {
+      setError("Please select the right country");
+      return;
+    }
 
     if (isClicked && !otherOptionText) {
       setError("Please specify how you will fund your studies.");
@@ -2407,7 +2407,7 @@ export const StepOneForm = ({
                                                             year - 1
                                                           }/${year}`}
                                                         >
-                                                          `{year - 1}/{year}`
+                                                          {year - 1}/{year}
                                                         </SelectItem>
                                                       );
                                                     }
@@ -2887,12 +2887,10 @@ export const StepOneForm = ({
                                                               field.onChange
                                                             }
                                                             disabled={(date) =>
-                                                              date <
-                                                                new Date() ||
                                                               date >
-                                                                new Date(
-                                                                  "2100-01-01"
-                                                                )
+                                                              new Date(
+                                                                "2100-01-01"
+                                                              )
                                                             }
                                                             initialFocus
                                                             weekStartsOn={1}
