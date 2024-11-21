@@ -72,30 +72,46 @@ const handleSubmitPaymentPlan = async (applicationID, values) => {
                   expectedPayments: values.expectedPayments || [],
               }
 
-        if (existingPaymentPlan) {
-            // Update existing payment plan
-            await db.paymentPlan.update({
-                where: { applicationID },
-                data: paymentPlanData,
-            })
-        } else {
-            // Create new payment plan
-            await db.paymentPlan.create({
+        // Check if SavedApplication exists
+        const existingSavedApplication = await db.savedApplication.findUnique({
+            where: { id: applicationID },
+        })
+
+        if (!existingSavedApplication) {
+            // Create new SavedApplication with PaymentPlan
+            await db.savedApplication.create({
                 data: {
-                    applicationID,
-                    ...paymentPlanData,
+                    id: applicationID,
+                    paymentPlan: {
+                        create: paymentPlanData,
+                    },
                 },
             })
-        }
+        } else {
+            // Update existing SavedApplication and PaymentPlan
+            if (existingPaymentPlan) {
+                await db.paymentPlan.update({
+                    where: { applicationID },
+                    data: paymentPlanData,
+                })
+            } else {
+                await db.paymentPlan.create({
+                    data: {
+                        ...paymentPlanData,
+                        applicationID,
+                    },
+                })
+            }
 
-        // Delete saved payment plan if it exists
-        if (existingSavedPaymentPlan) {
-            await db.savedPaymentPlan.delete({
-                where: { applicationID },
-            })
+            // Delete saved payment plan if it exists
+            if (existingSavedPaymentPlan) {
+                await db.savedPaymentPlan.delete({
+                    where: { applicationID },
+                })
+            }
         }
     } else {
-        // If not SLC, then check if payment plans have been created before
+        // If not SLC, handle other payment methods
         const [application, savedApplication] = await Promise.all([
             db.application.findUnique({
                 where: { id: applicationID },
@@ -112,11 +128,11 @@ const handleSubmitPaymentPlan = async (applicationID, values) => {
         const utapi = new UTApi()
 
         if (application?.tuition_doc_url) {
-            const fileKey = application.tuition_doc_url.split('f/')[1]
+            const fileKey = application.tuition_doc_url.split('f/')
             deletePromises.push(utapi.deleteFiles([fileKey]))
         }
         if (savedApplication?.tuition_doc_url) {
-            const fileKey = savedApplication.tuition_doc_url.split('f/')[1]
+            const fileKey = savedApplication.tuition_doc_url.split('f/')
             deletePromises.push(utapi.deleteFiles([fileKey]))
         }
 
@@ -135,13 +151,15 @@ const handleSubmitPaymentPlan = async (applicationID, values) => {
                     tuition_doc_name: null,
                 },
             }),
-            db.savedApplication.update({
-                where: { id: applicationID },
-                data: {
-                    tuition_doc_url: null,
-                    tuition_doc_name: null,
-                },
-            }),
+            savedApplication
+                ? db.savedApplication.update({
+                      where: { id: applicationID },
+                      data: {
+                          tuition_doc_url: null,
+                          tuition_doc_name: null,
+                      },
+                  })
+                : Promise.resolve(),
         ])
     }
 }
