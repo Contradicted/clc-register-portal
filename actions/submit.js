@@ -12,7 +12,8 @@ import { sendRecievedApplicationEmail, sendReSubmittedEmail } from '@/lib/mail'
 import { generateApplicationID } from '@/lib/utils'
 import { UTApi, UTFile } from 'uploadthing/server'
 
-const handleSubmitPaymentPlan = async (applicationID, values) => {
+const handleSubmitPaymentPlan = async (applicationID, values, userID) => {
+    console.log(values);
     if (values.tuitionFees === 'Student Loan Company England (SLC)') {
         // First check for existing payment plans
         const [existingSavedPaymentPlan, existingPaymentPlan] =
@@ -24,6 +25,15 @@ const handleSubmitPaymentPlan = async (applicationID, values) => {
                     where: { applicationID },
                 }),
             ])
+
+        // Get saved application to check if we're in submission mode
+        const savedApplication = await db.savedApplication.findUnique({
+            where: { id: applicationID },
+        })
+        
+        const application = await db.application.findUnique({
+            where: { id: applicationID },
+        })
 
         // Prepare payment plan data
         const paymentPlanData = existingSavedPaymentPlan
@@ -50,9 +60,9 @@ const handleSubmitPaymentPlan = async (applicationID, values) => {
               }
             : {
                   paymentOption: 'SLC',
-                  hasSlcAccount: values.hasSlcAccount === 'Yes',
+                  hasSlcAccount: values.hasSlcAccount ? values.hasSlcAccount === 'Yes' : null,
                   previouslyReceivedFunds:
-                      values.previouslyReceivedFunds === 'Yes',
+                      values.previouslyReceivedFunds ? values.previouslyReceivedFunds === 'Yes' : null,
                   previousFundingYear: values.previousFundingYear || null,
                   appliedForCourse: values.appliedForCourse === 'Yes',
                   crn: values.crn || null,
@@ -72,23 +82,9 @@ const handleSubmitPaymentPlan = async (applicationID, values) => {
                   expectedPayments: values.expectedPayments || [],
               }
 
-        // Check if SavedApplication exists
-        const existingSavedApplication = await db.savedApplication.findUnique({
-            where: { id: applicationID },
-        })
-
-        if (!existingSavedApplication) {
-            // Create new SavedApplication with PaymentPlan
-            await db.savedApplication.create({
-                data: {
-                    id: applicationID,
-                    paymentPlan: {
-                        create: paymentPlanData,
-                    },
-                },
-            })
-        } else {
-            // Update existing SavedApplication and PaymentPlan
+        // If we're in submission mode (application exists)
+        if (application) {
+            // Create or update payment plan for the submitted application
             if (existingPaymentPlan) {
                 await db.paymentPlan.update({
                     where: { applicationID },
@@ -102,11 +98,29 @@ const handleSubmitPaymentPlan = async (applicationID, values) => {
                     },
                 })
             }
-
+            
             // Delete saved payment plan if it exists
             if (existingSavedPaymentPlan) {
                 await db.savedPaymentPlan.delete({
                     where: { applicationID },
+                })
+            }
+        } else {
+            // We're in save mode, handle saved payment plan
+            if (!existingSavedPaymentPlan) {
+                await db.savedApplication.create({
+                    data: {
+                        id: applicationID,
+                        userID,
+                        paymentPlan: {
+                            create: paymentPlanData,
+                        },
+                    },
+                })
+            } else {
+                await db.savedPaymentPlan.update({
+                    where: { applicationID },
+                    data: paymentPlanData,
                 })
             }
         }
@@ -406,7 +420,11 @@ export const submit = async (
             },
         })
 
-        await handleSubmitPaymentPlan(existingApplication[0].id, parsedValues)
+        await handleSubmitPaymentPlan(
+            existingApplication[0].id,
+            parsedValues,
+            existingUser.id
+        )
 
         // Handle deleting qualifications
         if (deletedQualifications.length > 0) {
@@ -805,7 +823,11 @@ export const submit = async (
             },
         })
 
-        await handleSubmitPaymentPlan(applicationID, parsedValues)
+        await handleSubmitPaymentPlan(
+            applicationID,
+            parsedValues,
+            existingUser.id
+        )
 
         if (qualifications) {
             for (let i = 0; i < qualifications.length; i++) {
@@ -1117,7 +1139,11 @@ export const submit = async (
             },
         })
 
-        await handleSubmitPaymentPlan(applicationID, parsedValues)
+        await handleSubmitPaymentPlan(
+            applicationID,
+            parsedValues,
+            existingUser.id
+        )
 
         // Handle deleting qualifications
         if (deletedQualifications.length > 0) {

@@ -14,8 +14,8 @@ const handleSavePaymentPlan = async (applicationID, values) => {
   if (values.tuitionFees === "Student Loan Company England (SLC)") {
     const paymentPlanData = {
       paymentOption: "SLC",
-      hasSlcAccount: values.hasSlcAccount === "Yes",
-      previouslyReceivedFunds: values.previouslyReceivedFunds === "Yes",
+      hasSlcAccount: values.hasSlcAccount ? values.hasSlcAccount === "Yes" : null,
+      previouslyReceivedFunds: values.previouslyReceivedFunds ? values.previouslyReceivedFunds === "Yes" : null,
       previousFundingYear: values.previousFundingYear || null,
       appliedForCourse: values.appliedForCourse === "Yes",
       crn: values.crn || null,
