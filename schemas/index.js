@@ -325,7 +325,7 @@ export const SectionOneSchema = z
     tuitionFeeAmount: z
       .union([
         z.string().min(0),
-        z.number().positive("Amount must be greater than 0"),
+        z.number().positive("Amount must be greater than 0").max(10000, "Tuition fee amount cannot be greater than £10,000"),
       ])
       .transform((val) => {
         if (typeof val === "string" && val === "") return undefined;
@@ -346,10 +346,16 @@ export const SectionOneSchema = z
           message: "Maximum of 2 decimal places allowed",
         }
       )
+      .refine((val) => {
+        if (val === undefined) return true;
+        return val <= 10000;
+      }, {
+        message: "Tuition amount cannot be greater than £10,000"
+      })
       .optional(),
     maintenanceLoanAmount: z.coerce
       .number()
-      .positive("Amount must be greater than 0")
+      .max(20000, "Maintenance amount cannot be greater than £20,000")
       .optional(),
     ssn: z
       .string()
@@ -592,6 +598,19 @@ export const SectionOneSchema = z
                   }
                 }
                 break;
+            }
+
+            if (data.tuitionFeeAmount && data.courseFee) {
+              const courseFee = parseFloat(data.courseFee);
+              const tuitionFeeAmount = parseFloat(data.tuitionFeeAmount);
+
+              if (tuitionFeeAmount > courseFee) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: "Tuition fee amount cannot be greater than course fee",
+                  path: ["tuitionFeeAmount"]
+                })
+              }
             }
           }
         }
