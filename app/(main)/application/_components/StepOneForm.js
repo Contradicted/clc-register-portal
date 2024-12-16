@@ -1310,6 +1310,9 @@ export const StepOneForm = ({
                                                         <SelectItem value="Bristol">
                                                             Bristol
                                                         </SelectItem>
+                                                        <SelectItem value="Sheffield">
+                                                            Sheffield
+                                                        </SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </FormControl>
