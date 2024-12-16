@@ -1,14 +1,14 @@
 import { cn } from "@/lib/utils"
 
-export const FormSteps = ({ currentStepIndex }) => {
+export const FormSteps = ({ currentStepIndex, hideEqualOpportunities }) => {
     const steps = [
       "Personal Details",
       "Qualifications",
       "Work Experience",
       "Further Information",
-      "Equal Opportunities Monitoring",
+      !hideEqualOpportunities && "Equal Opportunities Monitoring",
       "Marketing Information",
-    ];
+    ].filter(Boolean);
 
     return (
       <div className="w-full mt-4 px-2 sm:px-5">

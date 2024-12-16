@@ -241,6 +241,7 @@ export const submit = async (
         shortfall,
         paymentStatus,
         courseFee,
+        hideEqualOpportunities,
         ...applicationValues
     } = parsedValues
 

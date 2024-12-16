@@ -2,7 +2,7 @@
 
 import { FormSteps } from "./FormSteps";
 
-export const FormHeader = ({ currentStepIndex }) => {
+export const FormHeader = ({ currentStepIndex, hideEqualOpportunities, }) => {
 
     return (
       <div className="w-full">
@@ -17,7 +17,7 @@ export const FormHeader = ({ currentStepIndex }) => {
           </div>
         </div>
 
-        <FormSteps currentStepIndex={currentStepIndex} />
+        <FormSteps currentStepIndex={currentStepIndex} hideEqualOpportunities={hideEqualOpportunities} />
       </div>
     );
 }

@@ -149,6 +149,7 @@ export const save = async (
     shortfall,
     paymentStatus,
     courseFee,
+    hideEqualOpportunities,
     ...applicationValues
   } = parsedValues;
 

@@ -296,6 +296,19 @@ export const StepOneForm = ({
         'usingMaintenanceForTuition'
     )
 
+    // Check if hybrid course is selected
+    const isHybridCourse = watchCourseTitle === "Master of Business Administration - MBA - (Top-Up) - Hybrid";
+
+    // Update hideEqualOpportunities only when course changes
+    useEffect(() => {
+        if (watchCourseTitle) {  // Only run if we have a course title
+          const shouldHide = watchCourseTitle === "Master of Business Administration - MBA - (Top-Up) - Hybrid";
+          if (shouldHide !== application?.hideEqualOpportunities) {  // Only update if value is different
+            updateData({ hideEqualOpportunities: shouldHide });
+          }
+        }
+      }, [watchCourseTitle]);  // Only depend on course title changes
+
     const handlePlaceSelect = ({ placeOfBirth, countryName }) => {
         form.setValue('placeOfBirth', placeOfBirth)
         setDetectedCountry(countryName)
@@ -2777,7 +2790,8 @@ export const StepOneForm = ({
                                                                 />
                                                             </FormControl>
                                                         )}
-                                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                                        {!isHybridCourse && (
+                                                            <FormItem className="flex items-center space-x-3 space-y-0">
                                                             <FormControl>
                                                                 <RadioGroupItem value="Student Loan Company England (SLC)" />
                                                             </FormControl>
@@ -2787,6 +2801,7 @@ export const StepOneForm = ({
                                                                 (SLC)
                                                             </FormLabel>
                                                         </FormItem>
+                                                        )}
 
                                                         {slcSelected && (
                                                             <div className="space-y-6 pb-4">

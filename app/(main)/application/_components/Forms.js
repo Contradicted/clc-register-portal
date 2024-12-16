@@ -29,8 +29,13 @@ export const Forms = ({ formData, userData, activeCourses }) => {
     setDeletedWorkExperiences,
   } = useMultiStepForm(6, formData);
 
-  const forms = [
-    <StepOneForm
+  // Check if step five (equal opportunities) should be hidden
+  const hideEqualOpportunities = applicationData?.hideEqualOpportunities
+
+  // Filter out step five (equal opportunities) if needed
+  const getFormSteps = () => {
+    const allSteps = [
+      <StepOneForm
       key="step-one"
       activeCourses={activeCourses}
       userDetails={userData}
@@ -87,7 +92,8 @@ export const Forms = ({ formData, userData, activeCourses }) => {
       deletedQualifications={deletedQualifications}
       deletedWorkExperiences={deletedWorkExperiences}
     />,
-    <StepFiveForm
+    !hideEqualOpportunities && (
+      <StepFiveForm
       key="step-five"
       application={applicationData}
       previousStep={previousStep}
@@ -100,13 +106,14 @@ export const Forms = ({ formData, userData, activeCourses }) => {
       deletedPendingQualifications={deletedPendingQualifications}
       deletedQualifications={deletedQualifications}
       deletedWorkExperiences={deletedWorkExperiences}
-    />,
+    />
+    ),
     <StepSixForm
       key="step-six"
       application={applicationData}
       previousStep={previousStep}
       nextStep={nextStep}
-      isLastStep={isLastStep}
+      isLastStep={hideEqualOpportunities || isLastStep}
       accumulatedFiles={accumulatedFiles}
       setAccumulatedFiles={setAccumulatedFiles}
       fData={fData}
@@ -115,11 +122,16 @@ export const Forms = ({ formData, userData, activeCourses }) => {
       deletedQualifications={deletedQualifications}
       deletedWorkExperiences={deletedWorkExperiences}
     />,
-  ];
+    ].filter(Boolean)
+
+    return allSteps;
+  }
+
+  const forms = getFormSteps();
 
   return (
     <div className="h-full w-full pt-12 flex flex-col">
-      <FormHeader currentStepIndex={currentStepIndex} />
+      <FormHeader currentStepIndex={currentStepIndex} hideEqualOpportunities={hideEqualOpportunities} />
 
       <main className="flex flex-1 mt-[50px]">{forms[currentStepIndex]}</main>
     </div>

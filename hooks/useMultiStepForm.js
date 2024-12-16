@@ -12,6 +12,9 @@ export const useMultiStepForm = (steps, initialData) => {
   const [deletedPendingQualifications, setDeletedPendingQualifications] =
     useState([]);
 
+  // Calculate total steps based on if Equal Opportunities is hidden
+  const totalSteps = applicationData?.hideEqualOpportunities ? steps - 1 : steps;
+
   const updateData = (formData, files) => {
     setApplicationData((prevData) => ({
       ...prevData,
@@ -32,7 +35,7 @@ export const useMultiStepForm = (steps, initialData) => {
   };
 
   const nextStep = (data, file) => {
-    if (currentStepIndex < steps - 1) {
+    if (currentStepIndex < totalSteps - 1) {
       setCurrentStepIndex((i) => i + 1);
     }
 
@@ -50,7 +53,7 @@ export const useMultiStepForm = (steps, initialData) => {
   return {
     currentStepIndex,
     isFirstStep: currentStepIndex === 0,
-    isLastStep: currentStepIndex === steps - 1,
+    isLastStep: currentStepIndex === totalSteps - 1,
     nextStep,
     applicationData,
     fData,
