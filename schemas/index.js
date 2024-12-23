@@ -116,10 +116,10 @@ export const SectionOneSchema = z
       })
       .refine(
         (value) => {
-          return value === "full_time" || value == "part_time";
+          return value === "full_time" || value == "part_time" || value == "hybrid_learning";
         },
         {
-          message: "Study mode must either be Full Time, Part Time",
+          message: "Study mode must either be Full Time, Part Time or Hybrid Learning",
         }
       ),
     title: z.string({
