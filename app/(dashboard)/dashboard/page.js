@@ -31,7 +31,7 @@ export default async function DashboardPage() {
                       label: "Applicant",
                       value: `${user.firstName} ${user.lastName}`,
                     },
-                    { label: "Entry month/year", value: "September 2023/4" },
+                    { label: "Entry", value: app.commencement },
                     {
                       label: "Status",
                       value: getDisplayStatus(app.status),
