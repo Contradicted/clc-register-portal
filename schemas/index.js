@@ -19,12 +19,14 @@ export const RegisterSchema = z.object({
   title: z.string().min(1, {
     message: "Title is required",
   }),
-  firstName: z.string().min(1, {
-    message: "First name is required",
-  }),
-  lastName: z.string().min(1, {
-    message: "Last name is required",
-  }),
+  firstName: z.string()
+  .min(1, { message: "First name is required" })
+  .max(50, { message: "First name cannot be longer than 50 characters" })
+  .regex(nameRegex, { message: "First name can only contain letters and spaces" }),
+  lastName: z.string()
+  .min(1, { message: "Last name is required" })
+  .max(50, { message: "Last name cannot be longer than 50 characters" })
+  .regex(nameRegex, { message: "Last name can only contain letters and spaces" }),
   email: z.string().email({
     message: "Email is required",
   }),
