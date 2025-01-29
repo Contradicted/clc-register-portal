@@ -98,6 +98,10 @@ export function LoginForm() {
                             disabled={isPending}
                           />
                         </FormControl>
+                        <p className="text-xs text-muted-foreground mt-1 italic">
+                          Please enter your email in lowercase (e.g.,
+                          name@example.com)
+                        </p>
                       </FormItem>
                     )}
                   />
