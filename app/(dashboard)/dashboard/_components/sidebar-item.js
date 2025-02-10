@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 const SidebarItem = ({ icon: Icon, label, href }) => {
     const pathname = usePathname()
 
-    const isActive = href === pathname || pathname.startsWith(`${href}/`)
+    const isActive = href === pathname;
 
     return (
         <Link
