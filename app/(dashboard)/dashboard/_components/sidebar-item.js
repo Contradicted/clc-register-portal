@@ -13,9 +13,9 @@ const SidebarItem = ({ icon: Icon, label, href }) => {
         <Link
             href={href}
             className={cn(
-                'group w-full p-4 flex items-center gap-x-3 bg-transparent rounded-[10px] text-[#718096] font-medium max-h-[47px] text-sm transition-all hover:text-black',
+                "group w-full p-4 flex items-center gap-x-3 bg-transparent rounded-[10px] text-[#718096] font-medium max-h-[47px] text-sm transition-all hover:text-black",
                 isActive &&
-                    'bg-black text-white font-semibold rounded-[10px] hover:bg-black/90 hover:text-white'
+                "bg-black text-white font-semibold rounded-[10px] hover:bg-[#000]/80 hover:text-white"
             )}
         >
             <Icon
