@@ -950,3 +950,289 @@ export const SectionTwoSavedSchema = z.object({
       }
     }),
 });
+
+export const FinanceInfoSchema = z
+  .object({
+    tuitionFees: z.union([
+      z.enum([
+        "Parents",
+        "Family Members",
+        "Employers",
+        "Self",
+        "Student Loan Company England (SLC)",
+      ]),
+      z.string().min(1, "Please specify the other option").refine(
+        (val) => val !== "Other",
+        "Please specify the other option"
+      ),
+    ]),
+    courseTitle: z.string().min(1, "Course title is required"),
+    hasSlcAccount: z.string().optional(),
+    previouslyReceivedFunds: z.string().optional(),
+    previousFundingYear: z.string().optional(),
+    appliedForCourse: z.string().optional(),
+    crn: z.string().optional(),
+    slcStatus: z.string().optional(),
+    tuitionFeeAmount: z
+      .union([z.string(), z.number()])
+      .transform((val) => {
+        if (typeof val === "string" && val === "") return undefined;
+        const num = typeof val === "string" ? parseFloat(val) : val;
+        return isNaN(num) ? undefined : num;
+      })
+      .refine(
+        (val) => {
+          if (val === undefined) return true;
+          return val > 0;
+        },
+        { message: "Amount must be greater than 0" }
+      )
+      .refine(
+        (val) => {
+          if (val === undefined) return true;
+          return val <= 10000;
+        },
+        { message: "Tuition fee amount cannot be greater than £10,000" }
+      )
+      .refine(
+        (val) => {
+          if (val === undefined) return true;
+          const str = val.toString();
+          const decimals = str.includes(".") ? str.split(".")[1].length : 0;
+          return decimals <= 2;
+        },
+        {
+          message: "Maximum of 2 decimal places allowed",
+        }
+      )
+      .optional(),
+    maintenanceLoanAmount: z.coerce
+      .number()
+      .positive("Amount must be greater than 0")
+      .max(20000, "Maintenance amount cannot be greater than £20,000")
+      .optional(),
+    ssn: z.string().optional(),
+    expectedPayments: z.array(
+      z.object({
+        date: z.union([z.string(), z.date()]).optional(),
+        amount: z.coerce
+          .number({
+            required_error: "Payment amount is required",
+          })
+          .positive("Amount must be greater than 0")
+          .optional(),
+        university: z.string().min(1, "University is required"),
+        course: z.string().min(1, "Course is required"),
+      })
+    ),
+    courseFee: z.number().optional(),
+    shortfall: z.number().optional(),
+    tuitionDoc: z.any().optional(),
+    deleteExistingTuitionDoc: z.boolean().optional(),
+  })
+  .superRefine((data, ctx) => {
+    // Only proceed with SLC-specific validation if SLC is selected
+    if (data.tuitionFees === "Student Loan Company England (SLC)") {
+      // Step 1: Basic SLC account validation
+      if (!data.hasSlcAccount) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Please specify if you have an SLC account",
+          path: ["hasSlcAccount"],
+        });
+        return;
+      }
+
+      // Step 2: Previous funding and application validation
+      if (data.hasSlcAccount === "Yes") {
+        if (!data.previouslyReceivedFunds) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Please specify if you have previously received funds",
+            path: ["previouslyReceivedFunds"],
+          });
+        }
+
+        if (
+          data.previouslyReceivedFunds === "Yes" &&
+          !data.previousFundingYear
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Please specify the year you received funding",
+            path: ["previousFundingYear"],
+          });
+        }
+
+        if (!data.appliedForCourse) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Please specify whether you have applied for this course",
+            path: ["appliedForCourse"],
+          });
+          return;
+        }
+
+        // Step 3: Application details validation
+        if (data.appliedForCourse === "Yes") {
+          if (!data.crn) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Please enter your CRN",
+              path: ["crn"],
+            });
+          }
+
+          if (!data.slcStatus) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Please select the status of your application",
+              path: ["slcStatus"],
+            });
+            return;
+          }
+
+          // Step 4: Approved status validations
+          if (data.slcStatus.startsWith("Approved")) {
+            // Amount validations based on approval type
+            if (
+              data.slcStatus.includes("Tuition Fees") &&
+              !data.tuitionFeeAmount
+            ) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Tuition fee amount is required",
+                path: ["tuitionFeeAmount"],
+              });
+            }
+
+            if (
+              data.slcStatus.includes("Maintenance Loan") &&
+              !data.maintenanceLoanAmount
+            ) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Maintenance loan amount is required",
+                path: ["maintenanceLoanAmount"],
+              });
+            }
+
+            // SSN validation
+            if (!data.ssn) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "SSN is required",
+                path: ["ssn"],
+              });
+            }
+
+            // Step 5: Expected payments validation
+            if (!data.expectedPayments || data.expectedPayments.length === 0) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "At least one expected payment is required",
+                path: ["expectedPayments"],
+              });
+              return;
+            }
+
+            // Validate individual payment fields
+            data.expectedPayments.forEach((payment, index) => {
+              if (!payment.date) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: "Payment date is required",
+                  path: ["expectedPayments", index, "date"],
+                });
+              }
+              if (!payment.amount) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: "Payment amount is required",
+                  path: ["expectedPayments", index, "amount"],
+                });
+              }
+              if (!payment.university) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: "University is required",
+                  path: ["expectedPayments", index, "university"],
+                });
+              }
+              if (!payment.course) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: "Course is required",
+                  path: ["expectedPayments", index, "course"],
+                });
+              }
+            });
+
+            // Step 6: Payment amount validation based on approval type
+            const totalExpectedPayments = data.expectedPayments.reduce(
+              (sum, payment) => sum + (payment.amount || 0),
+              0
+            );
+
+            switch (data.slcStatus) {
+              case "Approved - Tuition Fees":
+                if (data.tuitionFeeAmount && !data.usingMaintenanceForTuition) {
+                  if (
+                    Math.abs(totalExpectedPayments - data.tuitionFeeAmount) >
+                    0.01
+                  ) {
+                    ctx.addIssue({
+                      code: z.ZodIssueCode.custom,
+                      message: `Total expected payments must equal the tuition fee amount of ${formatCurrency(
+                        data.tuitionFeeAmount
+                      )}`,
+                      path: ["expectedPayments"],
+                    });
+                  }
+                }
+                break;
+
+              case "Approved - Maintenance Loan":
+                if (data.maintenanceLoanAmount) {
+                  if (totalExpectedPayments > data.maintenanceLoanAmount) {
+                    ctx.addIssue({
+                      code: z.ZodIssueCode.custom,
+                      message:
+                        "Total payments cannot exceed maintenance loan amount",
+                      path: ["expectedPayments"],
+                    });
+                  }
+                }
+                break;
+
+              case "Approved - Tuition Fees & Maintenance Loan":
+                if (data.tuitionFeeAmount) {
+                  let expectedTotal = data.tuitionFeeAmount;
+
+                  if (data.usingMaintenanceForTuition && data.courseFee) {
+                    const shortfall = data.courseFee - data.tuitionFeeAmount;
+                    if (shortfall > 0) {
+                      expectedTotal += Math.min(
+                        shortfall,
+                        data.maintenanceLoanAmount || 0
+                      );
+                    }
+                  }
+
+                  if (Math.abs(totalExpectedPayments - expectedTotal) > 0.01) {
+                    ctx.addIssue({
+                      code: z.ZodIssueCode.custom,
+                      message: `Total expected payments must equal ${formatCurrency(
+                        expectedTotal
+                      )}`,
+                      path: ["expectedPayments"],
+                    });
+                  }
+                }
+                break;
+            }
+          }
+        }
+      }
+    }
+  });
