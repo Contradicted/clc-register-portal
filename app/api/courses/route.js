@@ -10,7 +10,11 @@ export async function GET() {
             id: true,
             name: true,
             course_study_mode: true,
-            course_instances: true,
+            course_instances: {
+              where: {
+                status: true
+              }
+            }
           },
         });
 
