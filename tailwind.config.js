@@ -29,8 +29,8 @@ module.exports = withUt({
         background: "rgb(var(--background))",
         foreground: "rgb(var(--foreground))",
         primary: {
-          DEFAULT: "rgb(var(--primary))",
-          foreground: "rgb(var(--primary-foreground))",
+          DEFAULT: "rgba(var(--primary), <alpha-value>)",
+          foreground: "rgba(var(--primary-foreground), <alpha-value>)",
         },
         secondary: {
           DEFAULT: "rgb(var(--secondary))",
