@@ -21,6 +21,25 @@ export const getApplicationByUserID = async (userID) => {
     }
 }
 
+export const getApplicationIDByUserID = async (userID) => {
+  try {
+    const application = await db.application.findUnique({
+      where: {
+        userID: userID,
+      },
+      select: {
+        id: true,
+        courseID: true,
+      },
+    });
+
+    return application.courseID;
+  } catch (error) {
+    console.log("[FETCHING_APPLICATION_ID_BY_USER_ID_ERROR]", error);
+    return null;
+  }
+};
+
 export const getSavedApplicationByUserID = async (userID) => {
     try {
         const savedApplication = await db.savedApplication.findFirst({
