@@ -10,11 +10,7 @@ export async function GET() {
             id: true,
             name: true,
             course_study_mode: true,
-            course_instances: {
-              select: {
-                status: true
-              }
-            },
+            course_instances: true,
           },
         });
 
