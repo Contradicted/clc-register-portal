@@ -1,7 +1,7 @@
 import { RefreshHandler } from "@/components/RefreshHandler";
 import { getApplicationByUserID } from "@/data/application";
 import { currentUser } from "@/lib/auth";
-import { cn, getDisplayStatus } from "@/lib/utils";
+import { cn, formatStudyMode, getDisplayStatus } from "@/lib/utils";
 import { cookies } from "next/headers";
 import Link from "next/link";
 
@@ -26,7 +26,11 @@ export default async function DashboardPage() {
                   </h3>
                   {[
                     { label: "Course Title", value: app.courseTitle },
-                    { label: "Campus", value: app.campus },
+                    ...(app.campus ? [{ label: "Campus", value: app.campus }] : []),
+                    {
+                      label: "Study Mode",
+                      value: formatStudyMode(app.studyMode),
+                    },
                     {
                       label: "Applicant",
                       value: `${user.firstName} ${user.lastName}`,

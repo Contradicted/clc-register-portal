@@ -176,7 +176,7 @@ export const StepOneForm = ({
     )
     const [isCreatingPaymentPlan, setIsCreatingPaymentPlan] = useState(false)
 
-    console.log(application)
+    // console.log(application)
 
     const form = useForm({
         defaultValues: {
@@ -297,17 +297,28 @@ export const StepOneForm = ({
     )
 
     // Check if hybrid course is selected
-    const isHybridCourse = watchCourseTitle === "Master of Business Administration - MBA - (Top-Up) - Hybrid";
+    const isHybridCourse =
+      watchCourseTitle ===
+        "Master of Business Administration - MBA - (Top-Up) - Hybrid" ||
+      watchStudyMode === "hybrid_learning";
 
     // Update hideEqualOpportunities only when course changes
     useEffect(() => {
-        if (watchCourseTitle) {  // Only run if we have a course title
-          const shouldHide = watchCourseTitle === "Master of Business Administration - MBA - (Top-Up) - Hybrid";
-          if (shouldHide !== application?.hideEqualOpportunities) {  // Only update if value is different
-            updateData({ hideEqualOpportunities: shouldHide });
+        if (watchCourseTitle || watchStudyMode) {
+          // Only run if we have a course title
+          const shouldHide =
+            watchCourseTitle ===
+              "Master of Business Administration - MBA - (Top-Up) - Hybrid" ||
+            watchStudyMode === "hybrid_learning";
+          if (shouldHide !== application?.hideEqualOpportunities) {
+            // Only update if value is different
+            updateData({
+              hideEqualOpportunities: shouldHide,
+              campus: shouldHide ? null : application?.campus, // Clear campus if hybrid
+            });
           }
         }
-      }, [watchCourseTitle]);  // Only depend on course title changes
+      }, [watchCourseTitle, watchStudyMode]); // Only depend on course title changes
 
     const handlePlaceSelect = ({ placeOfBirth, countryName }) => {
         form.setValue('placeOfBirth', placeOfBirth)
@@ -367,6 +378,11 @@ export const StepOneForm = ({
             setIsRemoved(true)
         }
         const currentValues = form.getValues()
+
+        // Clear campus if hybrid course
+      if (isHybridCourse) {
+        currentValues.campus = null;
+      }
 
         const isValid = SectionOneSchema.safeParse(currentValues)
 
@@ -928,67 +944,14 @@ export const StepOneForm = ({
         }
     }, [watchSlcStatus])
 
-    // Add this near your other useEffects
-    // useEffect(() => {
-    //   // Initialize from either fData or application.paymentPlan
-    //   const paymentPlanData = fData || application?.paymentPlan;
+    useEffect(() => {
+        const shouldShowFields =
+          !isHybridCourse && watchNationality !== "British";
+        setIsEntryDateRequired(shouldShowFields);
+        setIsImmigrationRequired(shouldShowFields);
+      }, [isHybridCourse, watchNationality]);
 
-    //   if (paymentPlanData) {
-    //     // Initialize SLC-related states
-    //     if (paymentPlanData.slcStatus) {
-    //       setShowMaintenanceOption(
-    //         paymentPlanData.slcStatus ===
-    //           "Approved - Tuition Fees & Maintenance Loan"
-    //       );
-
-    //       // Initialize payment amounts and expected payments
-    //       if (paymentPlanData.expectedPayments?.length > 0) {
-    //         const amounts = {};
-    //         let total = 0;
-
-    //         // Ensure dates are properly converted to Date objects
-    //         const formattedPayments = paymentPlanData.expectedPayments.map(
-    //           (payment) => ({
-    //             ...payment,
-    //             date: payment.date ? new Date(payment.date) : undefined,
-    //             amount: Number(payment.amount) || 0,
-    //             university: payment.university || "Plymouth Marjon University",
-    //             course: payment.course || form.watch("courseTitle") || "",
-    //           })
-    //         );
-
-    //         // Set the formatted payments in the form
-    //         form.setValue("expectedPayments", formattedPayments);
-
-    //         // Calculate totals
-    //         formattedPayments.forEach((payment, index) => {
-    //           amounts[index] = payment.amount;
-    //           total += payment.amount;
-    //         });
-
-    //         setPaymentAmounts(amounts);
-    //         setTotalAmount(total);
-    //       }
-
-    //       // Set course fee
-    //       if (paymentPlanData.courseFee) {
-    //         setSelectedCourseFee(Number(paymentPlanData.courseFee));
-    //       }
-
-    //       // Set payment status
-    //       if (paymentPlanData.paymentStatus) {
-    //         setPaymentStatus(paymentPlanData.paymentStatus);
-    //       }
-
-    //       // Set maintenance option
-    //       setUseMaintenanceForTuition(
-    //         paymentPlanData.usingMaintenanceForTuition || false
-    //       );
-    //     }
-    //   }
-    // }, [application?.paymentPlan, fData, form]); // Run when either source changes
-
-    console.log(totalAmount)
+    // console.log(totalAmount)
 
     const saveForm = () => {
         setHasError(false)
@@ -1290,7 +1253,8 @@ export const StepOneForm = ({
                                     )}
                                 />
                             </div>
-                            <div className="w-full sm:w-1/2">
+                            {!isHybridCourse && (
+                                <div className="w-full sm:w-1/2">
                                 <FormField
                                     control={form.control}
                                     name="campus"
@@ -1336,6 +1300,7 @@ export const StepOneForm = ({
                                     )}
                                 />
                             </div>
+                            )}
                         </div>
                     </div>
 

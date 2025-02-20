@@ -134,7 +134,7 @@ export const SectionOneSchema = z
       .min(1, { message: "Commencement is required " }),
     campus: z.string({
       required_error: "Campus is required",
-    }),
+    }).nullable(),
     firstName: z
       .string({
         required_error: "First name is required",
@@ -372,6 +372,18 @@ export const SectionOneSchema = z
     expectedPayments: z.array(expectedPaymentSchema).optional(),
   })
   .superRefine((data, ctx) => {
+    // Check if campus is required (not hybrid)
+    const isHybridCourse = data.courseTitle === "Master of Business Administration - MBA - (Top-Up) - Hybrid" || 
+                          data.studyMode === "hybrid_learning";
+    
+    if (!isHybridCourse && !data.campus) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Campus is required",
+        path: ["campus"],
+      });
+    }
+    
     if (
       data.countryOfBirth !== "United Kingdom" &&
       data.nationality == "British"
