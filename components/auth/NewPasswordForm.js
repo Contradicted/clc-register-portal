@@ -145,7 +145,7 @@ export function NewPasswordForm() {
         </div>
         <div className="hidden bg-muted lg:flex lg:h-full lg:items-center lg:justify-center">
           <Image
-            src="/logo.svg"
+            src="/logo.png"
             alt="Image"
             width={isWide ? 850 : 1000}
             height={isWide ? 850 : 1000}

@@ -20,7 +20,7 @@ const Sidebar = async ({ className }) => {
         <div className={cn('h-full flex flex-col bg-[#FAFAFA]', className)}>
             <div className="flex items-center justify-center mt-5 border-b border-stroke mx-6">
                 <Image
-                    src="/logo.svg"
+                    src="/logo.png"
                     height={180}
                     width={180}
                     alt="clc-logo"

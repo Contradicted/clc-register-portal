@@ -29,7 +29,7 @@ const MobileSidebar = () => {
                 <div className="flex flex-col h-full">
                     <div className="flex items-center justify-center mt-5 border-b border-stroke mx-6">
                         <Image
-                            src="/logo.svg"
+                            src="/logo.png"
                             height={180}
                             width={180}
                             alt="clc-logo"

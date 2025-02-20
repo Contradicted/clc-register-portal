@@ -7,7 +7,7 @@ export const Header = () => {
       <div className="lg:max-w-screen-2xl mx-auto px-[50px] w-full h-full flex items-center justify-between">
         <div className="flex h-full w-full">
           <Image
-            src="/logo.svg"
+            src="/logo.png"
             alt="logo"
             width={200}
             height={200}
