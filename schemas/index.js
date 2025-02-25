@@ -384,17 +384,15 @@ export const SectionOneSchema = z
       });
     }
     
-    if (
-      data.countryOfBirth !== "United Kingdom" &&
-      data.nationality == "British"
-    ) {
-      if (!data.entryDateToUK) {
-        ctx.addIssue({
-          path: ["entryDateToUK"],
-          message: "Entry Date to UK is required",
-        });
-      }
+    // Check if entry date is required (only for non-British nationals)
+    if (data.nationality !== "British" && !data.entryDateToUK) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Entry date to UK is required",
+        path: ["entryDateToUK"],
+      });
     }
+
 
     if (data.nationality !== "British") {
       if (!data.immigration_status) {

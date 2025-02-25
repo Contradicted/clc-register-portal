@@ -409,6 +409,7 @@ export const StepOneForm = ({
 
         if (currentValues.nationality === 'British') {
             currentValues.immigration_status = null
+            currentValues.entryDateToUK = null
             currentValues.share_code = null
         }
 
