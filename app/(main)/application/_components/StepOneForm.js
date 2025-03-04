@@ -138,7 +138,7 @@ export const StepOneForm = ({
     )
     const [isEntryDateRequired, setIsEntryDateRequired] = useState(
         (application?.countryOfBirth !== 'United Kingdom' &&
-            application?.nationality !== 'British') ||
+            (application?.nationality !== 'British' || application?.nationality !== "Irish")) ||
             false
     )
     const [isImmigrationRequired, setIsImmigrationRequired] = useState(false)
@@ -407,7 +407,7 @@ export const StepOneForm = ({
             currentValues.entryDateToUK = null
         }
 
-        if (currentValues.nationality === 'British') {
+        if (currentValues.nationality === 'British' || currentValues.nationality === "Irish") {
             currentValues.immigration_status = null
             currentValues.entryDateToUK = null
             currentValues.share_code = null
@@ -637,14 +637,14 @@ export const StepOneForm = ({
     useEffect(() => {
         if (
             watchCountryOfBirth === 'United Kingdom' &&
-            watchNationality === 'British'
+            (watchNationality === 'British' || watchNationality === "Irish")
         ) {
             setIsEntryDateRequired(false)
         } else if (
             (watchCountryOfBirth !== 'United Kingdom' &&
-                watchNationality === 'British') ||
+                (watchNationality === 'British' || watchNationality === "Irish")) ||
             (watchCountryOfBirth !== 'United Kingdom' &&
-                watchNationality !== 'British')
+                watchNationality !== 'British' && watchNationality !== "Irish")
         ) {
             setIsEntryDateRequired(true)
         } else {
@@ -654,10 +654,10 @@ export const StepOneForm = ({
 
     useEffect(() => {
         setIsImmigrationRequired(
-            watchNationality !== 'British' && watchNationality !== undefined
+            watchNationality !== 'British' && watchNationality !== "Irish" && watchNationality !== undefined
         )
 
-        if (watchNationality === 'British') {
+        if (watchNationality === 'British' || watchNationality === "Irish") {
             setAccumulatedFiles((prev) => ({
                 ...prev,
                 immigrationFile_isRemoved: true,
@@ -947,7 +947,7 @@ export const StepOneForm = ({
 
     useEffect(() => {
         const shouldShowFields =
-          !isHybridCourse && watchNationality !== "British";
+          !isHybridCourse && (watchNationality !== "British" || watchNationality !== "Irish");
         setIsEntryDateRequired(shouldShowFields);
         setIsImmigrationRequired(shouldShowFields);
       }, [isHybridCourse, watchNationality]);
@@ -971,7 +971,7 @@ export const StepOneForm = ({
             stepOneData.entryDateToUK = null
         }
 
-        if (stepOneData.nationality === 'British') {
+        if (stepOneData.nationality === 'British' || stepOneData.nationality === "Irish") {
             stepOneData.immigration_status = null
             stepOneData.share_code = null
         }
@@ -1877,7 +1877,7 @@ export const StepOneForm = ({
                                                             )
                                                             setIsImmigrationRequired(
                                                                 value !==
-                                                                    'British'
+                                                                    'British' || value !== "Irish"
                                                             )
                                                         }}
                                                         defaultValue={
