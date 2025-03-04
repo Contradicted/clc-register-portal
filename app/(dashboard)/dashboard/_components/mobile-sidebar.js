@@ -9,7 +9,7 @@ import { LogoutButton } from '@/components/auth/LogoutButton'
 import { useMedia } from 'react-use'
 import { useEffect, useState } from 'react'
 
-const MobileSidebar = () => {
+const MobileSidebar = ({ courses, applicationID }) => {
     const [isOpen, setIsOpen] = useState(false)
 
     const isMobile = useMedia('(max-width: 1024px)', false)
@@ -38,7 +38,7 @@ const MobileSidebar = () => {
                     </div>
                     <div className="flex flex-col h-full w-full">
                         <div className="flex-1">
-                            <SidebarRoutes />
+                            <SidebarRoutes courses={courses} applicationID={applicationID} />
                         </div>
                         <LogoutButton className="w-full group flex justify-start gap-x-3 text-sm font-medium mb-10 text-[#718096] focus-visible:ring-0 focus-visible:ring-offset-0">
                             <LogOut

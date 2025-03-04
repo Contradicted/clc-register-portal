@@ -4,7 +4,7 @@ import { HandCoinsIcon, Home } from 'lucide-react'
 import SidebarItem from './sidebar-item'
 
 const SidebarRoutes = ({ courses, applicationID }) => {
-    const userCourse = courses.find((course) => course.id === applicationID);
+    const userCourse = courses?.find((course) => course.id === applicationID);
 
     const routes = [
         {
