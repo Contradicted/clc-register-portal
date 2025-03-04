@@ -385,7 +385,7 @@ export const SectionOneSchema = z
     }
     
     // Check if entry date is required (only for non-British & Irish nationals)
-    if ((data.nationality !== "British" || data.nationality !== "Irish") && !data.entryDateToUK) {
+    if ((data.nationality !== "British") && !data.entryDateToUK) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Entry date to UK is required",
@@ -394,7 +394,7 @@ export const SectionOneSchema = z
     }
 
 
-    if (data.nationality !== "British" || data.nationality !== "Irish") {
+    if (data.nationality !== "British") {
       if (!data.immigration_status) {
         ctx.addIssue({
           path: ["immigration_status"],
