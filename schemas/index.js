@@ -3,7 +3,7 @@ import * as z from "zod";
 
 const nameRegex = /^[A-Za-z\s]+$/; // Allows only letters and spaces
 const identificationNoRegex = /^(?=.*[0-9])[A-Za-z0-9]+$/; // Must contain at least one number and can include letters
-const postcodeRegEx = /^[a-z]{1,2}[0-9][0-9a-z]? ?[0-9][abd-hjlnp-uw-z]{2}$/i;
+const postcodeRegEx = /^[A-Za-z0-9\s-]{1,12}$/i; // Comprehensive regex for all international postcodes
 const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
 
 export const LoginSchema = z.object({
