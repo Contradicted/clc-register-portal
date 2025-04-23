@@ -110,7 +110,7 @@ export const updateFinance = async (formData) => {
       (wasApprovedMaintenance && !isNowApprovedMaintenance) || isNowRejected;
 
     // Determine if we need to handle files
-    const hasNewFile = tuitionDoc instanceof File;
+    const hasNewFile = !!tuitionDoc;
     const shouldDeleteFile = deleteExistingTuitionDoc === true;
     const needsFileCleanup =
       isLeavingSLC || shouldClearTuition || isNowRejected;
